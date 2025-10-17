@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <title>Debug Búsqueda Usuario</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .debug-box {
+        background: #f5f5f5;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .success {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+      .warning {
+        color: orange;
+      }
+      input,
+      button {
+        padding: 8px 12px;
+        margin: 5px;
+      }
+      #resultado {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-top: 20px;
+        background: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔍 Debug - Búsqueda de Usuario</h1>
+
+      <div class="debug-box">
+        <label>RUN a buscar:</label>
+        <input
+          type="text"
+          id="runInput"
+          value="3.885.027-K"
+          placeholder="Ingrese RUN"
+        />
+        <button onclick="buscarUsuarioDebug()">Buscar Usuario</button>
+        <button onclick="limpiarResultado()">Limpiar</button>
+      </div>
+
+      <div id="resultado">
+        <p>
+          Ingrese un RUN y presione "Buscar Usuario" para ver el resultado
+          detallado...
+        </p>
+      </div>
+    </div>
+
+    <script>
+      let debugLogs = [];
+
+      function log(message, type = "info") {
+        const timestamp = new Date().toLocaleTimeString();
+        debugLogs.push({ timestamp, message, type });
+        console.log(`[${timestamp}] ${message}`);
+        updateResultado();
+      }
+
+      function updateResultado() {
+        const div = document.getElementById("resultado");
+        let html = "<h3>🔍 Log de Debug:</h3>";
+
+        debugLogs.forEach((entry) => {
+          const className =
+            entry.type === "error"
+              ? "error"
+              : entry.type === "warning"
+                ? "warning"
+                : "success";
+          html += `<div class="${className}">[${entry.timestamp}] ${entry.message}</div>`;
+        });
+
+        div.innerHTML = html;
+        div.scrollTop = div.scrollHeight;
+      }
+
+      function limpiarResultado() {
+        debugLogs = [];
+        document.getElementById("resultado").innerHTML =
+          "<p>Log limpiado. Listo para nueva búsqueda...</p>";
+      }
+
+      async function buscarUsuarioDebug() {
+        const run = document.getElementById("runInput").value.trim();
+
+        if (!run) {
+          log("❌ Error: RUN vacío", "error");
+          return;
+        }
+
+        if (run.length < 8) {
+          log("⚠️ Warning: RUN muy corto (< 8 caracteres)", "warning");
+        }
+
+        log(`🚀 Iniciando búsqueda para RUN: "${run}"`);
+
+        try {
+          log("📡 Enviando petición POST a /usuario/buscar...");
+
+          const response = await fetch("/usuario/buscar", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ run: run }),
+          });
+
+          log(`📊 Respuesta HTTP: ${response.status} ${response.statusText}`);
+
+          if (!response.ok) {
+            log(`❌ Error HTTP: ${response.status}`, "error");
+            return;
+          }
+
+          const data = await response.json();
+          log("📦 Datos recibidos del servidor");
+
+          // Analizar la respuesta
+          if (data.encontrado) {
+            log("✅ Usuario encontrado en base de datos", "success");
+            log(`👤 Nombre: "${data.nombre || "N/A"}"`);
+            log(`📅 Fecha nacimiento: "${data.fecha_nacimiento || "N/A"}"`);
+            log(`👥 Sexo: "${data.sexo || "N/A"}"`);
+            log(`🏥 Categoría ID: "${data.categoria_id || "N/A"}"`);
+            log(`📍 Sector ID: "${data.sector_id || "N/A"}"`);
+            log(
+              `🧬 Patologías: ${data.patologias ? data.patologias.length : 0} registros`,
+            );
+            log(
+              `🔬 Exámenes: ${data.examenes ? data.examenes.length : 0} registros`,
+            );
+            log(
+              `📊 Controles: ${data.controles ? data.controles.length : 0} registros`,
+            );
+            log(
+              `📋 Acuerdos: ${data.acuerdos ? data.acuerdos.length : 0} registros`,
+            );
+
+            // Simular llenado de campos como lo hace usuario_form.html
+            log("🖱️ Simulando llenado de campos del formulario...");
+
+            const campos = [
+              { id: "nombre", valor: data.nombre },
+              { id: "fecha_nacimiento", valor: data.fecha_nacimiento },
+              { id: "sexo", valor: data.sexo },
+              { id: "categoria_id", valor: data.categoria_id },
+              { id: "sector_id", valor: data.sector_id },
+            ];
+
+            campos.forEach((campo) => {
+              const elemento = document.getElementById(campo.id);
+              if (elemento) {
+                elemento.value = campo.valor || "";
+                log(`✅ Campo "${campo.id}" rellenado: "${campo.valor}"`);
+              } else {
+                log(`⚠️ Campo "${campo.id}" no encontrado en DOM`, "warning");
+              }
+            });
+
+            // Verificar estructura de datos detalladamente
+            log("🔍 Análisis detallado de la respuesta:");
+            log(`🗂️ Claves principales: ${Object.keys(data).join(", ")}`);
+
+            if (data.patologias && Array.isArray(data.patologias)) {
+              log(
+                `🧬 Patologías: [${data.patologias.map((p) => p.nombre || p.id || p).join(", ")}]`,
+              );
+            }
+          } else {
+            log("❌ Usuario NO encontrado en base de datos", "error");
+            if (data.debug) {
+              log(`🐛 Debug info: ${JSON.stringify(data.debug)}`);
+            }
+          }
+
+          // Mostrar respuesta completa para análisis
+          log("📋 Respuesta JSON completa:");
+          log(JSON.stringify(data, null, 2));
+        } catch (error) {
+          log(`❌ Error de red o JavaScript: ${error.message}`, "error");
+          console.error("Error completo:", error);
+        }
+      }
+
+      // Crear campos simulados para testing
+      document.addEventListener("DOMContentLoaded", function () {
+        const container = document.querySelector(".container");
+        const fieldsHtml = `
+                <div class="debug-box">
+                    <h4>🧪 Campos de prueba (simulan usuario_form.html):</h4>
+                    <input type="text" id="nombre" placeholder="Nombre" readonly>
+                    <input type="text" id="fecha_nacimiento" placeholder="Fecha nacimiento" readonly>
+                    <input type="text" id="sexo" placeholder="Sexo" readonly>
+                    <input type="text" id="categoria_id" placeholder="Categoría ID" readonly>
+                    <input type="text" id="sector_id" placeholder="Sector ID" readonly>
+                </div>
+            `;
+        container.insertAdjacentHTML("beforeend", fieldsHtml);
+
+        log("🎯 Debug tool iniciado. Listo para pruebas.");
+      });
+    </script>
+  </body>
+</html>

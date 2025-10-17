@@ -1,0 +1,171 @@
+/* ============ Capa de armonización ECICEP 2025 (no destructiva) ============ */
+/* Scope para ganar especificidad sin eliminar nada existente */
+.ec-2025 {
+  --ec-gap-xs: 6px;
+  --ec-gap-sm: 10px;
+  --ec-gap-md: 16px;
+  --ec-gap-lg: 20px;
+  --ec-gap-xl: 28px;
+  --ec-label: 13px;
+  --ec-text: 14px;
+  --ec-note: 12px;
+  --ec-field-h: 42px;
+  --ec-field-pad-x: 12px;
+  --ec-field-pad-y: 8px;
+  --ec-col-min: 280px;
+}
+.ec-2025 .ec-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--ec-col-min), 1fr));
+  gap: var(--ec-gap-lg) var(--ec-gap-lg);
+  align-items: start;
+}
+.ec-2025 .ec-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--ec-gap-md);
+}
+.ec-2025 .ec-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ec-gap-xs);
+  min-width: 0;
+}
+.ec-2025 .ec-field > label {
+  font-size: var(--ec-label);
+  font-weight: 600;
+  line-height: 1.2;
+  color: #374151;
+  white-space: normal;
+}
+.ec-2025 input[type="text"],
+.ec-2025 input[type="date"],
+.ec-2025 input[type="number"],
+.ec-2025 input[type="email"],
+.ec-2025 input[type="tel"],
+.ec-2025 select,
+.ec-2025 textarea {
+  height: var(--ec-field-h);
+  padding: var(--ec-field-pad-y) var(--ec-field-pad-x);
+  font-size: var(--ec-text);
+  line-height: 1.3;
+  transform: none !important;
+  box-shadow: none;
+}
+.ec-2025 input::placeholder,
+.ec-2025 textarea::placeholder {
+  opacity: 0.9;
+  font-size: var(--ec-text);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+.ec-2025 .w-run {
+  min-width: 200px;
+  max-width: 260px;
+}
+.ec-2025 .w-fecha {
+  min-width: 160px;
+  max-width: 200px;
+}
+.ec-2025 .w-telefono {
+  min-width: 180px;
+  max-width: 220px;
+}
+.ec-2025 .w-num-xs {
+  min-width: 80px;
+  max-width: 90px;
+  text-align: right;
+}
+.ec-2025 .w-num-sm {
+  min-width: 100px;
+  max-width: 120px;
+  text-align: right;
+}
+.ec-2025 .w-num-md {
+  min-width: 130px;
+  max-width: 160px;
+  text-align: right;
+}
+.ec-2025 .w-num-lg {
+  min-width: 180px;
+  max-width: 260px;
+  text-align: right;
+}
+.ec-2025 .w-peso {
+  min-width: 120px;
+  max-width: 140px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ec-2025 .w-talla {
+  min-width: 120px;
+  max-width: 140px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ec-2025 .w-hba1c {
+  min-width: 110px;
+  max-width: 120px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ec-2025 .w-presion {
+  min-width: 100px;
+  max-width: 110px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.ec-2025 .ec-section {
+  margin-bottom: var(--ec-gap-xl);
+}
+.ec-2025 .ec-section .card,
+.ec-2025 .ec-section fieldset {
+  margin-bottom: var(--ec-gap-lg);
+}
+.ec-2025 .mt-0 {
+  margin-top: 0 !important;
+}
+.ec-2025 .mt-sm {
+  margin-top: var(--ec-gap-sm) !important;
+}
+.ec-2025 .mt-md {
+  margin-top: var(--ec-gap-md) !important;
+}
+.ec-2025 .mt-lg {
+  margin-top: var(--ec-gap-lg) !important;
+}
+.ec-2025 .mb-0 {
+  margin-bottom: 0 !important;
+}
+.ec-2025 .mb-sm {
+  margin-bottom: var(--ec-gap-sm) !important;
+}
+.ec-2025 .mb-md {
+  margin-bottom: var(--ec-gap-md) !important;
+}
+.ec-2025 .mb-lg {
+  margin-bottom: var(--ec-gap-lg) !important;
+}
+.ec-2025 .btn:hover,
+.ec-2025 button:hover {
+  transform: none !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+.ec-2025 .alerts-tabs,
+.ec-2025 .alerts-content,
+.ec-2025 .alert-item {
+  transition: box-shadow 0.15s ease !important;
+  transform: none !important;
+}
+.ec-2025 .alert-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e1e5e9;
+  background: #fff;
+}
+.ec-2025 .alert-item:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}

@@ -1,0 +1,488 @@
+/* Mejora visual encabezado y módulo de patologías ECICEP 2025 */
+:root {
+  --uf-hero-bg: linear-gradient(135deg, #0d47a1 0%, #1565c0 60%, #1e3a8a 100%);
+  --uf-hero-grid-color: rgba(255, 255, 255, 0.08);
+  --uf-hero-overlay:
+    radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.15),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(255, 255, 255, 0.12),
+      transparent 65%
+    );
+  --uf-card-bg: #ffffff;
+  --uf-card-border: #dbe4f0;
+  --uf-soft-shadow:
+    0 4px 18px -4px rgba(17, 24, 39, 0.18),
+    0 2px 6px -2px rgba(17, 24, 39, 0.12);
+  --uf-pill-bg: #eff6ff;
+  --uf-pill-color: #1d4ed8;
+  --uf-accent: #2563eb;
+  --uf-danger: #dc2626;
+  --uf-success: #059669;
+  --uf-radius: 14px;
+  --uf-transition: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- HERO / ENCABEZADO ---------- */
+.uf-hero {
+  position: relative;
+  margin: -24px -24px 32px -24px;
+  padding: 56px 48px 52px;
+  background: var(--uf-hero-bg);
+  color: #fff;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+.uf-hero:before,
+.uf-hero:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.uf-hero:before {
+  background: var(--uf-hero-overlay);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+}
+.uf-hero:after {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0) 40%
+  );
+}
+.uf-hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--uf-hero-grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--uf-hero-grid-color) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.2)
+  );
+  opacity: 0.55;
+}
+.uf-hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.uf-hero-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 260px;
+}
+.uf-hero h1 {
+  margin: 0;
+  font-size: clamp(28px, 4.2vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+.uf-hero p {
+  margin: 0;
+  font-size: clamp(14px, 1.4vw, 18px);
+  opacity: 0.9;
+  font-weight: 400;
+}
+.uf-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.13);
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  font-size: 12px;
+  backdrop-filter: blur(4px);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.uf-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.uf-hero-actions .btn {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px -3px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(4px);
+}
+.uf-hero-actions .btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.45);
+}
+.uf-hero-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: contain;
+  box-shadow: 0 6px 18px -4px rgba(0, 0, 0, 0.4);
+  background: #fff;
+  padding: 4px;
+}
+.uf-hero-mark {
+  width: 124px;
+  height: auto;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+}
+
+/* ---------- PATOLOGÍAS PANEL ---------- */
+.patologias-ecicep-container {
+  background: linear-gradient(165deg, #ffffff 0%, #f4f7fb 120%);
+  border: 1px solid var(--uf-card-border) !important;
+  border-radius: 18px !important;
+  padding: 28px 26px 30px 26px !important;
+  box-shadow: var(--uf-soft-shadow) !important;
+  position: relative;
+  overflow: hidden;
+}
+.patologias-ecicep-container:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle at 85% 30%,
+      rgba(37, 99, 235, 0.15),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 10% 80%,
+      rgba(59, 130, 246, 0.18),
+      transparent 65%
+    );
+  pointer-events: none;
+}
+.patologias-ecicep-container h4 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #0f295c;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+}
+.patologias-ecicep-container .familia-header {
+  margin: 18px 0 10px;
+  padding: 10px 14px;
+  border: 1px solid #c9d7eb;
+  background: linear-gradient(120deg, #f0f6ff, #e3eef9);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: var(--uf-transition);
+  position: relative;
+}
+.patologias-ecicep-container .familia-header:hover {
+  box-shadow: 0 4px 12px -4px rgba(30, 58, 138, 0.35);
+  transform: translateY(-2px);
+}
+.patologias-ecicep-container .familia-header[aria-expanded="true"] {
+  background: linear-gradient(120deg, #e0efff, #d6e9ff);
+  border-color: #93c5fd;
+}
+.patologias-ecicep-container .familia-header .fam-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0f3b82;
+}
+.patologias-ecicep-container .familia-header .fam-pill {
+  background: #1d4ed8;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.4);
+}
+.patologias-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px 14px;
+  margin: 6px 2px 4px;
+}
+.patologia-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px 10px 12px;
+  border: 1px solid #d5dfeb;
+  background: linear-gradient(120deg, #ffffff, #f2f7fb);
+  border-radius: 12px;
+  line-height: 1.25;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: var(--uf-transition);
+  min-height: 54px;
+}
+.patologia-item:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 10px -2px rgba(30, 58, 138, 0.25);
+  transform: translateY(-2px);
+}
+.patologia-item input[type="checkbox"] {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  border: 2px solid #4f6b94;
+  border-radius: 6px;
+  appearance: none;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  transition: var(--uf-transition);
+}
+.patologia-item input[type="checkbox"]:hover {
+  border-color: #2563eb;
+}
+.patologia-item input[type="checkbox"]:checked {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) inset;
+}
+.patologia-item input[type="checkbox"]:checked:after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: #fff;
+  display: block;
+}
+.patologia-item label {
+  cursor: pointer;
+  color: #1e3a5f;
+  flex: 1;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.patologia-item strong {
+  color: #0d3b86;
+  font-weight: 700;
+}
+.patologia-item.selected {
+  border-color: #059669;
+  background: linear-gradient(120deg, #e8fff8, #f0fdf4);
+}
+.patologias-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 4px 0 14px;
+}
+.patologias-toolbar button {
+  background: #1d4ed8;
+  color: #fff !important;
+  border: 1px solid #0f3b82;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--uf-transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.patologias-toolbar button:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px -4px rgba(30, 58, 138, 0.4);
+}
+.patologias-toolbar button:disabled {
+  background: #93a3b8 !important;
+  border-color: #93a3b8;
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+.patologias-status-inline {
+  font-size: 12px;
+  color: #0f3b82;
+  margin-top: 4px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.pat-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 10px 6px 10px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px dashed #93c5fd;
+  min-height: 58px;
+}
+.pat-badges .pat-empty {
+  opacity: 0.6;
+  font-style: italic;
+  font-size: 12px;
+}
+.pat-badge {
+  background: var(--uf-pill-bg);
+  color: var(--uf-pill-color);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+.pat-badge:before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+.patologias-ecicep-container .familia-wrapper {
+  margin-bottom: 12px;
+}
+.patologias-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+.patologias-header-bar .titulo {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #0f295c;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.patologias-header-bar .titulo span {
+  background: #1d4ed8;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Estado expandido indicador */
+.familia-header[aria-expanded="true"] .fam-pill {
+  background: #059669;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
+}
+
+/* Foco accesible */
+.patologia-item:focus-within,
+.familia-header:focus {
+  outline: 3px solid rgba(37, 99, 235, 0.45);
+  outline-offset: 2px;
+}
+
+/* Scroll interno opcional si se limita altura (no activo ahora) */
+.patologias-scroll-limit {
+  max-height: 560px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.patologias-scroll-limit::-webkit-scrollbar {
+  width: 10px;
+}
+.patologias-scroll-limit::-webkit-scrollbar-track {
+  background: transparent;
+}
+.patologias-scroll-limit::-webkit-scrollbar-thumb {
+  background: #c1d2e7;
+  border-radius: 20px;
+}
+.patologias-scroll-limit::-webkit-scrollbar-thumb:hover {
+  background: #9cb9d6;
+}
+
+/* Mini mejoras generales */
+.ai-filled {
+  position: relative;
+}
+.ai-filled:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid #22c55e;
+  border-radius: 8px;
+  pointer-events: none;
+  animation: aiBorder 3s ease 1;
+}
+@keyframes aiBorder {
+  0% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.15;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Responsive ajustes */
+@media (max-width: 900px) {
+  .uf-hero {
+    padding: 48px 32px 46px;
+  }
+  .uf-hero-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .uf-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .patologias-group {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+@media (max-width: 580px) {
+  .uf-hero {
+    padding: 42px 24px 40px;
+  }
+  .uf-hero h1 {
+    font-size: 30px;
+  }
+  .uf-hero p {
+    font-size: 14px;
+  }
+}

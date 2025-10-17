@@ -1,0 +1,121 @@
+/* Estilos unificados de semáforos y badges para exámenes clínicos */
+
+/* Tamaños base */
+.sem-dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  vertical-align: middle;
+  box-shadow: 0 0 0 1px #33415533;
+}
+
+/* Riesgo Pie DM */
+.sem-piedm-bajo {
+  background: #059669;
+}
+.sem-piedm-moderado {
+  background: #ca8a04;
+}
+.sem-piedm-alto {
+  background: #ea580c;
+}
+.sem-piedm-maximo {
+  background: #dc2626;
+}
+
+/* Estados vigencia Adulto Mayor */
+.sem-am-vigente {
+  background: #059669;
+}
+.sem-am-expira-pronto {
+  background: #ca8a04;
+}
+.sem-am-vencido {
+  background: #dc2626;
+}
+
+/* Pulsos */
+@keyframes semPulseRed {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+@keyframes semPulseAmber {
+  0% {
+    box-shadow: 0 0 0 0 rgba(202, 138, 4, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(202, 138, 4, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(202, 138, 4, 0);
+  }
+}
+
+.sem-pulse-overdue {
+  animation: semPulseRed 1.8s infinite;
+} /* vencido */
+.sem-pulse-today {
+  animation: semPulseAmber 2.4s infinite;
+} /* hoy */
+
+/* Badges resumen */
+.badge-am {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #e2e8f0;
+  color: #334155;
+}
+.badge-am.vigente {
+  background: #d1fae5;
+  color: #065f46;
+}
+.badge-am.vencido {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.badge-am.expira-pronto {
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.badge-piedm {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #e2e8f0;
+  color: #334155;
+}
+.badge-piedm.bajo {
+  background: #d1fae5;
+  color: #065f46;
+}
+.badge-piedm.moderado {
+  background: #fef9c3;
+  color: #92400e;
+}
+.badge-piedm.alto {
+  background: #fed7aa;
+  color: #9a3412;
+}
+.badge-piedm.maximo {
+  background: #fee2e2;
+  color: #b91c1c;
+}

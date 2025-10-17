@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug - Búsqueda de Exámenes</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .debug-section {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .success {
+        background: #d4edda;
+        border-color: #c3e6cb;
+      }
+      .error {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+      }
+      pre {
+        background: #f1f1f1;
+        padding: 10px;
+        border-radius: 3px;
+        overflow-x: auto;
+      }
+      button {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      input[type="text"] {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 200px;
+      }
+      .examenes-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+      }
+      .examenes-table th,
+      .examenes-table td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+        font-size: 12px;
+      }
+      .examenes-table th {
+        background: #f2f2f2;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔍 Debug - Búsqueda de Usuario con Exámenes</h1>
+
+    <div class="debug-section">
+      <h3>Buscar Usuario</h3>
+      <input
+        type="text"
+        id="runInput"
+        placeholder="Ingrese RUN"
+        value="10.000.141-1"
+      />
+      <button onclick="buscarUsuarioDebug()">Buscar Usuario</button>
+      <button onclick="limpiarDebug()">Limpiar</button>
+    </div>
+
+    <div class="debug-section" id="responseDebug" style="display: none">
+      <h3>📡 Respuesta del Servidor</h3>
+      <div id="responseStatus"></div>
+      <pre id="responseData"></pre>
+    </div>
+
+    <div class="debug-section" id="examenesDebug" style="display: none">
+      <h3>📊 Análisis de Exámenes</h3>
+      <div id="examenesAnalisis"></div>
+    </div>
+
+    <div class="debug-section" id="tablaDebug" style="display: none">
+      <h3>📋 Tabla de Exámenes Renderizada</h3>
+      <table class="examenes-table" id="examenesTable">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>SO2 %</th>
+            <th>Flujometría</th>
+            <th>Tos</th>
+            <th>Baciloscopia</th>
+            <th>HbA1c</th>
+            <th>Notas</th>
+          </tr>
+        </thead>
+        <tbody id="examenesBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      function limpiarDebug() {
+        document.getElementById("responseDebug").style.display = "none";
+        document.getElementById("examenesDebug").style.display = "none";
+        document.getElementById("tablaDebug").style.display = "none";
+      }
+
+      function buscarUsuarioDebug() {
+        const run = document.getElementById("runInput").value.trim();
+        if (!run) {
+          alert("Por favor ingrese un RUN");
+          return;
+        }
+
+        console.log("🔍 Iniciando búsqueda para RUN:", run);
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ run: run }),
+        })
+          .then((response) => {
+            console.log("📡 Respuesta recibida:", response);
+            document.getElementById("responseStatus").innerHTML =
+              `<strong>Status:</strong> ${response.status} ${response.statusText}`;
+
+            if (response.ok) {
+              document.getElementById("responseStatus").className = "success";
+            } else {
+              document.getElementById("responseStatus").className = "error";
+            }
+
+            return response.json();
+          })
+          .then((data) => {
+            console.log("📦 Datos parseados:", data);
+
+            // Mostrar respuesta completa
+            document.getElementById("responseData").textContent =
+              JSON.stringify(data, null, 2);
+            document.getElementById("responseDebug").style.display = "block";
+
+            // Analizar exámenes específicamente
+            if (data.examenes) {
+              console.log("✅ Campo examenes encontrado:", data.examenes);
+              console.log("📊 Tipo de examenes:", typeof data.examenes);
+              console.log("📊 Es array:", Array.isArray(data.examenes));
+              console.log("📊 Longitud:", data.examenes.length);
+
+              let analisis = `
+                        <p><strong>✅ Campo 'examenes' encontrado</strong></p>
+                        <p><strong>Tipo:</strong> ${typeof data.examenes}</p>
+                        <p><strong>Es array:</strong> ${Array.isArray(data.examenes)}</p>
+                        <p><strong>Cantidad:</strong> ${data.examenes.length}</p>
+                    `;
+
+              if (data.examenes.length > 0) {
+                analisis += `<p><strong>Primer examen:</strong></p>`;
+                analisis += `<pre>${JSON.stringify(data.examenes[0], null, 2)}</pre>`;
+
+                // Renderizar tabla
+                renderizarTablaExamenes(data.examenes);
+                document.getElementById("tablaDebug").style.display = "block";
+              } else {
+                analisis += `<p><strong>⚠️ Array vacío</strong></p>`;
+              }
+
+              document.getElementById("examenesAnalisis").innerHTML = analisis;
+            } else {
+              console.log("❌ Campo examenes NO encontrado en la respuesta");
+              document.getElementById("examenesAnalisis").innerHTML =
+                '<p><strong>❌ Campo "examenes" NO encontrado en la respuesta</strong></p>';
+            }
+
+            document.getElementById("examenesDebug").style.display = "block";
+          })
+          .catch((error) => {
+            console.error("❌ Error en la petición:", error);
+            document.getElementById("responseStatus").innerHTML =
+              `<strong>Error:</strong> ${error.message}`;
+            document.getElementById("responseStatus").className = "error";
+            document.getElementById("responseDebug").style.display = "block";
+          });
+      }
+
+      function renderizarTablaExamenes(examenes) {
+        const tbody = document.getElementById("examenesBody");
+        tbody.innerHTML = "";
+
+        if (examenes && examenes.length > 0) {
+          examenes.forEach((ex, index) => {
+            console.log(`🏥 Procesando examen ${index + 1}:`, ex);
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                        <td>${ex.examen_fecha || ""}</td>
+                        <td>${ex.so2_percent || ""}</td>
+                        <td>${ex.flujometria || ""}</td>
+                        <td>${ex.tos === true ? "Sí" : ex.tos === false ? "No" : ""}</td>
+                        <td>${ex.baciloscopia === true ? "Sí" : ex.baciloscopia === false ? "No" : ""}</td>
+                        <td>${ex.hba1c || ""}</td>
+                        <td>${(ex.notas || "").substring(0, 50)}${(ex.notas || "").length > 50 ? "..." : ""}</td>
+                    `;
+            tbody.appendChild(row);
+          });
+          console.log(`✅ Tabla renderizada con ${examenes.length} filas`);
+        } else {
+          tbody.innerHTML =
+            '<tr><td colspan="7" style="text-align:center; color:#888;">No hay exámenes</td></tr>';
+          console.log("⚠️ No hay exámenes para mostrar");
+        }
+      }
+
+      // Auto-ejecutar al cargar
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("🚀 Página de debug cargada");
+      });
+    </script>
+  </body>
+</html>

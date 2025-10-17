@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Básico</title>
+  </head>
+  <body>
+    <h1>Test Básico de Fetch</h1>
+    <button onclick="test()">TEST</button>
+    <div id="result"></div>
+
+    <script>
+      function test() {
+        console.log("Iniciando test...");
+        const result = document.getElementById("result");
+        result.innerHTML = "Probando...";
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ run: "10.000.141-1" }),
+        })
+          .then((response) => {
+            console.log("Response:", response);
+            return response.text();
+          })
+          .then((text) => {
+            console.log("Text:", text);
+            result.innerHTML = "<pre>" + text + "</pre>";
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            result.innerHTML = "Error: " + error.message;
+          });
+      }
+    </script>
+  </body>
+</html>

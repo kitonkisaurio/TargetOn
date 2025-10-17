@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Buscador ECICEP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --ink: #222;
+        --muted: #6c757d;
+        --line: #e5e7eb;
+        --brand: #0d6efd;
+        --brand-600: #0b5ed7;
+        --success: #198754;
+        --card: #fff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          "Helvetica Neue",
+          Arial;
+      }
+      img {
+        max-width: 100%;
+        display: block;
+      }
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+
+      /* Header */
+      header.app-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-bottom: 2px solid var(--line);
+        background: #fff;
+        padding: 10px 16px;
+        margin-bottom: 16px;
+        border-radius: 0 0 10px 10px;
+        box-shadow: 0 4px 8px rgb(0 0 0 / 0.03);
+      }
+      header.app-header h1 {
+        margin: 0;
+        font-size: clamp(20px, 3.2vw, 28px);
+        font-weight: 700;
+      }
+      header.app-header .logo {
+        height: 225px;
+        width: auto;
+      } /* Aumentado 50%: de 150px a 225px */
+
+      /* Imagen monitoreo metas */
+      .metas-link {
+        margin-left: auto; /* empuja la imagen a la derecha */
+        display: flex;
+        align-items: center;
+        position: relative; /* asegura superposición limpia del hover */
+        overflow: visible;
+      }
+      .metas-img {
+        width: 150px; /* tamaño fijo */
+        height: auto;
+        transition: transform 0.3s ease; /* animación suave */
+        transform-origin: center center;
+        will-change: transform;
+      }
+      .metas-img:hover {
+        transform: scale(1.5); /* zoom al pasar mouse */
+      }
+
+      /* Botones */
+      .btn {
+        display: inline-block;
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--ink);
+        padding: 0.45rem 0.7rem;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .btn:hover {
+        filter: brightness(0.98);
+      }
+      .btn-primary {
+        background: var(--brand);
+        border-color: var(--brand);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--brand-600);
+        border-color: var(--brand-600);
+      }
+      .btn-success {
+        background: var(--success);
+        border-color: var(--success);
+        color: #fff;
+      }
+      .btn-outline-secondary {
+        background: #fff;
+        border-color: #c7c9cc;
+        color: #333;
+      }
+      .btn-xs {
+        padding: 0.2rem 0.45rem;
+        font-size: 0.78rem;
+      }
+
+      /* Grid filtros */
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+      .filters {
+        grid-template-columns: repeat(12, 1fr);
+        align-items: end;
+        margin-bottom: 8px;
+      }
+      .col-12 {
+        grid-column: 1/-1;
+      }
+      .col-6 {
+        grid-column: span 6;
+      }
+      .col-4 {
+        grid-column: span 4;
+      }
+      .col-3 {
+        grid-column: span 3;
+      }
+      .col-2 {
+        grid-column: span 2;
+      }
+      .col-1 {
+        grid-column: span 1;
+      }
+      label {
+        display: block;
+        font-size: 0.86rem;
+        margin-bottom: 6px;
+        color: #374151;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 0.5rem 0.6rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.5rem;
+        background: #fff;
+      }
+      input[type="date"] {
+        padding: 0.45rem 0.6rem;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      /* Tabla */
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 0.6rem;
+        background: var(--card);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1100px;
+        table-layout: fixed;
+      }
+      thead th {
+        position: sticky;
+        top: 0;
+        background: #f3f4f6;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        padding: 0.6rem 0.6rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
+      }
+      tbody td {
+        border-top: 1px solid var(--line);
+        padding: 0.55rem 0.6rem;
+        font-size: 0.92rem;
+        vertical-align: middle;
+      }
+      tbody tr:hover {
+        background: #fafafa;
+      }
+      .nowrap {
+        white-space: nowrap;
+      }
+      .muted {
+        color: var(--muted);
+      }
+
+      /* Columnas más anchas y nombre en una línea */
+      th.col-run,
+      td.col-run {
+        width: 12ch;
+      }
+      th.col-nombre,
+      td.col-nombre {
+        width: 34%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      th.col-fecha,
+      td.col-fecha {
+        width: 12ch;
+      }
+      th.col-sector,
+      td.col-sector {
+        width: 14ch;
+      }
+      th.col-prof,
+      td.col-prof {
+        width: 16ch;
+      }
+      th.col-num,
+      td.col-num {
+        width: 8ch;
+      }
+
+      /* Footer */
+      footer.app-footer {
+        margin-top: 28px;
+        border-top: 2px solid var(--line);
+        padding: 14px 10px;
+        background: #fff;
+        border-radius: 10px 10px 0 0;
+      }
+      footer.app-footer .marca {
+        height: 150px;
+        width: auto;
+        margin: 0 auto;
+      }
+
+      @media (max-width: 1024px) {
+        .container {
+          max-width: 100%;
+          padding: 12px;
+        }
+      }
+      @media (max-width: 720px) {
+        .filters {
+          grid-template-columns: repeat(6, 1fr);
+        }
+        .col-6 {
+          grid-column: span 6;
+        }
+        .col-4 {
+          grid-column: span 6;
+        }
+        .col-3 {
+          grid-column: span 3;
+        }
+        .col-2 {
+          grid-column: span 3;
+        }
+        .col-1 {
+          grid-column: span 3;
+        }
+        header.app-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .metas-link {
+          margin-left: 0;
+        } /* en móviles no forzar extremo derecho */
+      }
+    </style>
+  </head>
+  <body>
+    <!-- HEADER -->
+    <header class="app-header">
+      <img class="logo" src="/static/logo_ecicep.jpg" alt="ECICEP" />
+      <h1>Buscador ECICEP</h1>
+      <a href="https://grafana.ecicep.org" target="_blank" class="metas-link">
+        <!-- Si guardas en static/1.png -->
+        <img
+          src="/static/1.png?v=1"
+          alt="Monitoreo Metas"
+          title="Monitoreo Metas 📈"
+          class="metas-img"
+        />
+        <!-- Si prefieres static/img/1.png, usa: /static/img/1.png?v=1 -->
+      </a>
+    </header>
+
+    <div class="container">
+      <!-- Botones por sector -->
+      <section class="grid col-12" style="margin-bottom: 10px">
+        <h3 style="margin: 0.2rem 0">Sectores</h3>
+        <div class="flex wrap" style="gap: 0.5rem">
+          <!-- Sectores disponibles - estas rutas deben ser definidas en el backend -->
+          <a
+            class="btn btn-primary btn-xs"
+            href="/sector/R"
+            title="Ver planilla de Renca"
+          >
+            Planilla Renca
+          </a>
+          <a
+            class="btn btn-primary btn-xs"
+            href="/sector/L"
+            title="Ver planilla de Las Condes"
+          >
+            Planilla Las Condes
+          </a>
+          <a
+            class="btn btn-primary btn-xs"
+            href="/sector/C"
+            title="Ver planilla de Conchalí"
+          >
+            Planilla Conchalí
+          </a>
+          <a
+            class="btn btn-primary btn-xs"
+            href="/sector/H"
+            title="Ver planilla de Huechuraba"
+          >
+            Planilla Huechuraba
+          </a>
+          <a
+            class="btn btn-primary btn-xs"
+            href="/sector/RB"
+            title="Ver planilla de Recoleta Bajo"
+          >
+            Planilla Recoleta Bajo
+          </a>
+          <a
+            class="btn btn-primary btn-xs"
+            href="/sector/RA"
+            title="Ver planilla de Recoleta Alto"
+          >
+            Planilla Recoleta Alto
+          </a>
+          <a
+            class="btn btn-primary btn-xs"
+            href="/sector/I"
+            title="Ver planilla de Independencia"
+          >
+            Planilla Independencia
+          </a>
+          <a class="btn" href="/logout" title="Cerrar sesión">Cerrar sesión</a>
+        </div>
+      </section>
+
+      <!-- Filtros -->
+      <form id="frm" class="grid filters" onsubmit="evBuscar(event)">
+        <div class="col-2">
+          <label for="run">RUN</label>
+          <input
+            id="run"
+            placeholder="12.345.678-9"
+            autocomplete="off"
+            oninput="formatearRun(this)"
+          />
+        </div>
+
+        <div class="col-4">
+          <label for="nombre">Nombre</label>
+          <input
+            id="nombre"
+            placeholder="Apellidos o nombres"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="col-2">
+          <label for="fecha_desde">Ingreso desde</label>
+          <input id="fecha_desde" type="date" />
+        </div>
+
+        <div class="col-2">
+          <label for="fecha_hasta">Ingreso hasta</label>
+          <input id="fecha_hasta" type="date" />
+        </div>
+
+        <div class="col-1">
+          <label for="sexo">Sexo</label>
+          <select id="sexo">
+            <option value="">Todos</option>
+            <option value="masculino">Mas</option>
+            <option value="femenino">Fem</option>
+          </select>
+        </div>
+
+        <div class="col-1">
+          <label for="categoria_id">Cat.</label>
+          <!-- ENVÍA categoria_id=1/2/3 -->
+          <select id="categoria_id">
+            <option value="">Todas</option>
+            <option value="1">G1</option>
+            <option value="2">G2</option>
+            <option value="3">G3</option>
+          </select>
+        </div>
+
+        <div class="col-2">
+          <label for="sector_id">Sector</label>
+          <!-- value = id, texto = nombre -->
+          <select id="sector_id">
+            <option value="">Todos</option>
+            <option value="R">Renca</option>
+            <option value="L">Las Condes</option>
+            <option value="C">Conchalí</option>
+            <option value="H">Huechuraba</option>
+            <option value="RB">Recoleta Bajo</option>
+            <option value="RA">Recoleta Alto</option>
+            <option value="I">Independencia</option>
+          </select>
+        </div>
+
+        <div class="col-12 actions">
+          <button type="submit" class="btn btn-success">Buscar</button>
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            id="btn-limpiar"
+          >
+            Limpiar
+          </button>
+        </div>
+      </form>
+
+      <hr
+        style="
+          border: none;
+          border-top: 1px solid var(--line);
+          margin: 10px 0 12px;
+        "
+      />
+
+      <div id="resumen" class="small muted" style="margin-bottom: 8px">
+        Resultados: 0
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-run">RUN</th>
+              <th class="col-nombre">Nombre</th>
+              <th class="col-fecha">Ingreso</th>
+              <th class="col-num">Sexo</th>
+              <th class="col-num">Cat</th>
+              <th class="col-sector">Sector</th>
+              <th class="col-fecha">Últ. control</th>
+              <th class="col-prof">Profesional</th>
+              <th class="col-num">IMC</th>
+              <th class="col-num">PA</th>
+              <th class="nowrap">Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      <img
+        class="marca"
+        src="{{ url_for('static', filename='yomandrake.png') }}"
+        alt="yomandrake"
+      />
+    </footer>
+
+    <script>
+      // Mapeo de códigos de sector a nombres
+      const sectoresMap = {
+        1: "ROJO",
+        2: "ANTIHUALA",
+        3: "TRES PINOS",
+        4: "PANGUE",
+        5: "RANQUILCO",
+        6: "AMARILLO",
+        7: "VERDE",
+      };
+
+      // --- Normalización y máscara de RUN ---
+      function runNormalizado(run) {
+        if (!run) return "";
+        return (run + "").replace(/[^0-9kK]/g, "");
+      }
+      function formatearRun(input) {
+        const raw = input.value.replace(/[^0-9kK]/g, "").toUpperCase();
+        if (!raw) {
+          input.value = "";
+          return;
+        }
+        if (raw.length === 1) {
+          input.value = raw;
+          return;
+        }
+        const cuerpo = raw.slice(0, -1);
+        const dv = raw.slice(-1);
+        const conPuntos = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        input.value = conPuntos + "-" + dv;
+      }
+
+      // Fechas solo día/mes/año en es-CL
+      function fmtFecha(x) {
+        if (!x) return "";
+        const d = new Date(x);
+        if (!isNaN(d)) return d.toLocaleDateString("es-CL");
+        // fallback si viene como "YYYY-MM-DD"
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(x);
+        return m ? `${m[3]}-${m[2]}-${m[1]}` : x;
+      }
+
+      // Obtener nombre del sector por ID
+      function obtenerNombreSector(sectorId) {
+        return sectoresMap[sectorId] || sectorId;
+      }
+
+      // Helpers UI
+      function setResumen(n) {
+        document.getElementById("resumen").textContent = "Resultados: " + n;
+      }
+      function limpiar() {
+        document.getElementById("run").value = "";
+        document.getElementById("nombre").value = "";
+        document.getElementById("fecha_desde").value = "";
+        document.getElementById("fecha_hasta").value = "";
+        document.getElementById("sexo").value = "";
+        document.getElementById("categoria_id").value = "";
+        document.getElementById("sector_id").value = "";
+        document.getElementById("tbody").innerHTML = "";
+        setResumen(0);
+      }
+      document.getElementById("btn-limpiar").addEventListener("click", limpiar);
+
+      // Búsqueda
+      async function evBuscar(e) {
+        e.preventDefault();
+        const p = new URLSearchParams();
+
+        const run = runNormalizado(document.getElementById("run").value);
+        const nombre = document.getElementById("nombre").value.trim();
+        const fdesde = document.getElementById("fecha_desde").value;
+        const fhasta = document.getElementById("fecha_hasta").value;
+        const sexo = document.getElementById("sexo").value;
+        const catId = document.getElementById("categoria_id").value;
+        const sector = document.getElementById("sector_id").value;
+
+        if (run) p.set("run", run);
+        if (nombre) p.set("nombre", nombre);
+        if (fdesde) p.set("desde", fdesde);
+        if (fhasta) p.set("hasta", fhasta);
+        if (sexo) p.set("sexo", sexo);
+        if (catId) p.set("categoria_id", catId);
+        if (sector) p.set("sector_id", sector);
+
+        p.set("limit", "200");
+        p.set("offset", "0");
+
+        try {
+          const r = await fetch("/api/usuarios?" + p.toString());
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const data = await r.json();
+          renderTabla(data.items || []);
+          setResumen((data.items || []).length);
+        } catch (err) {
+          console.error("Error consultando /api/usuarios:", err);
+          alert("Error consultando el backend");
+        }
+      }
+
+      function renderTabla(items) {
+        const tb = document.getElementById("tbody");
+        tb.innerHTML = "";
+        for (const it of items) {
+          const pa = [it.presion_sistolica || "", it.presion_diastolica || ""]
+            .filter(Boolean)
+            .join("/");
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+        <td class="col-run nowrap">${it.run || ""}</td>
+        <td class="col-nombre">${it.nombre || ""}</td>
+        <td class="col-fecha nowrap">${fmtFecha(it.fecha_ingreso) || ""}</td>
+        <td class="col-num">${it.sexo || ""}</td>
+        <td class="col-num">${it.categoria_id ?? ""}</td>
+        <td class="col-sector">${obtenerNombreSector(it.sector_id) || it.sector_nombre || ""}</td>
+        <td class="col-fecha nowrap">${fmtFecha(it.ultima_fecha_control) || ""}</td>
+        <td class="col-prof">${it.ultimo_profesional || ""}</td>
+        <td class="col-num">${it.imc ?? ""}</td>
+        <td class="col-num">${pa}</td>
+        <td class="nowrap">
+          <a class="btn btn-outline-secondary btn-xs"
+             href="/usuario/${runNormalizado(it.run)}" target="_blank" title="Ver ficha">Ver</a>
+          <a class="btn btn-outline-secondary btn-xs"
+             href="/csv/usuario/${runNormalizado(it.run)}" target="_blank" title="CSV">CSV</a>
+        </td>
+      `;
+          tb.appendChild(tr);
+        }
+      }
+    </script>
+  </body>
+</html>

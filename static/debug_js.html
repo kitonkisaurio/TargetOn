@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug JavaScript Exámenes</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .debug {
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin: 10px 0;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+        background: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 10px 0;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .console {
+        background: #000;
+        color: #0f0;
+        padding: 10px;
+        height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🐛 Debug JavaScript Exámenes</h1>
+
+    <div class="debug">
+      <h3>Test 1: Buscar Usuario Real</h3>
+      <button onclick="testBuscarUsuarioReal()">Buscar 10.000.141-1</button>
+      <div id="status1"></div>
+    </div>
+
+    <div class="debug">
+      <h3>Test 2: Función actualizarTablaExamenes Directa</h3>
+      <button onclick="testActualizarTabla()">Test con Datos Hardcoded</button>
+      <div id="status2"></div>
+    </div>
+
+    <div class="debug">
+      <h3>Tabla de Exámenes</h3>
+      <table id="tabla-examenes">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>SO2 %</th>
+            <th>Flujometría</th>
+            <th>Tos</th>
+            <th>Baciloscopia</th>
+            <th>Creatininemia</th>
+            <th>Col</th>
+            <th>HDL</th>
+            <th>LDL</th>
+            <th>TAG</th>
+            <th>Microalb.</th>
+            <th>Microalb. valor</th>
+            <th>VFG</th>
+            <th>RAC</th>
+            <th>RPR</th>
+            <th>TSH</th>
+            <th>HbA1c</th>
+            <th>Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="18" style="text-align: center; color: #888">
+              Esperando datos...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="debug">
+      <h3>Console Debug</h3>
+      <div class="console" id="console"></div>
+      <button onclick="document.getElementById('console').innerHTML = ''">
+        Limpiar Console
+      </button>
+    </div>
+
+    <script>
+      // Capturar console.log para mostrar en pantalla
+      const originalLog = console.log;
+      const originalError = console.error;
+      const consoleDiv = document.getElementById("console");
+
+      function addToConsole(type, args) {
+        const entry = document.createElement("div");
+        entry.style.color = type === "error" ? "#ff4444" : "#00ff00";
+        entry.textContent = `[${type}] ${args.join(" ")}`;
+        consoleDiv.appendChild(entry);
+        consoleDiv.scrollTop = consoleDiv.scrollHeight;
+      }
+
+      console.log = function (...args) {
+        originalLog.apply(console, args);
+        addToConsole("LOG", args);
+      };
+
+      console.error = function (...args) {
+        originalError.apply(console, args);
+        addToConsole("ERROR", args);
+      };
+
+      function testBuscarUsuarioReal() {
+        console.log("🔍 Iniciando búsqueda real del usuario...");
+        document.getElementById("status1").innerHTML = "⏳ Buscando...";
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ run: "10.000.141-1" }),
+        })
+          .then((response) => {
+            console.log("📡 Response status:", response.status);
+            return response.json();
+          })
+          .then((data) => {
+            console.log("📦 Data completa recibida:", data);
+            console.log("🏥 Campo examenes:", data.examenes);
+            console.log("🏥 Tipo de examenes:", typeof data.examenes);
+            console.log("🏥 Es array:", Array.isArray(data.examenes));
+            console.log(
+              "🏥 Longitud:",
+              data.examenes ? data.examenes.length : "undefined",
+            );
+
+            if (data.examenes && data.examenes.length > 0) {
+              console.log("✅ Primer examen:", data.examenes[0]);
+              document.getElementById("status1").innerHTML = `
+                        <div style="color: green;">
+                            ✅ Encontrado: ${data.encontrado}<br>
+                            👤 Nombre: ${data.nombre}<br>
+                            🏥 Exámenes: ${data.examenes.length}
+                        </div>
+                    `;
+              // Llamar a la función de actualización
+              console.log("🔄 Llamando a actualizarTablaExamenes...");
+              actualizarTablaExamenes(data.examenes);
+            } else {
+              document.getElementById("status1").innerHTML = `
+                        <div style="color: orange;">
+                            ⚠️ Usuario encontrado pero sin exámenes
+                        </div>
+                    `;
+            }
+          })
+          .catch((error) => {
+            console.error("❌ Error:", error);
+            document.getElementById("status1").innerHTML = `
+                    <div style="color: red;">❌ Error: ${error.message}</div>
+                `;
+          });
+      }
+
+      function testActualizarTabla() {
+        console.log("🧪 Test directo de actualizarTablaExamenes...");
+
+        const datosTest = [
+          {
+            examen_fecha: "2023-12-12",
+            so2_percent: null,
+            flujometria: null,
+            tos: null,
+            baciloscopia: null,
+            creatinemia: null,
+            col: null,
+            hdl: null,
+            ldl: null,
+            tag: null,
+            microalbuminuria: null,
+            microalbuminuria_val: null,
+            vfg: null,
+            rac: null,
+            rpr: null,
+            tsh: null,
+            hba1c: "8.20",
+            notas: "importada desde usuariocontrol",
+          },
+          {
+            examen_fecha: "2022-12-07",
+            so2_percent: null,
+            flujometria: null,
+            tos: null,
+            baciloscopia: null,
+            creatinemia: null,
+            col: null,
+            hdl: null,
+            ldl: null,
+            tag: null,
+            microalbuminuria: null,
+            microalbuminuria_val: null,
+            vfg: null,
+            rac: null,
+            rpr: null,
+            tsh: null,
+            hba1c: "7.90",
+            notas: "importada desde usuariocontrol",
+          },
+        ];
+
+        console.log("📊 Datos de test preparados:", datosTest);
+        document.getElementById("status2").innerHTML =
+          "⏳ Actualizando tabla...";
+
+        try {
+          actualizarTablaExamenes(datosTest);
+          document.getElementById("status2").innerHTML = "✅ Función ejecutada";
+        } catch (error) {
+          console.error("❌ Error en actualizarTablaExamenes:", error);
+          document.getElementById("status2").innerHTML =
+            `❌ Error: ${error.message}`;
+        }
+      }
+
+      function actualizarTablaExamenes(examenes) {
+        console.log("🔄 actualizarTablaExamenes llamada con:", examenes);
+        console.log(
+          "📊 Número de exámenes:",
+          examenes ? examenes.length : "examenes es null/undefined",
+        );
+        console.log("📊 Tipo de examenes:", typeof examenes);
+        console.log("📊 Es array:", Array.isArray(examenes));
+
+        const tablaBody = document.querySelector("#tabla-examenes tbody");
+        if (!tablaBody) {
+          console.error("❌ No se encontró el tbody de la tabla exámenes");
+          return;
+        }
+
+        console.log("✅ Tbody encontrado:", tablaBody);
+        console.log("🧹 Limpiando contenido actual del tbody");
+
+        // Limpiar contenido actual completamente
+        tablaBody.innerHTML = "";
+        console.log("🧹 Tbody limpiado, innerHTML ahora:", tablaBody.innerHTML);
+
+        if (examenes && Array.isArray(examenes) && examenes.length > 0) {
+          console.log("✅ Agregando", examenes.length, "exámenes a la tabla");
+
+          examenes.forEach((ex, index) => {
+            console.log(`🏥 Procesando examen ${index + 1}:`, ex);
+
+            const row = document.createElement("tr");
+            const rowHTML = `
+                        <td>${ex.examen_fecha || ""}</td>
+                        <td>${ex.so2_percent || ""}</td>
+                        <td>${ex.flujometria || ""}</td>
+                        <td>${ex.tos === true ? "Sí" : ex.tos === false ? "No" : ""}</td>
+                        <td>${ex.baciloscopia === true ? "Sí" : ex.baciloscopia === false ? "No" : ""}</td>
+                        <td>${ex.creatinemia || ""}</td>
+                        <td>${ex.col || ""}</td>
+                        <td>${ex.hdl || ""}</td>
+                        <td>${ex.ldl || ""}</td>
+                        <td>${ex.tag || ""}</td>
+                        <td>${ex.microalbuminuria === true ? "Sí" : ex.microalbuminuria === false ? "No" : ""}</td>
+                        <td>${ex.microalbuminuria_val || ""}</td>
+                        <td>${ex.vfg || ""}</td>
+                        <td>${ex.rac || ""}</td>
+                        <td>${ex.rpr === true ? "Sí" : ex.rpr === false ? "No" : ""}</td>
+                        <td>${ex.tsh || ""}</td>
+                        <td>${ex.hba1c || ""}</td>
+                        <td>${(ex.notas || "").substring(0, 100)}${(ex.notas || "").length > 100 ? "..." : ""}</td>
+                    `;
+
+            row.innerHTML = rowHTML;
+            console.log(`🏥 Fila ${index + 1} creada, agregando al tbody...`);
+            tablaBody.appendChild(row);
+          });
+
+          console.log("✅ Tabla actualizada con", examenes.length, "filas");
+          console.log(
+            "📋 Estado final del tbody:",
+            tablaBody.innerHTML.substring(0, 200) + "...",
+          );
+        } else {
+          console.log(
+            "⚠️ No hay exámenes válidos, mostrando mensaje de no hay datos",
+          );
+          const row = document.createElement("tr");
+          row.innerHTML =
+            '<td colspan="18" style="text-align:center; color:#888; padding:20px;">No hay exámenes registrados para este usuario.</td>';
+          tablaBody.appendChild(row);
+          console.log('⚠️ Mensaje de "no hay datos" agregado');
+        }
+      }
+
+      console.log("🚀 Página de debug cargada");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,228 @@
+/* Hoja de estilos extraída desde estadisticas.html para mantener <head> limpio */
+:root {
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --card-bg: #ffffff;
+  --table-header-primary: #0f5fa8;
+  --table-header-secondary: #0f5fa8;
+  --table-border: #e2e8f0;
+  --table-row-even: #f8fafc;
+  --table-row-hover: #eef6ff;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+}
+
+.card-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0;
+}
+h2 {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.75rem;
+}
+.btn {
+  font-weight: 500;
+  border-radius: 8px;
+}
+
+.table {
+  font-family: "Inter", sans-serif;
+  font-size: 0.875rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm);
+}
+.table thead th {
+  background: var(--table-header-primary);
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  padding: 0.6rem 0.6rem;
+  border: none;
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+}
+.table thead th:first-child {
+  border-top-left-radius: 8px;
+}
+.table thead th:last-child {
+  border-top-right-radius: 8px;
+}
+.table tbody td {
+  padding: 0.65rem 0.6rem;
+  border-top: 1px solid var(--table-border);
+  border-bottom: 1px solid var(--table-border);
+  color: var(--text-primary);
+  font-weight: 400;
+  text-align: center;
+  vertical-align: middle;
+}
+.table tbody tr:nth-child(even) {
+  background-color: var(--table-row-even);
+}
+.table tbody tr:hover {
+  background-color: var(--table-row-hover) !important;
+}
+.table-bordered > :not(caption) > * > * {
+  border-width: 1px;
+  border-color: var(--table-border);
+}
+.table-section-header > td {
+  background: var(--table-header-secondary) !important;
+  color: #fff !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.025em;
+}
+#tabla-pscv-metas .sep-total,
+#tabla-seccion-a .sep-total {
+  border-left: 3px solid #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.05) !important;
+  font-weight: 600;
+}
+#tabla-pscv-metas .sep-po,
+#tabla-pscv-metas .sep-mig {
+  border-left: 3px solid #8b5cf6 !important;
+  background-color: rgba(139, 92, 246, 0.05) !important;
+}
+.table-sticky-wrap {
+  max-height: 70vh;
+  overflow: auto;
+  border-radius: 8px;
+  border: 1px solid var(--table-border);
+  box-shadow: var(--shadow-md);
+}
+.table.table-sm {
+  --th-h: 2rem;
+}
+.table-sticky thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--table-header-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+#tabla-pscv-metas.table-sticky thead tr:nth-child(1) th,
+#tabla-seccion-a.table-sticky thead tr:nth-child(1) th {
+  top: 0;
+  z-index: 12;
+}
+#tabla-pscv-metas.table-sticky thead tr:nth-child(2) th,
+#tabla-seccion-a.table-sticky thead tr:nth-child(2) th {
+  top: var(--th-h, 2.5rem);
+  z-index: 11;
+}
+#tabla-pscv-metas.table-sticky thead tr:nth-child(3) th,
+#tabla-seccion-a.table-sticky thead tr:nth-child(3) th {
+  top: calc(var(--th-h, 2.5rem) * 2);
+  z-index: 10;
+}
+.table-sticky td.sticky-col,
+.table-sticky th.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 15;
+  background: var(--card-bg);
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+.table-sticky thead th.sticky-col {
+  z-index: 20;
+  background: var(--table-header-primary);
+}
+.sticky-col-shadow {
+  box-shadow: 4px 0 8px rgba(0, 0, 0, 0.12);
+  border-right: 2px solid rgba(59, 130, 246, 0.3) !important;
+}
+.concepto-col,
+.concepto-subcol,
+.concept-col {
+  width: auto;
+  min-width: 200px;
+  max-width: 360px;
+  white-space: normal;
+  word-break: break-word;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+@media (max-width: 768px) {
+  .table {
+    font-size: 0.8rem;
+  }
+  .table thead th {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.7rem;
+  }
+  .table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+  .concepto-col,
+  .concepto-subcol,
+  .concept-col {
+    min-width: 180px;
+    max-width: 300px;
+  }
+}
+.table tbody td:not(.concept-col):not(.concepto-col):not(.concepto-subcol) {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+#tabla-pscv-variables th:first-child,
+#tabla-pscv-variables td:first-child {
+  min-width: 130px;
+  max-width: 200px;
+  white-space: normal;
+  word-break: break-word;
+}
+#tabla-pscv-variables tbody td {
+  font-size: 0.7rem;
+  padding: 0.5rem 0.5rem;
+}
+.small.text-muted {
+  color: var(--text-secondary) !important;
+  font-style: italic;
+  font-weight: 400;
+}
+.diagnosticos-tooltip {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--text-secondary);
+  text-underline-offset: 3px;
+  position: relative;
+}
+.diagnosticos-tooltip:hover {
+  color: #3b82f6;
+  text-decoration-color: #3b82f6;
+}
+.diagnosticos-tooltip[title] {
+  white-space: pre-line;
+}
+
+/* Celdas de relleno puramente presentacionales utilizadas para alinear cabeceras multinivel.
+  Se marcan en HTML como <td role="presentation" aria-hidden="true" class="placeholder-cell">.
+  Objetivos:
+  - No interferir visualmente (sin fondo, bordes, ni texto)
+  - No añadir altura extra
+  - Mantener mínima huella horizontal para que la estructura de la tabla conserve su grid
+*/
+.placeholder-cell {
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 0;
+  font-size: 0;
+  border: none !important;
+  background: transparent !important;
+  width: 0.25rem; /* ancho mínimo simbólico para preservar posición en layout */
+}
+
+/* En caso de necesitar totalmente colapsar el ancho, podría ajustarse a width:0; pero
+  mantener un ancho mínimo reduce riesgos de colapso inesperado en algunos navegadores. */
