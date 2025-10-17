@@ -1,0 +1,26 @@
+<section id="{{ id_root|default('mod-patologias') }}" class="card">
+  <div class="card-header"><h3 class="card-title">Patologías</h3></div>
+  <div class="card-body">
+    <div class="patologias-container">
+      {% for p in patologias %}
+      <label class="patologia-item">
+        <input
+          type="checkbox"
+          name="{{ name|default('patologias[]') }}"
+          value="{{ p.id }}"
+          {%
+          if
+          p.id
+          in
+          seleccionadas
+          %}checked{%
+          endif
+          %}
+        />
+        {{ p.codigo }} — {{ p.nombre }}
+      </label>
+      {% endfor %}
+    </div>
+    <div id="{{ id_root|default('mod-patologias') }}-subopciones"></div>
+  </div>
+</section>

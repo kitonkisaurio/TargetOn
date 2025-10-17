@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gráficos de evolución — {{ run }}</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --card: #fff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          Noto Sans,
+          Helvetica,
+          Arial;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 20px auto;
+        padding: 0 16px;
+      }
+      .row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .col {
+        flex: 1 1 520px;
+        min-width: 320px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        padding: 18px;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 6px 0 18px 0;
+      }
+      h3 {
+        margin: 0 0 10px 0;
+      }
+      .topbar {
+        display: flex;
+        gap: 12px;
+        margin: 6px 0 16px 0;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fff;
+        text-decoration: none;
+        color: var(--text);
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 14px;
+        margin: 10px 0 0 4px;
+      }
+      /* Alto fijo y controlado para impedir “estiramientos” */
+      .chart-wrap {
+        position: relative;
+        width: 100%;
+        height: 320px;
+        min-height: 320px;
+      }
+      canvas {
+        display: block;
+        position: absolute;
+        inset: 0;
+        width: 100% !important;
+        height: 100% !important;
+      }
+      .hidden {
+        display: none;
+      }
+      /* Controles de zoom */
+      .zoom-controls {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        display: flex;
+        gap: 5px;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+      }
+      .zoom-controls:hover {
+        opacity: 1;
+      }
+      .zoom-btn {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1;
+        color: #333;
+        transition: all 0.2s;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      .zoom-btn:hover {
+        background: #f0f0f0;
+        border-color: #999;
+      }
+      .zoom-btn:active {
+        background: #e0e0e0;
+        transform: translateY(1px);
+      }
+      /* Force cache refresh */
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <a class="btn" href="{{ url_for('usuario_detalle', run=run) }}"
+          >← Volver</a
+        >
+      </div>
+
+      <h1>Gráficos de evolución — {{ run }}</h1>
+
+      <p id="msg" class="muted hidden">No hay gráficos disponibles.</p>
+      
+      <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 14px;">
+        <strong>💡 Controles de zoom:</strong> 
+        Cada gráfico tiene controles individuales (🔍+ 🔍- ↺) para hacer zoom hasta 3x. 
+        También puedes usar la rueda del mouse y arrastrar para navegar.
+      </div>
+
+      <div id="charts" class="row">
+        <div class="col">
+          <div class="card">
+            <h3>Peso (kg) e IMC</h3>
+            <div class="chart-wrap">
+              <canvas id="pesoImc"></canvas>
+              <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn('pesoImc')" title="Zoom In (3x máximo)">🔍+</button>
+                <button class="zoom-btn" onclick="zoomOut('pesoImc')" title="Zoom Out">🔍-</button>
+                <button class="zoom-btn" onclick="resetZoom('pesoImc')" title="Reset Zoom">↺</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3>Presión arterial (mmHg)</h3>
+            <div class="chart-wrap">
+              <canvas id="pa"></canvas>
+              <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn('pa')" title="Zoom In (3x máximo)">🔍+</button>
+                <button class="zoom-btn" onclick="zoomOut('pa')" title="Zoom Out">🔍-</button>
+                <button class="zoom-btn" onclick="resetZoom('pa')" title="Reset Zoom">↺</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3>HGT (mg/dL) y CC (cm)</h3>
+            <div class="chart-wrap">
+              <canvas id="hgtCc"></canvas>
+              <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn('hgtCc')" title="Zoom In (3x máximo)">🔍+</button>
+                <button class="zoom-btn" onclick="zoomOut('hgtCc')" title="Zoom Out">🔍-</button>
+                <button class="zoom-btn" onclick="resetZoom('hgtCc')" title="Reset Zoom">↺</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% if tiene_diabetes %}
+        <div class="col">
+          <div class="card">
+            <h3>HbA1c (%)</h3>
+            <div class="chart-wrap">
+              <canvas id="hba1c"></canvas>
+              <div class="zoom-controls">
+                <button class="zoom-btn" onclick="zoomIn('hba1c')" title="Zoom In (3x máximo)">🔍+</button>
+                <button class="zoom-btn" onclick="zoomOut('hba1c')" title="Zoom Out">🔍-</button>
+                <button class="zoom-btn" onclick="resetZoom('hba1c')" title="Reset Zoom">↺</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Datos inyectados como JSON seguro -->
+      <script id="fechas-data" type="application/json">
+        {{ fechas|tojson }}
+      </script>
+      <script id="series-data" type="application/json">
+        {{ series|tojson }}
+      </script>
+      <script id="meta-data" type="application/json">
+        {{ {'fecha_nacimiento': fecha_nacimiento, 'tiene_diabetes': tiene_diabetes}|tojson }}
+      </script>
+
+      <script src="/static/js/common.js"></script>
+      <script>
+        console.log("=== INICIO GRÁFICOS ===");
+
+        // Verificar Chart.js
+        if (typeof Chart === "undefined") {
+          console.error("❌ Chart.js NO está cargado");
+          document.getElementById("charts").innerHTML =
+            '<p style="color:red;">Error: Chart.js no está cargado</p>';
+          throw new Error("Chart.js no está disponible");
+        }
+        console.log("✅ Chart.js cargado:", Chart.version);
+
+        // Registrar plugin de anotaciones para v4.1.1
+        try {
+          // Intentar múltiples formas de registrar el plugin
+          let pluginRegistered = false;
+
+          if (typeof window["chartjs-plugin-annotation"] !== "undefined") {
+            Chart.register(
+              window["chartjs-plugin-annotation"].default ||
+                window["chartjs-plugin-annotation"],
+            );
+            pluginRegistered = true;
+            console.log(
+              "✅ Plugin de anotaciones registrado (chartjs-plugin-annotation)",
+            );
+          } else if (typeof annotationPlugin !== "undefined") {
+            Chart.register(annotationPlugin);
+            pluginRegistered = true;
+            console.log("✅ Plugin registrado (annotationPlugin global)");
+          } else if (typeof ChartAnnotation !== "undefined") {
+            Chart.register(ChartAnnotation);
+            pluginRegistered = true;
+            console.log("✅ Plugin registrado (ChartAnnotation)");
+          }
+
+          if (!pluginRegistered) {
+            console.warn(
+              "⚠️ Plugin de anotaciones NO disponible - gráficos sin líneas de referencia",
+            );
+            console.log(
+              "Objetos disponibles en window:",
+              Object.keys(window).filter(
+                (k) =>
+                  k.toLowerCase().includes("chart") ||
+                  k.toLowerCase().includes("annotation"),
+              ),
+            );
+          }
+        } catch (e) {
+          console.error("❌ Error registrando plugin:", e);
+        }
+
+        // Registrar plugin de zoom
+        try {
+          let zoomPluginRegistered = false;
+
+          if (typeof window["chartjs-plugin-zoom"] !== "undefined") {
+            Chart.register(
+              window["chartjs-plugin-zoom"].default ||
+                window["chartjs-plugin-zoom"],
+            );
+            zoomPluginRegistered = true;
+            console.log("✅ Plugin de zoom registrado (chartjs-plugin-zoom)");
+          } else if (typeof zoomPlugin !== "undefined") {
+            Chart.register(zoomPlugin);
+            zoomPluginRegistered = true;
+            console.log("✅ Plugin de zoom registrado (zoomPlugin global)");
+          }
+
+          if (!zoomPluginRegistered) {
+            console.warn("⚠️ Plugin de zoom NO disponible - sin funcionalidad de zoom");
+          }
+        } catch (e) {
+          console.error("❌ Error registrando plugin de zoom:", e);
+        }
+
+        // Función para calcular edad
+        function calcularEdad(fechaNacimiento) {
+          if (!fechaNacimiento) return 0;
+          const hoy = new Date();
+          const nacimiento = new Date(fechaNacimiento);
+          let edad = hoy.getFullYear() - nacimiento.getFullYear();
+          const mes = hoy.getMonth() - nacimiento.getMonth();
+          if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+            edad--;
+          }
+          return edad;
+        }
+
+        // Datos del backend (parseados desde <script type="application/json">)
+        function parseJsonScript(id, fallback) {
+          try {
+            const el = document.getElementById(id);
+            if (!el) return fallback;
+            return (
+              JSON.parse(el.textContent || el.innerText || "null") ?? fallback
+            );
+          } catch (e) {
+            console.warn("No se pudo parsear", id, e);
+            return fallback;
+          }
+        }
+        const labels = parseJsonScript("fechas-data", []);
+        const s = parseJsonScript("series-data", {});
+        const meta = parseJsonScript("meta-data", {});
+        const fechaNacimiento = meta.fecha_nacimiento || null;
+        const tieneDiabetes = !!meta.tiene_diabetes;
+
+        // Debug: Mostrar datos recibidos
+        console.log("📊 Datos recibidos:");
+        console.log("- Labels (fechas):", labels.length, labels.slice(0, 3));
+        console.log("- Series:", Object.keys(s), s);
+        console.log("- Meta:", meta);
+        console.log("- Fecha nacimiento:", fechaNacimiento);
+        console.log("- Tiene diabetes:", tieneDiabetes);
+
+        // Filtra pares (x,y) válidos (sin null/undefined/NaN)
+        function buildXY(xs, ysRaw) {
+          const xsOut = [],
+            ysOut = [];
+          for (let i = 0; i < xs.length; i++) {
+            const y = Array.isArray(ysRaw) ? ysRaw[i] : null;
+            if (y !== null && y !== undefined && !Number.isNaN(y)) {
+              xsOut.push(xs[i]);
+              ysOut.push(y);
+            }
+          }
+          return { xs: xsOut, ys: ysOut };
+        }
+
+        // ¿Hay algún dato?
+        const hasAnyData =
+          (s.peso || []).some((v) => v != null) ||
+          (s.imc || []).some((v) => v != null) ||
+          (s.psis || []).some((v) => v != null) ||
+          (s.pdia || []).some((v) => v != null) ||
+          (s.hgt || []).some((v) => v != null) ||
+          (s.cc || []).some((v) => v != null) ||
+          (s.hba1c || []).some((v) => v != null);
+
+        if (!labels.length || !hasAnyData) {
+          console.log("❌ No hay datos para mostrar gráficos");
+          console.log("- Labels length:", labels.length);
+          console.log("- Has any data:", hasAnyData);
+          document.getElementById("charts").classList.add("hidden");
+          const m = document.getElementById("msg");
+          m.classList.remove("hidden");
+          m.textContent = `No hay datos suficientes para generar gráficos. Fechas: ${labels.length}, Datos: ${hasAnyData ? "Sí" : "No"}`;
+        } else {
+          console.log(
+            "✅ Generando gráficos con",
+            labels.length,
+            "puntos de datos",
+          );
+          
+          // Variable global para almacenar instancias de gráficos
+          window.chartInstances = {};
+          
+          // Función helper para combinar opciones de zoom y anotaciones
+          function createChartOptions(annotations = []) {
+            return {
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: false,
+              spanGaps: true,
+              interaction: { mode: "nearest", intersect: false },
+              scales: {
+                x: { ticks: { autoSkip: true, maxRotation: 0 } },
+                y: { beginAtZero: false },
+              },
+              plugins: {
+                zoom: {
+                  zoom: {
+                    wheel: {
+                      enabled: true,
+                      speed: 0.1,
+                    },
+                    pinch: {
+                      enabled: true
+                    },
+                    mode: 'xy',
+                  },
+                  pan: {
+                    enabled: true,
+                    mode: 'xy',
+                  }
+                },
+                annotation: annotations.length > 0 ? {
+                  annotations: annotations
+                } : undefined
+              }
+            };
+          }
+          
+
+
+          // Peso + IMC
+          (() => {
+            const p = buildXY(labels, s.peso || []);
+            const m = buildXY(labels, s.imc || []);
+            const lab = p.xs.length >= m.xs.length ? p.xs : m.xs;
+
+            // Edad del usuario (calculada una sola vez arriba si se requiere; aquí solo lectura)
+            const edad = calcularEdad(fechaNacimiento);
+
+            // Valores de IMC según edad
+            const esAdultoMayor = edad >= 65;
+            const imc1 = esAdultoMayor ? 28 : 25;
+            const imc2 = esAdultoMayor ? 32 : 30;
+            const label1 = esAdultoMayor ? "IMC 28 SP (AM)" : "IMC 25 SP";
+            const label2 = esAdultoMayor ? "IMC 32 OB (AM)" : "IMC 30 OB";
+
+            window.chartInstances.pesoImc = new Chart(document.getElementById("pesoImc"), {
+              type: "line",
+              data: {
+                labels: lab,
+                datasets: [
+                  {
+                    label: "Peso (kg)",
+                    data: p.ys,
+                    borderColor: "#3b82f6",
+                    backgroundColor: "rgba(59, 130, 246, 0.1)",
+                    borderWidth: 2,
+                    tension: 0.2,
+                  },
+                  {
+                    label: "IMC",
+                    data: m.ys,
+                    borderColor: "#ef4444",
+                    backgroundColor: "rgba(239, 68, 68, 0.1)",
+                    borderWidth: 2,
+                    tension: 0.2,
+                  },
+                ],
+              },
+              options: createChartOptions([
+                {
+                  type: "line",
+                  yMin: imc1,
+                  yMax: imc1,
+                  borderColor: "#ff8c00",
+                  borderWidth: 2,
+                  borderDash: [5, 5],
+                  label: {
+                    content: label1,
+                    enabled: true,
+                    position: "end",
+                  },
+                },
+                {
+                  type: "line",
+                  yMin: imc2,
+                  yMax: imc2,
+                  borderColor: "#ff8c00",
+                  borderWidth: 2,
+                  borderDash: [5, 5],
+                  label: {
+                    content: label2,
+                    enabled: true,
+                    position: "end",
+                  },
+                },
+              ]),
+            });
+          })();
+
+          // Presión arterial
+          (() => {
+            const sistolica = buildXY(labels, s.psis || []);
+            const diastolica = buildXY(labels, s.pdia || []);
+            const labPA =
+              sistolica.xs.length >= diastolica.xs.length
+                ? sistolica.xs
+                : diastolica.xs;
+
+            // Edad del usuario para líneas de referencia (reutilizamos cálculo rápido)
+            const edad = calcularEdad(fechaNacimiento);
+
+            // Preparar anotaciones según la edad
+            const annotations = [];
+
+            // Línea sistólica según edad
+            const sistolicaRef = edad >= 80 ? 150 : 140;
+            const sistolicaLabel =
+              edad >= 80 ? "PA 150 SIS (≥80 años)" : "PA 140 SIS";
+
+            annotations.push({
+              type: "line",
+              yMin: sistolicaRef,
+              yMax: sistolicaRef,
+              borderColor: "#059669",
+              borderWidth: 2,
+              borderDash: [5, 5],
+              label: {
+                content: sistolicaLabel,
+                enabled: true,
+                position: "end",
+              },
+            });
+
+            // Línea diastólica (siempre 90)
+            annotations.push({
+              type: "line",
+              yMin: 90,
+              yMax: 90,
+              borderColor: "#059669",
+              borderWidth: 2,
+              borderDash: [5, 5],
+              label: {
+                content: "PA 90 DIAS",
+                enabled: true,
+                position: "end",
+              },
+            });
+
+            window.chartInstances.pa = new Chart(document.getElementById("pa"), {
+              type: "line",
+              data: {
+                labels: labPA,
+                datasets: [
+                  {
+                    label: "Sistólica",
+                    data: sistolica.ys,
+                    borderColor: "#dc2626",
+                    backgroundColor: "rgba(220, 38, 38, 0.1)",
+                    borderWidth: 2,
+                    tension: 0.2,
+                  },
+                  {
+                    label: "Diastólica",
+                    data: diastolica.ys,
+                    borderColor: "#7c3aed",
+                    backgroundColor: "rgba(124, 58, 237, 0.1)",
+                    borderWidth: 2,
+                    tension: 0.2,
+                  },
+                ],
+              },
+              options: createChartOptions(annotations),
+            });
+          })();
+
+          // HGT + CC
+          (() => {
+            const hgt = buildXY(labels, s.hgt || []);
+            const cc = buildXY(labels, s.cc || []);
+            const labHGT = hgt.xs.length >= cc.xs.length ? hgt.xs : cc.xs;
+
+            // Preparar anotaciones para HGT solamente
+            const annotations = [];
+
+            // Línea de HGT (siempre 100 mg/dL)
+            annotations.push({
+              type: "line",
+              yMin: 100,
+              yMax: 100,
+              borderColor: "#059669",
+              borderWidth: 2,
+              borderDash: [5, 5],
+              label: {
+                content: "HGT 100",
+                enabled: true,
+                position: "end",
+              },
+            });
+
+            window.chartInstances.hgtCc = new Chart(document.getElementById("hgtCc"), {
+              type: "line",
+              data: {
+                labels: labHGT,
+                datasets: [
+                  {
+                    label: "HGT (mg/dL)",
+                    data: hgt.ys,
+                    borderColor: "#059669",
+                    backgroundColor: "rgba(5, 150, 105, 0.1)",
+                    borderWidth: 2,
+                    tension: 0.2,
+                  },
+                  {
+                    label: "CC (cm)",
+                    data: cc.ys,
+                    borderColor: "#ea580c",
+                    backgroundColor: "rgba(234, 88, 12, 0.1)",
+                    borderWidth: 2,
+                    tension: 0.2,
+                  },
+                ],
+              },
+              options: createChartOptions(annotations),
+            });
+          })();
+
+          // HbA1c (solo si está disponible y hay canvas)
+          (() => {
+            const hba1cCanvas = document.getElementById("hba1c");
+            const hba1c = buildXY(labels, s.hba1c || []);
+            if (hba1cCanvas && tieneDiabetes && hba1c.ys.length > 0) {
+              const edad = calcularEdad(fechaNacimiento);
+              const hba1cRef = edad >= 80 && tieneDiabetes ? 8 : 7;
+              const hba1cLabel =
+                edad >= 80 && tieneDiabetes
+                  ? "HbA1c 8% (≥80 años)"
+                  : "HbA1c 7%";
+              window.chartInstances.hba1c = new Chart(hba1cCanvas, {
+                type: "line",
+                data: {
+                  labels: hba1c.xs,
+                  datasets: [
+                    {
+                      label: "HbA1c (%)",
+                      data: hba1c.ys,
+                      borderColor: "#8b5cf6",
+                      backgroundColor: "rgba(139, 92, 246, 0.1)",
+                      borderWidth: 2,
+                      tension: 0.2,
+                    },
+                  ],
+                },
+                options: createChartOptions([
+                  {
+                    type: "line",
+                    yMin: hba1cRef,
+                    yMax: hba1cRef,
+                    borderColor: "#059669",
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                      content: hba1cLabel,
+                      enabled: true,
+                      position: "end",
+                    },
+                  },
+                ]),
+              });
+            }
+          })();
+        }
+        
+        // Funciones de control de zoom - límite máximo de 3x
+        window.currentZoomLevels = {};
+        
+        function initZoomLevel(chartId) {
+          if (!window.currentZoomLevels[chartId]) {
+            window.currentZoomLevels[chartId] = 1.0;
+          }
+        }
+        
+        function zoomIn(chartId) {
+          const chart = window.chartInstances[chartId];
+          if (!chart) {
+            console.warn(`Chart ${chartId} no encontrado`);
+            return;
+          }
+          
+          initZoomLevel(chartId);
+          
+          // Verificar límite de 3x zoom
+          if (window.currentZoomLevels[chartId] >= 3.0) {
+            console.log(`${chartId}: Zoom máximo alcanzado (3x)`);
+            return;
+          }
+          
+          // Incrementar zoom en 0.5x
+          window.currentZoomLevels[chartId] = Math.min(3.0, window.currentZoomLevels[chartId] + 0.5);
+          
+          // Aplicar zoom usando el plugin
+          chart.zoom(1.5); // Factor de zoom relativo
+          
+          console.log(`${chartId}: Zoom aplicado. Nivel actual: ${window.currentZoomLevels[chartId]}x`);
+        }
+        
+        function zoomOut(chartId) {
+          const chart = window.chartInstances[chartId];
+          if (!chart) {
+            console.warn(`Chart ${chartId} no encontrado`);
+            return;
+          }
+          
+          initZoomLevel(chartId);
+          
+          // Verificar límite mínimo
+          if (window.currentZoomLevels[chartId] <= 1.0) {
+            console.log(`${chartId}: Zoom mínimo alcanzado (1x)`);
+            return;
+          }
+          
+          // Decrementar zoom en 0.5x
+          window.currentZoomLevels[chartId] = Math.max(1.0, window.currentZoomLevels[chartId] - 0.5);
+          
+          // Aplicar zoom out usando el plugin
+          chart.zoom(0.67); // Factor de zoom relativo (1/1.5)
+          
+          console.log(`${chartId}: Zoom out aplicado. Nivel actual: ${window.currentZoomLevels[chartId]}x`);
+        }
+        
+        function resetZoom(chartId) {
+          const chart = window.chartInstances[chartId];
+          if (!chart) {
+            console.warn(`Chart ${chartId} no encontrado`);
+            return;
+          }
+          
+          // Resetear zoom usando el plugin
+          chart.resetZoom();
+          
+          // Resetear contador
+          window.currentZoomLevels[chartId] = 1.0;
+          
+          console.log(`${chartId}: Zoom reseteado a 1x`);
+        }
+        
+        // Mostrar instrucciones de uso en consola
+        console.log("🔍 Controles de zoom disponibles:");
+        console.log("- Botones: Zoom In (+), Zoom Out (-), Reset (↺)");
+        console.log("- Rueda del mouse: zoom libre");
+        console.log("- Drag: paneo");
+        console.log("- Límite máximo: 3x zoom por gráfico individual");
+        
+      </script>
+    </div>
+  </body>
+</html>

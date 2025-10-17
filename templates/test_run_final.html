@@ -1,0 +1,322 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test RUN Final - Debug Completo</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      input[type="text"] {
+        padding: 10px;
+        margin: 10px 0;
+        width: 300px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+      }
+      .run-valid {
+        border-color: #28a745 !important;
+        background-color: #f8fff9;
+      }
+      .run-invalid {
+        border-color: #dc3545 !important;
+        background-color: #fff8f8;
+      }
+      .debug {
+        background: #f1f1f1;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        font-family: monospace;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      .result {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        background: #e7f3ff;
+      }
+      .loading {
+        color: #007bff;
+        font-style: italic;
+      }
+      .found {
+        background: #d4edda;
+        color: #155724;
+      }
+      .not-found {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔍 Test RUN Final - Debug Completo</h1>
+
+      <div>
+        <label for="run">Ingresa RUN:</label>
+        <input
+          type="text"
+          id="run"
+          placeholder="Ej: 100001411"
+          maxlength="12"
+        />
+      </div>
+
+      <div id="result" class="result" style="display: none">
+        <h3>Resultado:</h3>
+        <div id="result-content"></div>
+      </div>
+
+      <div class="debug">
+        <h4>🐛 Debug Log:</h4>
+        <div id="debug-log"></div>
+      </div>
+
+      <button onclick="clearLog()">🧹 Limpiar Log</button>
+      <button onclick="testDirecto()">🔬 Test Directo API</button>
+    </div>
+
+    <script>
+      let debugLog = document.getElementById("debug-log");
+      let timeoutId;
+
+      function log(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        debugLog.innerHTML += `[${timestamp}] ${message}<br>`;
+        debugLog.scrollTop = debugLog.scrollHeight;
+      }
+
+      function clearLog() {
+        debugLog.innerHTML = "";
+      }
+
+      // Función de normalización de RUN
+      function normalizarRun(run) {
+        return run.replace(/[^0-9kK]/g, "").toUpperCase();
+      }
+
+      // Función de validación del dígito verificador (versión corregida)
+      function dvValido(runNorm) {
+        if (!runNorm || runNorm.length < 2) return false;
+
+        const cuerpo = runNorm.slice(0, -1);
+        const dv = runNorm.slice(-1);
+
+        // Calcular DV usando algoritmo chileno correcto
+        let suma = 0;
+        let multiplicador = 2;
+
+        for (let i = cuerpo.length - 1; i >= 0; i--) {
+          suma += parseInt(cuerpo[i]) * multiplicador;
+          multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+        }
+
+        const resto = suma % 11;
+        const dvCalculado =
+          resto === 0 ? "0" : resto === 1 ? "K" : (11 - resto).toString();
+
+        return dv === dvCalculado;
+      }
+
+      // Función para formatear RUN con puntos y guión
+      function formatearRun(valor) {
+        let v = valor.replace(/[^0-9kK]/g, "").toUpperCase();
+        if (v.length > 1) {
+          const cuerpo = v.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          const dv = v.slice(-1);
+          return cuerpo + "-" + dv;
+        }
+        return v;
+      }
+
+      // Función para establecer estado visual del RUN
+      function setRunEstado(estado) {
+        const el = document.getElementById("run");
+        if (!el) return;
+
+        el.classList.remove("run-valid", "run-invalid");
+        if (estado === true) {
+          el.classList.add("run-valid");
+          el.title = "RUN válido";
+        } else if (estado === false) {
+          el.classList.add("run-invalid");
+          el.title = "RUN inválido";
+        } else {
+          el.title = "";
+        }
+      }
+
+      // Función principal de búsqueda
+      function buscarUsuario(run) {
+        if (!run || run.length < 8) {
+          log("⚠️ RUN muy corto para buscar: " + run);
+          return;
+        }
+
+        log(`🔍 Iniciando búsqueda para RUN: ${run}`);
+
+        const resultDiv = document.getElementById("result");
+        const resultContent = document.getElementById("result-content");
+
+        resultDiv.style.display = "block";
+        resultContent.innerHTML = '<div class="loading">🔄 Buscando...</div>';
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ run: run }),
+        })
+          .then((response) => {
+            log(`📡 Respuesta del servidor: ${response.status}`);
+            return response.json();
+          })
+          .then((data) => {
+            log(`📦 Datos recibidos: ${JSON.stringify(data)}`);
+
+            if (data.encontrado) {
+              resultContent.innerHTML = `
+                        <div class="found">
+                            <h4>✅ Usuario Encontrado</h4>
+                            <p><strong>Nombre:</strong> ${data.nombre || "N/A"}</p>
+                            <p><strong>Apellidos:</strong> ${data.apellido_paterno || ""} ${data.apellido_materno || ""}</p>
+                            <p><strong>Fecha Nacimiento:</strong> ${data.fecha_nacimiento || "N/A"}</p>
+                            <p><strong>Dirección:</strong> ${data.direccion || "N/A"}</p>
+                            <p><strong>Teléfono:</strong> ${data.telefono || "N/A"}</p>
+                            <p><strong>Sexo:</strong> ${data.sexo || "N/A"}</p>
+                            <p><strong>Patologías:</strong> ${data.patologias ? data.patologias.length : 0}</p>
+                            <p><strong>Exámenes:</strong> ${data.examenes ? data.examenes.length : 0}</p>
+                        </div>
+                    `;
+            } else {
+              resultContent.innerHTML = `
+                        <div class="not-found">
+                            <h4>ℹ️ Usuario Nuevo</h4>
+                            <p>El RUN ${run} no existe en la base de datos.</p>
+                            <p>Puedes continuar para crear un nuevo usuario.</p>
+                        </div>
+                    `;
+            }
+          })
+          .catch((error) => {
+            log(`❌ Error en búsqueda: ${error.message}`);
+            resultContent.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Error</h4>
+                        <p>Error al buscar usuario: ${error.message}</p>
+                    </div>
+                `;
+          });
+      }
+
+      // Manejador principal del input RUN
+      function manejarBusquedaRun(e) {
+        const valorOriginal = e.target.value;
+        log(`⌨️ Input detectado: "${valorOriginal}"`);
+
+        // Aplicar formato
+        const valorFormateado = formatearRun(valorOriginal);
+        e.target.value = valorFormateado;
+        log(`✨ Valor formateado: "${valorFormateado}"`);
+
+        // Validar RUN si está completo
+        const runNormalizado = normalizarRun(valorFormateado);
+        const runLimpio = valorFormateado.replace(/[^0-9kK]/g, "");
+
+        log(
+          `🔍 RUN normalizado: "${runNormalizado}", Limpio: "${runLimpio}", Longitud: ${runLimpio.length}`,
+        );
+
+        if (runLimpio.length >= 8) {
+          if (dvValido(runNormalizado)) {
+            log("✅ RUN válido, programando búsqueda...");
+            setRunEstado(true);
+
+            // Limpiar timeout anterior
+            clearTimeout(timeoutId);
+
+            // Buscar después de 500ms de inactividad
+            timeoutId = setTimeout(() => {
+              const runActual = document.getElementById("run").value;
+              if (runActual && runActual.length >= 8) {
+                log("🚀 Ejecutando búsqueda automática...");
+                buscarUsuario(runActual);
+              }
+            }, 500);
+          } else {
+            log("❌ RUN inválido");
+            setRunEstado(false);
+          }
+        } else {
+          log(`⏳ RUN incompleto, longitud: ${runLimpio.length}`);
+          setRunEstado(null);
+          document.getElementById("result").style.display = "none";
+        }
+      }
+
+      // Test directo de la API
+      function testDirecto() {
+        log("🔬 Iniciando test directo de API...");
+        buscarUsuario("10.000.141-1");
+      }
+
+      // Inicialización cuando el DOM está listo
+      document.addEventListener("DOMContentLoaded", function () {
+        log("🚀 DOM listo, inicializando eventos...");
+
+        const runInput = document.getElementById("run");
+        if (!runInput) {
+          log("❌ ERROR: No se encontró el elemento RUN");
+          return;
+        }
+
+        log("📍 Elemento RUN encontrado");
+
+        // Eventos del input
+        runInput.addEventListener("input", manejarBusquedaRun);
+        runInput.addEventListener("paste", function () {
+          log("📋 Evento paste detectado");
+          setTimeout(() => {
+            manejarBusquedaRun({ target: runInput });
+          }, 100);
+        });
+        runInput.addEventListener("keyup", function (e) {
+          if (e.key === "Enter") {
+            log("⏎ Enter presionado");
+            const runNormalizado = normalizarRun(runInput.value);
+            const runLimpio = runInput.value.replace(/[^0-9kK]/g, "");
+            if (runLimpio.length >= 8 && dvValido(runNormalizado)) {
+              log("🚀 Enter - búsqueda inmediata");
+              buscarUsuario(runInput.value);
+            }
+          }
+        });
+
+        log("✅ Eventos asignados correctamente");
+      });
+
+      log("🎯 Script cargado completamente");
+    </script>
+
+    <!-- Scripts adicionales -->
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/run-formatter.js') }}"></script>
+  </body>
+</html>

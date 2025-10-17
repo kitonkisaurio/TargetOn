@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test Patologías</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      .pat-badge {
+        padding: 4px 8px;
+        margin: 2px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .pat-green {
+        background: #28a745;
+        color: white;
+      }
+      .pat-red {
+        background: #dc3545;
+        color: white;
+      }
+      .pat-yellow {
+        background: #ffc107;
+        color: black;
+      }
+      .pat-default {
+        background: #6c757d;
+        color: white;
+      }
+      .pat-empty {
+        color: #6c757d;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test Patologías</h1>
+
+    <input type="text" id="run" placeholder="Ingresa RUN (ej: 8.371.186-8)" />
+    <button onclick="cargarPatologias()">Cargar Patologías</button>
+
+    <div id="resultado" style="margin-top: 20px">
+      <h3>Patologías:</h3>
+      <div id="patologias-badges">
+        <span class="pat-empty">Sin patologías cargadas</span>
+      </div>
+    </div>
+
+    <div
+      id="debug"
+      style="margin-top: 20px; background: #f8f9fa; padding: 10px"
+    >
+      <h4>Debug:</h4>
+      <div id="debug-info"></div>
+    </div>
+
+    <script>
+      function log(msg) {
+        console.log(msg);
+        const debug = document.getElementById("debug-info");
+        debug.innerHTML += "<div>" + msg + "</div>";
+      }
+
+      function cargarPatologias() {
+        const run = document.getElementById("run").value;
+        log("🔥 Cargando patologías para: " + run);
+
+        // Limpiar RUN
+        const runLimpio = run.replace(/[\.\-\s]/g, "");
+        log("🧹 RUN limpio: " + runLimpio);
+
+        const url = `/api/patologias/${runLimpio}`;
+        log("🔗 URL: " + url);
+
+        fetch(url)
+          .then((response) => {
+            log("📡 Status: " + response.status);
+            return response.json();
+          })
+          .then((data) => {
+            log("📦 Datos: " + JSON.stringify(data));
+            mostrarPatologias(data.patologias || []);
+          })
+          .catch((error) => {
+            log("❌ Error: " + error);
+            mostrarPatologias([]);
+          });
+      }
+
+      function mostrarPatologias(patologias) {
+        log("🎨 Mostrando " + patologias.length + " patologías");
+
+        const container = document.getElementById("patologias-badges");
+        container.innerHTML = "";
+
+        if (patologias.length === 0) {
+          container.innerHTML =
+            '<span class="pat-empty">Sin patologías en BD</span>';
+          return;
+        }
+
+        patologias.forEach((pat) => {
+          const badge = document.createElement("span");
+          badge.className = `pat-badge pat-${pat.color}`;
+          badge.textContent = `${pat.nombre} (${pat.cie10})`;
+          container.appendChild(badge);
+          log(
+            "🏷️ Badge: " + pat.nombre + " (" + pat.cie10 + ") - " + pat.color,
+          );
+        });
+
+        log("✅ Patologías mostradas!");
+      }
+    </script>
+  </body>
+</html>

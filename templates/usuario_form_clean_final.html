@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <title>Formulario de Usuario - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f5f6fa;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      .form-group {
+        margin: 15px 0;
+      }
+      label {
+        display: inline-block;
+        width: 140px;
+        font-weight: bold;
+      }
+      input[type="text"],
+      input[type="date"],
+      select {
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        width: 250px;
+        font-size: 14px;
+      }
+      .run-valid {
+        border-color: #28a745 !important;
+        background-color: #d4edda;
+      }
+      .run-invalid {
+        border-color: #dc3545 !important;
+        background-color: #f8d7da;
+      }
+      #loading {
+        display: none;
+        color: #007cba;
+        margin: 10px 0;
+        font-weight: bold;
+      }
+      #usuario-encontrado {
+        display: none;
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+      .btn-primary {
+        background: #007cba;
+        color: white;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 10px 5px;
+      }
+      .btn-primary:hover {
+        background: #005a87;
+      }
+      .btn-secondary {
+        background: #6c757d;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        margin: 5px;
+      }
+      .form-section {
+        background: #f8f9fa;
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+      }
+      .debug-info {
+        background: #e7f3ff;
+        border: 1px solid #b8daff;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        font-family: monospace;
+        font-size: 12px;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+      }
+      h3 {
+        color: #34495e;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>📋 Formulario de Usuario - ECICEP</h1>
+
+      <div class="debug-info" id="debug-info">
+        🔧 Debug: Funciones cargándose...
+      </div>
+
+      <form id="usuarioForm" method="POST" action="/usuario/nuevo">
+        <div class="form-section">
+          <h3>🆔 Datos de Identificación</h3>
+
+          <div class="form-group">
+            <label>RUN: *</label>
+            <input
+              type="text"
+              name="run"
+              id="run"
+              required
+              maxlength="13"
+              placeholder="Ej: 12.345.678-9"
+              value="{{ (request.form.get('run') or (usuario.run if usuario and usuario.run else request.args.get('run'))) or '' }}"
+            />
+            <button type="button" class="btn-secondary" onclick="testRun()">
+              🔍 Test
+            </button>
+            <div id="loading">🔄 Buscando usuario...</div>
+            <div id="usuario-encontrado">
+              <strong>✅ Usuario encontrado:</strong>
+              <div id="datos-usuario"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Nombre: *</label>
+            <input
+              type="text"
+              name="nombre"
+              id="nombre"
+              required
+              placeholder="Nombre completo"
+              value="{{ request.form.get('nombre') or (usuario.nombre if usuario and usuario.nombre else '') }}"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Fecha Nac.: *</label>
+            <input
+              type="date"
+              name="fecha_nacimiento"
+              id="fecha_nacimiento"
+              required
+              value="{{ request.form.get('fecha_nacimiento') or (usuario.fecha_nacimiento if usuario and usuario.fecha_nacimiento else '') }}"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Sexo:</label>
+            <select name="sexo" id="sexo">
+              <option value="">-- Seleccione sexo --</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Edad (años):</label>
+            <input
+              type="text"
+              name="edad"
+              id="edad"
+              readonly
+              style="background: #f8f9fa"
+              placeholder="--"
+            />
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>📍 Datos de Contacto</h3>
+
+          <div class="form-group">
+            <label>Dirección:</label>
+            <input
+              type="text"
+              name="direccion"
+              id="direccion"
+              placeholder="Dirección completa"
+              value="{{ request.form.get('direccion') or (usuario.direccion if usuario and usuario.direccion else '') }}"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Teléfono:</label>
+            <input
+              type="text"
+              name="telefono"
+              id="telefono"
+              placeholder="Ej: +56912345678"
+              value="{{ request.form.get('telefono') or (usuario.telefono if usuario and usuario.telefono else '') }}"
+            />
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>📋 Información Adicional</h3>
+
+          <div class="form-group">
+            <label>Fecha de ingreso:</label>
+            <input
+              type="date"
+              name="fecha_ingreso"
+              id="fecha_ingreso"
+              value="{{ request.form.get('fecha_ingreso') or '' }}"
+            />
+          </div>
+        </div>
+
+        <div class="form-section">
+          <button type="submit" class="btn-primary">💾 Guardar Usuario</button>
+          <button
+            type="button"
+            class="btn-primary"
+            onclick="limpiarFormulario()"
+          >
+            🧹 Limpiar
+          </button>
+          <button
+            type="button"
+            class="btn-secondary"
+            onclick="debugFormulario()"
+          >
+            🔧 Debug
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      console.log("🚀 Formulario ECICEP - Versión limpia cargada");
+
+      // Variables globales
+      let debugMode = true;
+      let usuarioEncontrado = null;
+
+      // Función de debug
+      function updateDebug(mensaje) {
+        const debugDiv = document.getElementById("debug-info");
+        if (debugDiv && debugMode) {
+          debugDiv.innerHTML = `🔧 Debug: ${mensaje}`;
+        }
+        console.log("🔧", mensaje);
+      }
+
+      // Función para formatear RUN chileno
+      function formatearRUN(value) {
+        if (!value) return "";
+
+        // Limpiar y normalizar
+        let clean = value.replace(/[^0-9kK]/g, "").toUpperCase();
+
+        if (clean.length >= 2) {
+          // Separar cuerpo y dígito verificador
+          const cuerpo = clean.slice(0, -1);
+          const dv = clean.slice(-1);
+
+          // Formatear con puntos cada 3 dígitos desde la derecha
+          const conPuntos = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+          return conPuntos + "-" + dv;
+        }
+
+        return clean;
+      }
+
+      // Función para validar RUN chileno
+      function validarRUN(run) {
+        if (!run) return false;
+
+        const clean = run.replace(/\./g, "").replace(/\s+/g, "").toUpperCase();
+        const match = clean.match(/^([0-9]{1,8})-([0-9K])$/);
+
+        if (!match) return false;
+
+        const cuerpo = match[1];
+        const dv = match[2];
+
+        let suma = 0;
+        let multiplicador = 2;
+
+        for (let i = cuerpo.length - 1; i >= 0; i--) {
+          suma += parseInt(cuerpo[i], 10) * multiplicador;
+          multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+        }
+
+        const resto = 11 - (suma % 11);
+        const dvCalculado =
+          resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+
+        return dvCalculado === dv;
+      }
+
+      // Función para calcular edad
+      function calcularEdad(fechaNacimiento) {
+        if (!fechaNacimiento) return null;
+
+        const hoy = new Date();
+        const nacimiento = new Date(fechaNacimiento);
+
+        if (isNaN(nacimiento.getTime())) return null;
+
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const mes = hoy.getMonth() - nacimiento.getMonth();
+
+        if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+          edad--;
+        }
+
+        return edad;
+      }
+
+      // Función para manejar el input del RUN
+      function manejarInputRUN(event) {
+        const runInput = event.target;
+        const valorOriginal = runInput.value;
+
+        updateDebug(`Input RUN detectado: "${valorOriginal}"`);
+
+        // Formatear automáticamente
+        const valorFormateado = formatearRUN(valorOriginal);
+
+        if (valorFormateado !== valorOriginal) {
+          runInput.value = valorFormateado;
+          updateDebug(`RUN formateado: "${valorFormateado}"`);
+        }
+
+        // Validar si está completo
+        const runLimpio = valorFormateado.replace(/[^0-9kK]/g, "");
+
+        if (runLimpio.length >= 8) {
+          const esValido = validarRUN(valorFormateado);
+
+          // Actualizar clase visual
+          runInput.classList.remove("run-valid", "run-invalid");
+          runInput.classList.add(esValido ? "run-valid" : "run-invalid");
+
+          updateDebug(
+            `RUN ${esValido ? "válido" : "inválido"}: "${valorFormateado}"`,
+          );
+
+          // Si es válido, buscar usuario
+          if (esValido) {
+            buscarUsuario(valorFormateado);
+          }
+        } else {
+          // RUN incompleto, quitar clases
+          runInput.classList.remove("run-valid", "run-invalid");
+          updateDebug(`RUN incompleto: ${runLimpio.length} dígitos`);
+        }
+      }
+
+      // Función para buscar usuario
+      function buscarUsuario(run) {
+        updateDebug(`Buscando usuario con RUN: ${run}`);
+
+        const loadingDiv = document.getElementById("loading");
+        const encontradoDiv = document.getElementById("usuario-encontrado");
+
+        // Mostrar loading
+        if (loadingDiv) loadingDiv.style.display = "block";
+        if (encontradoDiv) encontradoDiv.style.display = "none";
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ run: run }),
+        })
+          .then((response) => {
+            updateDebug(`Respuesta del servidor: ${response.status}`);
+            return response.json();
+          })
+          .then((data) => {
+            // Ocultar loading
+            if (loadingDiv) loadingDiv.style.display = "none";
+
+            if (data.encontrado && data.nombre) {
+              updateDebug(`Usuario encontrado: ${data.nombre}`);
+
+              // Mostrar información del usuario encontrado
+              if (encontradoDiv) {
+                const datosDiv = document.getElementById("datos-usuario");
+                if (datosDiv) {
+                  datosDiv.innerHTML = `
+                                <strong>${data.nombre}</strong><br>
+                                Fecha nac.: ${data.fecha_nacimiento || "No registrada"}<br>
+                                Dirección: ${data.direccion || "No registrada"}
+                            `;
+                }
+                encontradoDiv.style.display = "block";
+              }
+
+              // Autocompletar formulario
+              const nombreInput = document.getElementById("nombre");
+              const fechaNacInput = document.getElementById("fecha_nacimiento");
+              const direccionInput = document.getElementById("direccion");
+              const telefonoInput = document.getElementById("telefono");
+              const sexoSelect = document.getElementById("sexo");
+
+              if (nombreInput && data.nombre) nombreInput.value = data.nombre;
+              if (fechaNacInput && data.fecha_nacimiento)
+                fechaNacInput.value = data.fecha_nacimiento;
+              if (direccionInput && data.direccion)
+                direccionInput.value = data.direccion;
+              if (telefonoInput && data.telefono)
+                telefonoInput.value = data.telefono;
+              if (sexoSelect && data.sexo) sexoSelect.value = data.sexo;
+
+              // Calcular edad automáticamente
+              if (data.fecha_nacimiento) {
+                calcularYMostrarEdad();
+              }
+
+              usuarioEncontrado = data;
+              updateDebug("Formulario autocompletado correctamente");
+            } else {
+              updateDebug("Usuario no encontrado - nuevo usuario");
+              usuarioEncontrado = null;
+            }
+          })
+          .catch((error) => {
+            updateDebug(`Error en búsqueda: ${error.message}`);
+            if (loadingDiv) loadingDiv.style.display = "none";
+          });
+      }
+
+      // Función para calcular y mostrar edad
+      function calcularYMostrarEdad() {
+        const fechaNacInput = document.getElementById("fecha_nacimiento");
+        const edadInput = document.getElementById("edad");
+
+        if (fechaNacInput && fechaNacInput.value && edadInput) {
+          const edad = calcularEdad(fechaNacInput.value);
+          if (edad !== null) {
+            edadInput.value = edad + " años";
+            updateDebug(`Edad calculada: ${edad} años`);
+          }
+        }
+      }
+
+      // Función de test
+      function testRun() {
+        const runInput = document.getElementById("run");
+        if (runInput) {
+          runInput.value = "10000141-1";
+          manejarInputRUN({ target: runInput });
+          updateDebug("Test de RUN ejecutado");
+        }
+      }
+
+      // Función para limpiar formulario
+      function limpiarFormulario() {
+        document.getElementById("usuarioForm").reset();
+        document.getElementById("usuario-encontrado").style.display = "none";
+        document.getElementById("loading").style.display = "none";
+        const runInput = document.getElementById("run");
+        if (runInput) {
+          runInput.classList.remove("run-valid", "run-invalid");
+        }
+        usuarioEncontrado = null;
+        updateDebug("Formulario limpiado");
+      }
+
+      // Función de debug
+      function debugFormulario() {
+        console.log("=== DEBUG FORMULARIO ===");
+        console.log("Usuario encontrado:", usuarioEncontrado);
+        console.log("RUN actual:", document.getElementById("run").value);
+        console.log("Nombre actual:", document.getElementById("nombre").value);
+        updateDebug("Debug ejecutado - revisar consola");
+      }
+
+      // Configurar eventos cuando el DOM esté listo
+      function configurarEventos() {
+        updateDebug("Configurando eventos...");
+
+        const runInput = document.getElementById("run");
+        const fechaNacInput = document.getElementById("fecha_nacimiento");
+
+        if (runInput) {
+          // Eventos para formateo de RUN
+          runInput.addEventListener("input", manejarInputRUN);
+          runInput.addEventListener("paste", function (e) {
+            setTimeout(() => manejarInputRUN(e), 10);
+          });
+
+          updateDebug("Eventos de RUN configurados");
+
+          // Si ya hay valor, procesarlo
+          if (runInput.value.trim()) {
+            updateDebug("Valor inicial detectado, procesando...");
+            manejarInputRUN({ target: runInput });
+          }
+        }
+
+        if (fechaNacInput) {
+          // Evento para calcular edad automáticamente
+          fechaNacInput.addEventListener("change", calcularYMostrarEdad);
+          fechaNacInput.addEventListener("input", calcularYMostrarEdad);
+
+          updateDebug("Eventos de fecha configurados");
+        }
+
+        updateDebug("Todos los eventos configurados correctamente");
+      }
+
+      // Inicializar cuando el DOM esté listo
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", configurarEventos);
+      } else {
+        configurarEventos();
+      }
+
+      updateDebug("Script cargado correctamente");
+    </script>
+  </body>
+</html>

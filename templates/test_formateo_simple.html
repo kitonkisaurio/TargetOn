@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Formateo RUN Simple</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      input {
+        padding: 10px;
+        font-size: 16px;
+        width: 200px;
+        margin: 10px;
+      }
+      .result {
+        margin: 10px 0;
+        font-family: monospace;
+        background: #f0f0f0;
+        padding: 10px;
+      }
+      .run-valid {
+        color: green;
+        border-color: green;
+      }
+      .run-invalid {
+        color: red;
+        border-color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Test Formateo RUN - Caso específico</h1>
+
+    <div>
+      <label>Prueba el caso: 1-00001411</label>
+      <input type="text" id="test-run" name="run" value="1-00001411" />
+      <button onclick="testFormateo()">Formatear</button>
+    </div>
+
+    <div class="result" id="resultado">Resultado aparecerá aquí...</div>
+
+    <div>
+      <h3>Otros casos de prueba:</h3>
+      <button onclick="probarCaso('100001411')">100001411</button>
+      <button onclick="probarCaso('1-00001411')">1-00001411</button>
+      <button onclick="probarCaso('10.000.141-1')">10.000.141-1</button>
+      <button onclick="probarCaso('83711868')">83711868</button>
+    </div>
+
+    <div
+      id="log"
+      style="
+        margin-top: 20px;
+        background: #f5f5f5;
+        padding: 10px;
+        max-height: 300px;
+        overflow-y: auto;
+      "
+    >
+      <strong>Log:</strong><br />
+    </div>
+
+    <!-- Scripts locales en el mismo directorio -->
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/run-formatter.js"></script>
+
+    <script>
+      function log(message) {
+        const logDiv = document.getElementById("log");
+        logDiv.innerHTML +=
+          new Date().toLocaleTimeString() + ": " + message + "<br>";
+        logDiv.scrollTop = logDiv.scrollHeight;
+        console.log(message);
+      }
+
+      function testFormateo() {
+        const input = document.getElementById("test-run");
+        const value = input.value;
+        log('🧪 Probando: "' + value + '"');
+
+        // Verificar qué formateadores están disponibles
+        if (window.EciceRUNFormatter) {
+          log("✅ EciceRUNFormatter disponible");
+          const formatted = window.EciceRUNFormatter.formatear(value);
+          const isValid = window.EciceRUNFormatter.validar(value);
+          const clean = window.EciceRUNFormatter.obtenerLimpio(value);
+
+          input.value = formatted;
+          input.className = isValid ? "run-valid" : "run-invalid";
+
+          document.getElementById("resultado").innerHTML = `
+                    <strong>Original:</strong> "${value}"<br>
+                    <strong>Formateado:</strong> "${formatted}"<br>
+                    <strong>Limpio:</strong> "${clean}"<br>
+                    <strong>Válido:</strong> ${isValid ? "✅" : "❌"}
+                `;
+
+          log("📋 Resultado: " + formatted + " (válido: " + isValid + ")");
+        } else if (window.Common && window.Common.formatearRUN) {
+          log("⚠️ Usando Common.formatearRUN (fallback)");
+          const formatted = window.Common.formatearRUN(value);
+          input.value = formatted;
+
+          document.getElementById("resultado").innerHTML = `
+                    <strong>Original:</strong> "${value}"<br>
+                    <strong>Formateado:</strong> "${formatted}"<br>
+                    <em>Usando fallback</em>
+                `;
+
+          log("📋 Resultado fallback: " + formatted);
+        } else {
+          log("❌ No hay formateadores disponibles");
+          document.getElementById("resultado").innerHTML =
+            "❌ Error: No hay formateadores disponibles";
+        }
+      }
+
+      function probarCaso(valor) {
+        document.getElementById("test-run").value = valor;
+        testFormateo();
+      }
+
+      // Auto-probar al cargar
+      document.addEventListener("DOMContentLoaded", function () {
+        log("📱 Página cargada");
+        setTimeout(() => {
+          testFormateo();
+        }, 500);
+      });
+    </script>
+  </body>
+</html>

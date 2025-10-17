@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar Nuevo Usuario - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+        :root{
+            --bg:#f8fafc; --ink:#222; --muted:#6c757d; --line:#e5e7eb;
+            --brand:#0d6efd; --brand-600:#0b5ed7; --success:#198754; --card:#fff;
+        }
+        *{box-sizing:border-box}
+        body { 
+            margin:0;padding:0;background:var(--bg);color:var(--ink);
+            font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial;
+            font-size: 14px;
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: var(--card); 
+            padding: 16px; 
+            border-radius: 6px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--line);
+        }
+        .header h2 {
+            color: var(--ink);
+            margin: 0;
+            font-size: clamp(18px, 2.5vw, 24px);
+            font-weight: 700;
+        }
+        fieldset { 
+            border: 1px solid var(--line); 
+            border-radius: 6px; 
+            margin: 16px 0; 
+            padding: 16px; 
+        }
+        legend { 
+            font-weight: 600; 
+            color: var(--brand); 
+            padding: 0 8px; 
+            font-size: 16px; 
+        }
+        label { 
+            display: block; 
+            margin: 8px 0 4px 0; 
+            font-weight: 600; 
+            font-size: 14px; 
+            color: #374151;
+        }
+        input, select { 
+            width: 100%; 
+            padding: .5rem .6rem; 
+            border: 1px solid #cbd5e1; 
+            border-radius: .5rem; 
+            background: #fff;
+            font-size: 14px;
+        }
+        
+        /* Anchos específicos para campos optimizados - más compactos */
+        input[name="run"] { width: 140px !important; } /* Para 12.345.678-0 */
+        input[name="fecha_nacimiento"] { width: 130px !important; } /* Para 20/08/2020 */
+        input[name="telefono"] { width: 140px !important; } /* Más compacto */
+        input[name="fecha"] { width: 130px !important; } /* Para 00/00/0000 */
+        input[name="presion_sistolica"] { width: 80px !important; } /* Para 123 */
+        input[name="presion_diastolica"] { width: 80px !important; } /* Para 120 */
+        input[name="hgt"] { width: 80px !important; } /* Para 000 */
+        input[name="cc"] { width: 80px !important; } /* Para 123 */
+        input[name="hba1c"] { width: 90px !important; } /* Para 10.0 */
+        input[name="peso"] { width: 90px !important; } /* Para peso */
+        input[name="talla"] { width: 90px !important; } /* Para talla */
+        input[name="fecha_ingreso"] { width: 130px !important; } /* Para fecha */
+        
+        /* Contenedor para campos en línea - más compacto */
+        .campos-linea {
+            display: flex;
+            gap: 12px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        .campos-linea label {
+            margin-bottom: 0;
+            flex: none;
+        }
+        
+        /* Anchos específicos para selects - más compactos */
+        select[name="sexo"] { width: 120px !important; } /* Para masculino/femenino */
+        select[name="categoria_id"] { width: 90px !important; } /* Para G1, G2, G3 */
+        select[name="sector_id"] { width: 160px !important; } /* Para sectores */
+        select[name="profesional"] { width: 140px !important; } /* Para profesional */
+        
+        /* Botones compactos como en index.html */
+        .btn{
+            display:inline-block;border:1px solid var(--line);background:#fff;color:var(--ink);
+            padding:.45rem .7rem;border-radius:.5rem;font-size:.9rem;cursor:pointer;text-decoration:none;
+        }
+        .btn:hover{filter:brightness(0.98)}
+        .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff}
+        .btn-primary:hover{background:var(--brand-600);border-color:var(--brand-600)}
+        .btn-success{background:var(--success);border-color:var(--success);color:#fff}
+        .btn-secondary{background:#6c757d;border-color:#6c757d;color:#fff}
+        .btn-secondary:hover{background:#5a6268;border-color:#5a6268}
+        
+        input:focus, select:focus {
+            border-color: var(--brand);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(13,110,253,0.1);
+        }
+        input[type="submit"], button { 
+            background: var(--brand); 
+            color: white; 
+            padding: .5rem .8rem; 
+            border: none; 
+            border-radius: .5rem; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: 600;
+            margin: 8px 6px 0 0; 
+        }
+        input[type="submit"]:hover, button:hover { 
+            background: var(--brand-600); 
+        }
+        .mensaje { 
+            padding: 12px; 
+            border-radius: 6px;
+            margin: 12px 0; 
+            font-size: 14px; 
+            font-weight: 500;
+        }
+        .mensaje.error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
+        }
+        .mensaje.exito { 
+            background: #d4edda; 
+            color: #155724; 
+            border: 1px solid #c3e6cb; 
+        }
+        small { 
+            color: var(--muted); 
+            font-size: 12px; 
+            font-weight: normal;
+        }
+        .volver { 
+            display: inline-block; 
+            margin: 16px 0; 
+            background: var(--brand); 
+            color: white !important; 
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: 600;
+            padding: .5rem .8rem; 
+            border-radius: .5rem; 
+            transition: all 0.2s ease;
+        }
+        .volver:hover { 
+            background: var(--brand-600); 
+            text-decoration: none;
+        }
+        .loading { 
+            display: none; 
+            color: var(--brand); 
+            font-style: italic; 
+            font-size: 14px; 
+            font-weight: 500;
+        }
+        .encontrado { 
+            background: #d1ecf1; 
+            color: #0c5460;
+            border: 1px solid #bee5eb; 
+            padding: 8px; 
+            border-radius: 6px; 
+            margin: 8px 0; 
+            font-size: 14px; 
+            font-weight: 500;
+        }
+        .patologias-container {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 12px;
+            background: #f8f9fa;
+        }
+        .patologia-item {
+            margin: 6px 0;
+            font-size: 14px;
+        }
+        .patologia-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+            transform: scale(1.1);
+        }
+        
+        /* Estilos para botones de contraer/expandir */
+        .categoria-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 4px 0;
+        }
+        
+        .categoria-header:hover {
+            background: rgba(13, 110, 253, 0.05);
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+        
+        .categoria-toggle {
+            background: none;
+            border: none;
+            color: var(--brand);
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .categoria-toggle:hover {
+            background: rgba(13, 110, 253, 0.1);
+            transform: scale(1.1);
+        }
+        
+        .categoria-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .categoria-content.collapsed {
+            height: 0 !important;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Estilos para botones de control de categorías */
+        .btn-categoria-control:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-categoria-control:active {
+            transform: translateY(0);
+        }
+        
+        .categoria-badge {
+            background: var(--brand);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 12px;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+        .buttons-container {
+            text-align: center;
+            margin: 16px 0;
+        }
+        
+        /* Estilos para resumen de patologías */
+        .patologias-resumen {
+            margin-top: 8px;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            min-height: 35px;
+        }
+        .patologias-titulo {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .pat-badges {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .pat {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 12px;
+            font-weight: 500;
+            border: 1px solid transparent;
+            font-size: 11px;
+        }
+        .pat-diabetes {
+            background: #dcfce7;
+            color: #16a34a;
+            border-color: #86efac;
+        }
+        .pat-hta {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+        .pat-dislipidemia {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+        .pat-empty {
+            color: #6c757d;
+            font-style: italic;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="volver">← Volver al inicio</a>
+        
+        <div class="header">
+            <div style="width: 200px; text-align: left;">
+                <img src="/static/logo_ecicep.jpg" alt="Logo ECICEP" style="height: 150px; width: auto; max-width: 200px; object-fit: contain;">
+            </div>
+            <div style="flex: 1; text-align: center;">
+                <h2>Ingresar nuevo usuario y control</h2>
+            </div>
+            <div style="width: 200px; text-align: right;">
+                <img src="/static/dbecicep.png" alt="DB ECICEP" style="height: 150px; width: auto; max-width: 200px; object-fit: contain;">
+            </div>
+        </div>
+        
+        {% if mensaje %}
+            {% if 'RUN inválido' in mensaje or 'Error' in mensaje %}
+                <div class="mensaje error">{{ mensaje }}</div>
+            {% else %}
+                <div class="mensaje exito">{{ mensaje }}</div>
+            {% endif %}
+        {% endif %}
+
+        <form method="post" autocomplete="off">
+            <fieldset>
+                <legend>Datos del usuario</legend>
+                <label>RUN: <input type="text" name="run" id="run" required maxlength="12"></label>
+                <!-- Resumen de patologías -->
+                <div class="patologias-resumen">
+                    <div class="patologias-titulo">Patologías:</div>
+                    <div id="patologias-badges" class="pat-badges">
+                        <span class="pat-empty">Sin patologías seleccionadas</span>
+                    </div>
+                </div>
+                <div id="loading" class="loading">Buscando usuario...</div>
+                <div id="usuario-encontrado" class="encontrado" style="display: none;">
+                    <strong>Usuario encontrado en la base de datos. Los campos se han completado automáticamente.</strong>
+                </div>
+                <label>Nombre: <input type="text" name="nombre" id="nombre" required></label>
+                <label>Fecha de nacimiento: <input type="date" name="fecha_nacimiento" id="fecha_nacimiento" required></label>
+                <label>Dirección: <input type="text" name="direccion" id="direccion"></label>
+                <div class="campos-linea">
+                    <label>Teléfono: <input type="text" name="telefono" id="telefono"></label>
+                    <label>Fecha de ingreso: <input type="date" name="fecha_ingreso" id="fecha_ingreso"></label>
+                </div>
+                <small>Fecha de ingreso al sistema (se completa automáticamente al guardar si no se especifica)</small>
+                <div class="campos-linea">
+                    <label>Sexo:
+                        <select name="sexo" id="sexo" required>
+                            <option value="">-- Seleccione --</option>
+                            <option value="masculino">masculino</option>
+                            <option value="femenino">femenino</option>
+                        </select>
+                    </label>
+                    <label>Categoría:
+                        <select name="categoria_id" id="categoria_id">
+                            <option value="">-- Seleccione --</option>
+                            {% for cat in categorias %}
+                                <option value="{{ cat.id }}">G{{ cat.id }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>Sector:
+                        <select name="sector_id" id="sector_id">
+                            <option value="">-- Seleccione --</option>
+                            {% for sec in sectores %}
+                                <option value="{{ sec.id }}">{{ sec.nombre|upper }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                </div>
+                <label>Patologías (Sistema ECICEP 2025):</label>
+                <div style="margin: 8px 0 12px 0; display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" class="btn-categoria-control" onclick="expandirTodasCategorias()" style="background: #198754; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: background 0.2s;">
+                        📂 Expandir Todas
+                    </button>
+                    <button type="button" class="btn-categoria-control" onclick="contraerTodasCategorias()" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: background 0.2s;">
+                        📁 Contraer Todas
+                    </button>
+                    <button type="button" class="btn-categoria-control" onclick="expandirSoloSeleccionadas()" style="background: #0d6efd; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; transition: background 0.2s;">
+                        ✅ Expandir Solo Seleccionadas
+                    </button>
+                </div>
+                <div class="patologias-ecicep-container" style="max-height: 650px; overflow-y: auto; border: 1px solid var(--line); border-radius: 6px; padding: 16px; background: #f8f9fa;">
+                    
+                    <!-- SALUD MENTAL Y PSIQUIATRÍA -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('salud-mental')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🧠 SALUD MENTAL Y PSIQUIATRÍA
+                                <span class="categoria-badge" id="badge-salud-mental">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-salud-mental">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-salud-mental">
+                        
+                        <!-- CONSUMO PERJUDICIAL O DEPENDIENTE DE DROGAS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="drogas_policonsumo" id="pat_drogas_policonsumo">
+                            <label for="pat_drogas_policonsumo" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Consumo perjudicial o dependiente de drogas / Policonsumo</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: Z72.2, F11-F19 (Opiáceos, cannabinoides, sedantes, cocaína, estimulantes, alucinógenos, etc.)
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- CONSUMO PERJUDICIAL O DEPENDIENTE DEL ALCOHOL -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="alcohol_dependencia" id="pat_alcohol_dependencia">
+                            <label for="pat_alcohol_dependencia" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Consumo perjudicial o dependiente del alcohol</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F10 (Dependencia, abstinencia, trastorno psicótico, síndrome amnésico, etc.)
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- DEPRESIÓN GRAVE SIN PSICOSIS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="depresion_grave_sin_psicosis" id="pat_depresion_grave_sin_psicosis">
+                            <label for="pat_depresion_grave_sin_psicosis" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Depresión grave con ideación suicida, refractaria (sin psicosis)</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F33.2 - Trastorno depresivo recurrente, episodio grave sin síntomas psicóticos
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- DEPRESIÓN GRAVE CON PSICOSIS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="depresion_grave_con_psicosis" id="pat_depresion_grave_con_psicosis">
+                            <label for="pat_depresion_grave_con_psicosis" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Depresión grave con ideación suicida, refractaria (con psicosis)</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F33.3 - Trastorno depresivo recurrente, episodio grave con síntomas psicóticos
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- DEPRESIÓN LEVE O MODERADA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="depresion_leve_moderada" id="pat_depresion_leve_moderada">
+                            <label for="pat_depresion_leve_moderada" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Depresión leve o moderada</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F33.4, F33.8, F33.9 - Trastorno depresivo recurrente en remisión
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ESQUIZOFRENIA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="esquizofrenia_trastornos_psicoticos" id="pat_esquizofrenia_trastornos_psicoticos">
+                            <label for="pat_esquizofrenia_trastornos_psicoticos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Esquizofrenia</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F20-F23 (Esquizofrenia, trastorno esquizotípico, trastornos delirantes, psicóticos agudos)
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TRASTORNOS DEL SUEÑO -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="trastornos_sueño" id="pat_trastornos_sueño">
+                            <label for="pat_trastornos_sueño" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Trastornos del sueño</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F51, G47 - Trastornos no orgánicos del sueño
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- MALTRATO/VIOLENCIA INTRAFAMILIAR/ABUSO SEXUAL -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="maltrato_violencia_abuso" id="pat_maltrato_violencia_abuso">
+                            <label for="pat_maltrato_violencia_abuso" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Maltrato físico/psicológico / Violencia intrafamiliar / Abuso sexual / Ideación e intento suicida</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: T74, Y07 - Síndromes del maltrato
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ANSIEDAD -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="ansiedad" id="pat_ansiedad">
+                            <label for="pat_ansiedad" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Ansiedad</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F40-F42 - Trastornos fóbicos, ansiedad, obsesivo-compulsivo
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TRASTORNO DE LA PERSONALIDAD -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="trastorno_personalidad" id="pat_trastorno_personalidad">
+                            <label for="pat_trastorno_personalidad" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Trastorno de la personalidad</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F60-F62, F68-F69 - Trastornos específicos y mixtos de personalidad
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TRASTORNOS ALIMENTARIOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="trastornos_alimentarios" id="pat_trastornos_alimentarios">
+                            <label for="pat_trastornos_alimentarios" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Trastornos alimentarios</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F50 - Anorexia nerviosa, bulimia nerviosa, hiperfagia, vómitos psicológicos
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- OTROS TRASTORNOS DE SALUD MENTAL -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="otros_trastornos_salud_mental" id="pat_otros_trastornos_salud_mental">
+                            <label for="pat_otros_trastornos_salud_mental" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Otros trastornos de salud mental</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F63-F66 - Trastornos de hábitos, impulsos, identidad de género, preferencia sexual
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TABAQUISMO -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="tabaquismo" id="pat_tabaquismo">
+                            <label for="pat_tabaquismo" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tabaquismo</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F17 - Trastornos mentales y del comportamiento por tabaco, dependencia, abstinencia
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content salud-mental -->
+                    </div> <!-- Fin categoria-seccion salud-mental -->
+
+                    <!-- ENFERMEDADES METABÓLICAS Y ENDOCRINAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('metabolicas-endocrinas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🩺 ENFERMEDADES METABÓLICAS Y ENDOCRINAS
+                                <span class="categoria-badge" id="badge-metabolicas-endocrinas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-metabolicas-endocrinas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-metabolicas-endocrinas">
+                        
+                        <!-- DIABETES -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="diabetes_mellitus" id="pat_diabetes_mellitus">
+                            <label for="pat_diabetes_mellitus" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Diabetes Mellitus</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: E10-E14 - Diabetes insulinodependiente, no insulinodependiente, asociada a desnutrición, otras especificadas
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- DISLIPIDEMIAS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="dislipidemias" id="pat_dislipidemias">
+                            <label for="pat_dislipidemias" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Dislipidemias</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: E78 - Trastorno del metabolismo de las lipoproteínas y otras dislipidemias
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- OBESIDAD -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="obesidad" id="pat_obesidad">
+                            <label for="pat_obesidad" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Obesidad</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: E66 - Obesidad
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TRASTORNOS TIROIDEOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="trastornos_tiroideos" id="pat_trastornos_tiroideos">
+                            <label for="pat_trastornos_tiroideos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Trastornos Tiroideos</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: E01-E05 - Trastornos por deficiencia de yodo, hipotiroidismo, hipertiroidismo (tirotoxicosis)
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- HIPERURICEMIA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="hiperuricemia_gota" id="pat_hiperuricemia_gota">
+                            <label for="pat_hiperuricemia_gota" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Hiperuricemia / Gota</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: M10 - Gota
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content metabolicas-endocrinas -->
+                    </div> <!-- Fin categoria-seccion metabolicas-endocrinas -->
+
+                    <!-- ENFERMEDADES CARDIOVASCULARES -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('cardiovasculares')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                ❤️ ENFERMEDADES CARDIOVASCULARES
+                                <span class="categoria-badge" id="badge-cardiovasculares">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-cardiovasculares">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-cardiovasculares">
+                        
+                        <!-- HIPERTENSIÓN -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="hipertension" id="pat_hipertension">
+                            <label for="pat_hipertension" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Hipertensión</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I10, I12, I13 - Hipertensión esencial, enfermedad renal hipertensiva, enfermedad cardiorrenal hipertensiva
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ENFERMEDADES CARDIOVASCULARES / IAM / CARDIOPATÍA ISQUÉMICA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="cardiovasculares_iam_cardiopatia" id="pat_cardiovasculares_iam_cardiopatia">
+                            <label for="pat_cardiovasculares_iam_cardiopatia" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Enfermedades cardiovasculares / IAM / Cardiopatía isquémica</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I11, I20-I22, I25, I51-I52 - Enfermedad cardiaca hipertensiva, angina de pecho, infarto agudo al miocardio, enfermedad isquémica crónica del corazón
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- FIBRILACIÓN AURICULAR / FLUTTER -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="fibrilacion_auricular_flutter" id="pat_fibrilacion_auricular_flutter">
+                            <label for="pat_fibrilacion_auricular_flutter" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Fibrilación auricular / Flutter auricular</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I48.1-I48.9, I49.0, I49.9 - Fibrilación auricular persistente/crónica, aleteo auricular típico/atípico, fibrilación y aleteo ventricular
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- INSUFICIENCIA CARDÍACA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="insuficiencia_cardiaca" id="pat_insuficiencia_cardiaca">
+                            <label for="pat_insuficiencia_cardiaca" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Insuficiencia cardíaca</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I50 - Insuficiencia cardíaca
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ENFERMEDAD CEREBROVASCULAR / ACV / AVE -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="cerebrovascular_acv_ave" id="pat_cerebrovascular_acv_ave">
+                            <label for="pat_cerebrovascular_acv_ave" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Enfermedad cerebrovascular / ACV / AVE</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I64, I67-I68, G46 - Accidente vascular encefálico agudo, aterosclerosis cerebral, encefalopatía hipertensiva, síndromes vasculares encefálicos
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ISQUEMIA CEREBRAL TRANSITORIA (TIA) -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="isquemia_cerebral_tia" id="pat_isquemia_cerebral_tia">
+                            <label for="pat_isquemia_cerebral_tia" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Isquemia cerebral transitoria (TIA)</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: G45 - Isquemia cerebral transitoria y síndromes afines
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ARRITMIA CARDÍACA / TAQUICARDIA PAROXÍSTICA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="arritmia_taquicardia" id="pat_arritmia_taquicardia">
+                            <label for="pat_arritmia_taquicardia" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Arritmia cardíaca / Taquicardia paroxística</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I47, I49.0, I49.9, I48.1-I48.9 - Arritmias ventriculares y supraventriculares, fibrilación y aleteo ventricular, arritmia cardíaca no especificada
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content cardiovasculares -->
+                    </div> <!-- Fin categoria-seccion cardiovasculares -->
+
+                    <!-- ENFERMEDADES RESPIRATORIAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('respiratorias')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🫁 ENFERMEDADES RESPIRATORIAS
+                                <span class="categoria-badge" id="badge-respiratorias">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-respiratorias">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-respiratorias">
+                        
+                        <!-- ASMA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="asma" id="pat_asma">
+                            <label for="pat_asma" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Asma</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: J45, J46 - Asma, estado asmático
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ENFERMEDAD PULMONAR OBSTRUCTIVA CRÓNICA (EPOC) -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="epoc" id="pat_epoc">
+                            <label for="pat_epoc" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Enfermedad Pulmonar Obstructiva Crónica (EPOC)</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: J41-J44 - Bronquitis crónica simple/mucopurulenta, bronquitis crónica no especificada, enfisema, otras enfermedades pulmonares obstructivas crónicas
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content respiratorias -->
+                    </div> <!-- Fin categoria-seccion respiratorias -->
+
+                    <!-- ENFERMEDADES RENALES Y UROLÓGICAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('renales-urologicas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🫘 ENFERMEDADES RENALES Y UROLÓGICAS
+                                <span class="categoria-badge" id="badge-renales-urologicas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-renales-urologicas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-renales-urologicas">
+                        
+                        <!-- ENFERMEDAD RENAL CRÓNICA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="enfermedad_renal_cronica" id="pat_enfermedad_renal_cronica">
+                            <label for="pat_enfermedad_renal_cronica" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Enfermedad renal crónica</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: N15, N19, I12 - Otras enfermedades renales tubulointersticiales, insuficiencia renal no especificada, enfermedad renal hipertensiva
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ENFERMEDAD RENAL CRÓNICA AVANZADA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="enfermedad_renal_avanzada" id="pat_enfermedad_renal_avanzada">
+                            <label for="pat_enfermedad_renal_avanzada" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Enfermedad renal crónica avanzada</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: N18.4, N18 - Enfermedad renal crónica etapa 4, insuficiencia renal terminal
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- HIPERTROFIA PROSTÁTICA BENIGNA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="hipertrofia_prostatica_benigna" id="pat_hipertrofia_prostatica_benigna">
+                            <label for="pat_hipertrofia_prostatica_benigna" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Hipertrofia prostática benigna</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: N40 - Hiperplasia de la próstata
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content renales-urologicas -->
+                    </div> <!-- Fin categoria-seccion renales-urologicas -->
+
+                    <!-- ENFERMEDADES DIGESTIVAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('digestivas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🫀 ENFERMEDADES DIGESTIVAS
+                                <span class="categoria-badge" id="badge-digestivas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-digestivas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-digestivas">
+                        
+                        <!-- ENFERMEDADES HEPÁTICAS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="enfermedades_hepaticas" id="pat_enfermedades_hepaticas">
+                            <label for="pat_enfermedades_hepaticas" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Enfermedades hepáticas</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: B18, K70-K74 - Hepatitis viral crónica, enfermedad alcohólica del hígado, enfermedad tóxica del hígado, hepatitis crónica no especificada, fibrosis y cirrosis hepática
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ENTERITIS CRÓNICA / COLITIS ULCEROSA / CROHN -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="enteritis_cronica_colitis_crohn" id="pat_enteritis_cronica_colitis_crohn">
+                            <label for="pat_enteritis_cronica_colitis_crohn" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Enteritis crónica / Colitis ulcerosa / Crohn</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: K50-K52 - Enfermedad de Crohn, colitis ulcerativa, otras colitis y gastroenteritis no infecciosas
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content digestivas -->
+                    </div> <!-- Fin categoria-seccion digestivas -->
+
+                    <!-- ENFERMEDADES MÚSCULO-ESQUELÉTICAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('musculo-esqueleticas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🦴 ENFERMEDADES MÚSCULO-ESQUELÉTICAS
+                                <span class="categoria-badge" id="badge-musculo-esqueleticas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-musculo-esqueleticas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-musculo-esqueleticas">
+                        
+                        <!-- ARTRITIS REUMATOIDE -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="artritis_reumatoidea" id="pat_artritis_reumatoidea">
+                            <label for="pat_artritis_reumatoidea" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Artritis reumatoide</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: M05, M06 - Artritis reumatoide seropositiva, otras artritis reumatoides
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ARTROSIS DE RODILLA, CADERA U OTRO TIPO -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="artrosis_rodilla_cadera_otros" id="pat_artrosis_rodilla_cadera_otros">
+                            <label for="pat_artrosis_rodilla_cadera_otros" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Artrosis de rodilla, cadera u otro tipo</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: M15-M19 - Poliartrosis, coxartrosis, gonartrosis, artrosis carpometacarpiana, otras artrosis
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- DOLOR NEUROPÁTICO / FIBROMIALGIA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="dolor_neuropatico_fibromialgia" id="pat_dolor_neuropatico_fibromialgia">
+                            <label for="pat_dolor_neuropatico_fibromialgia" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Dolor neuropático / Fibromialgia</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: G50, M79.7 - Trastornos del nervio trigémino, fibromialgia
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- LUPUS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="lupus_eritematoso" id="pat_lupus_eritematoso">
+                            <label for="pat_lupus_eritematoso" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Lupus eritematoso</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: M32, L93 - Lupus eritematoso sistémico (inducido por drogas, con compromiso de órganos, otras formas), lupus eritematoso cutáneo (discoide, subagudo, otros localizados)
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content musculo-esqueleticas -->
+                    </div> <!-- Fin categoria-seccion musculo-esqueleticas -->
+
+                    <!-- ENFERMEDADES NEUROLÓGICAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('neurologicas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🧠 ENFERMEDADES NEUROLÓGICAS
+                                <span class="categoria-badge" id="badge-neurologicas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-neurologicas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-neurologicas">
+                        
+                        <!-- DEMENCIA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="demencia" id="pat_demencia">
+                            <label for="pat_demencia" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Demencia</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F00-F03 - Demencia Alzheimer, demencia vascular, demencia en otras enfermedades, demencia no especificada
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- EPILEPSIA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="epilepsia" id="pat_epilepsia">
+                            <label for="pat_epilepsia" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Epilepsia</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: G40 - Epilepsia
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ESCLEROSIS MÚLTIPLE -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="esclerosis_multiple" id="pat_esclerosis_multiple">
+                            <label for="pat_esclerosis_multiple" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Esclerosis múltiple</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: G35 - Esclerosis múltiple
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- PARKINSONISMO -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="parkinsonismo" id="pat_parkinsonismo">
+                            <label for="pat_parkinsonismo" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Parkinsonismo</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: G20-G26 - Enfermedad de Parkinson, parkinsonismo secundario, otras enfermedades extrapiramidales, distonía, otros trastornos extrapiramidales y del movimiento
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- RETRASO MENTAL -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="retraso_mental" id="pat_retraso_mental">
+                            <label for="pat_retraso_mental" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Retraso mental</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: F70-F79 - Retraso mental leve, moderado, grave, profundo, otros tipos, no especificado
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content neurologicas -->
+                    </div> <!-- Fin categoria-seccion neurologicas -->
+
+                    <!-- ENFERMEDADES INMUNOLÓGICAS Y HEMATOLÓGICAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('inmunologicas-hematologicas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🛡️ ENFERMEDADES INMUNOLÓGICAS Y HEMATOLÓGICAS
+                                <span class="categoria-badge" id="badge-inmunologicas-hematologicas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-inmunologicas-hematologicas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-inmunologicas-hematologicas">
+                        
+                        <!-- ANEMIA CRÓNICA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="anemia_cronica" id="pat_anemia_cronica">
+                            <label for="pat_anemia_cronica" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Anemia crónica</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: D50-D64 - Anemias por deficiencia de hierro, vitamina B12, folatos, nutricionales, enzimáticas, talasemia, trastornos falciformes, hemolíticas hereditarias, hemolítica adquirida, aplásticas, posthemorrágica aguda, otras anemias
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- OTROS DEFECTOS DE LA COAGULACIÓN -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="defectos_coagulacion" id="pat_defectos_coagulacion">
+                            <label for="pat_defectos_coagulacion" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Otros defectos de la coagulación</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: D68-D69, D77 - Otros defectos de la coagulación, púrpura y otras afecciones hemorrágicas, otras enfermedades de la sangre y órganos hematopoyéticos
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUBERCULOSIS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="tuberculosis" id="pat_tuberculosis">
+                            <label for="pat_tuberculosis" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tuberculosis</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: A15, A17-A19 - Tuberculosis respiratoria, del sistema nervioso, de otros órganos, tuberculosis miliar
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- INFECCIÓN POR VIH / SIDA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="vih_sida" id="pat_vih_sida">
+                            <label for="pat_vih_sida" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Infección por VIH / SIDA</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: B21-B24 - Enfermedades por virus de la inmunodeficiencia humana (VIH) resultante en otras afecciones, enfermedades especificadas, otras afecciones, sin otra especificación
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content inmunologicas-hematologicas -->
+                    </div> <!-- Fin categoria-seccion inmunologicas-hematologicas -->
+
+                    <!-- ENFERMEDADES OFTALMOLÓGICAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('oftalmologicas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                👁️ ENFERMEDADES OFTALMOLÓGICAS
+                                <span class="categoria-badge" id="badge-oftalmologicas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-oftalmologicas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-oftalmologicas">
+                        
+                        <!-- CATARATA / RETINOPATÍA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="cataratas_retinopatia" id="pat_cataratas_retinopatia">
+                            <label for="pat_cataratas_retinopatia" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Catarata / Retinopatía</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: Q12, H25-H26, H28 - Malformaciones congénitas del cristalino, catarata senil, otras cataratas, cataratas y trastornos del cristalino asociados
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- CEGUERA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="ceguera" id="pat_ceguera">
+                            <label for="pat_ceguera" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Ceguera</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: H54 - Ceguera y disminución de agudeza visual
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- GLAUCOMA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="glaucoma" id="pat_glaucoma">
+                            <label for="pat_glaucoma" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Glaucoma</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: H40 - Glaucoma
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content oftalmologicas -->
+                    </div> <!-- Fin categoria-seccion oftalmologicas -->
+
+                    <!-- ENFERMEDADES OTORRINOLARINGOLÓGICAS (ORL) -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('otorrinolaringologicas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                👂 ENFERMEDADES OTORRINOLARINGOLÓGICAS (ORL)
+                                <span class="categoria-badge" id="badge-otorrinolaringologicas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-otorrinolaringologicas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-otorrinolaringologicas">
+                        
+                        <!-- PRESBIACUSIA / HIPOACUSIA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="presbiacusia_hipoacusia" id="pat_presbiacusia_hipoacusia">
+                            <label for="pat_presbiacusia_hipoacusia" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Presbiacusia / Hipoacusia</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: H90-H91 - Hipoacusia conductiva y neurosensorial, otras hipoacusias
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content otorrinolaringologicas -->
+                    </div> <!-- Fin categoria-seccion otorrinolaringologicas -->
+
+                    <!-- CONDICIONES SOCIOECONÓMICAS / PSICOSOCIALES -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('socioeconomicas-psicosociales')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                👥 CONDICIONES SOCIOECONÓMICAS / PSICOSOCIALES
+                                <span class="categoria-badge" id="badge-socioeconomicas-psicosociales">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-socioeconomicas-psicosociales">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-socioeconomicas-psicosociales">
+                        
+                        <!-- CONDICIONES PSICOSOCIALES -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="condiciones_psicosociales" id="pat_condiciones_psicosociales">
+                            <label for="pat_condiciones_psicosociales" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Condiciones psicosociales</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: Z55-Z65 - Problemas de educación y alfabetización, empleo/desempleo, exposición a factores de riesgo ocupacional, ambiente físico, ambiente social, hechos negativos en la niñez, problemas de crianza, grupo primario de apoyo, circunstancias psicosociales
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- VIOLENCIA DOMÉSTICA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="violencia_domestica" id="pat_violencia_domestica">
+                            <label for="pat_violencia_domestica" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Violencia doméstica</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: T74, Y07 - Síndromes del maltrato
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- SÍNDROMES DEL MALTRATO -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="maltratos" id="pat_maltratos">
+                            <label for="pat_maltratos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Síndromes del maltrato</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: T74, Y07 - Síndromes del maltrato
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content socioeconomicas-psicosociales -->
+                    </div> <!-- Fin categoria-seccion socioeconomicas-psicosociales -->
+
+                    <!-- FUNCIONALIDAD Y DISCAPACIDAD -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('funcionalidad-discapacidad')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                ♿ FUNCIONALIDAD Y DISCAPACIDAD
+                                <span class="categoria-badge" id="badge-funcionalidad-discapacidad">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-funcionalidad-discapacidad">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-funcionalidad-discapacidad">
+                        
+                        <!-- FUNCIÓN LIMITADA / DISCAPACIDAD / DEPENDENCIA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="funcion_limitada" id="pat_funcion_limitada">
+                            <label for="pat_funcion_limitada" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Función limitada / discapacidad / dependencia</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: Z74 - Problemas relacionados con dependencia de servicios de apoyo
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- DEPENDENCIA DE MÁQUINAS Y DISPOSITIVOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="dependencia_maquinas_dispositivos" id="pat_dependencia_maquinas_dispositivos">
+                            <label for="pat_dependencia_maquinas_dispositivos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Dependencia de máquinas y dispositivos capacitantes</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: Z99 - Dependencia de máquinas y dispositivos capacitantes, no clasificados en otra parte
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ANORMALIDADES DE LA MARCHA Y MOVILIDAD -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="anormalidades_marcha_movilidad" id="pat_anormalidades_marcha_movilidad">
+                            <label for="pat_anormalidades_marcha_movilidad" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Anormalidades de la marcha y la movilidad</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: R26 - Anormalidades de la marcha y la movilidad
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content funcionalidad-discapacidad -->
+                    </div> <!-- Fin categoria-seccion funcionalidad-discapacidad -->
+
+                    <!-- ENFERMEDADES ONCOLÓGICAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('oncologicas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🎗️ ENFERMEDADES ONCOLÓGICAS
+                                <span class="categoria-badge" id="badge-oncologicas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-oncologicas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-oncologicas">
+                        
+                        <!-- TUMORES MALIGNOS CAVIDAD BUCAL Y FARINGE -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_labio_cavidad_bucal_faringe" id="pat_tumor_maligno_labio_cavidad_bucal_faringe">
+                            <label for="pat_tumor_maligno_labio_cavidad_bucal_faringe" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno del labio, cavidad bucal y faringe</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C00-C14 - Labio, lengua, encía, piso de la boca, paladar, boca, glándulas salivales, amígdala, orofaringe, nasofaringe, seno piriforme, hipofaringe
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES MALIGNOS ÓRGANOS DIGESTIVOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_organos_digestivos" id="pat_tumor_maligno_organos_digestivos">
+                            <label for="pat_tumor_maligno_organos_digestivos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno de órganos digestivos</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C15-C26 - Esófago, estómago, intestino delgado, colon, recto, ano, hígado, vesícula biliar, vías biliares, páncreas
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES MALIGNOS ÓRGANOS RESPIRATORIOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_organos_respiratorios" id="pat_tumor_maligno_organos_respiratorios">
+                            <label for="pat_tumor_maligno_organos_respiratorios" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno de órganos respiratorios e intratorácicos</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C30, C32-C39 - Fosas nasales, oído medio, laringe, tráquea, bronquios, pulmón, timo, corazón, mediastino, pleura
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES MALIGNOS HUESOS Y CARTÍLAGOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_huesos_cartilagos" id="pat_tumor_maligno_huesos_cartilagos">
+                            <label for="pat_tumor_maligno_huesos_cartilagos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno de huesos y cartílagos articulares</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C40-C41 - Huesos y cartílagos articulares de miembros y otros sitios
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- MESOTELIOMA Y SARCOMAS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="mesotelioma_sarcomas" id="pat_mesotelioma_sarcomas">
+                            <label for="pat_mesotelioma_sarcomas" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Mesotelioma y sarcomas de tejidos blandos</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C45-C49 - Mesotelioma, sarcoma de Kaposi, nervios periféricos, peritoneo, retroperitoneo, tejidos conjuntivos y blandos
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES MALIGNOS ÓRGANOS GENITALES FEMENINOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_genitales_femeninos" id="pat_tumor_maligno_genitales_femeninos">
+                            <label for="pat_tumor_maligno_genitales_femeninos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno de órganos genitales femeninos</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C51-C58 - Vulva, vagina, cuello uterino, cuerpo uterino, útero, ovario, otros órganos genitales femeninos, placenta
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES MALIGNOS ÓRGANOS GENITALES MASCULINOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_genitales_masculinos" id="pat_tumor_maligno_genitales_masculinos">
+                            <label for="pat_tumor_maligno_genitales_masculinos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno de órganos genitales masculinos</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C60-C63 - Pene, próstata, testículo, otros órganos genitales masculinos
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES MALIGNOS VÍAS URINARIAS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_vias_urinarias" id="pat_tumor_maligno_vias_urinarias">
+                            <label for="pat_tumor_maligno_vias_urinarias" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno de las vías urinarias</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C64-C68 - Riñón, pelvis renal, uréter, vejiga urinaria, otros órganos urinarios
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES MALIGNOS SISTEMA NERVIOSO CENTRAL -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_sistema_nervioso" id="pat_tumor_maligno_sistema_nervioso">
+                            <label for="pat_tumor_maligno_sistema_nervioso" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno del sistema nervioso central y ojo</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C69, C71-C72 - Ojo y anexos, encéfalo, médula espinal, nervios craneales
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES MALIGNOS GLÁNDULAS ENDOCRINAS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_glandulas_endocrinas" id="pat_tumor_maligno_glandulas_endocrinas">
+                            <label for="pat_tumor_maligno_glandulas_endocrinas" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno de glándulas endocrinas</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C73-C75 - Glándula tiroides, glándula suprarrenal, otras glándulas endocrinas
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES MALIGNOS SECUNDARIOS Y MAL DEFINIDOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="tumor_maligno_secundarios_mal_definidos" id="pat_tumor_maligno_secundarios_mal_definidos">
+                            <label for="pat_tumor_maligno_secundarios_mal_definidos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor maligno secundario y de sitios mal definidos</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C76-C80, C97 - Sitios mal definidos, ganglios linfáticos, órganos respiratorios y digestivos, otros sitios, múltiples independientes
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- LINFOMAS Y LEUCEMIAS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="3" name="patologia[]" value="linfomas_leucemias" id="pat_linfomas_leucemias">
+                            <label for="pat_linfomas_leucemias" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Linfomas y leucemias</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: C81-C96 - Enfermedad de Hodgkin, linfoma no-Hodgkin, enfermedades inmunoproliferativas, mieloma múltiple, leucemias (linfoide, mieloide, monocítica), tumores del tejido linfático
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- CARCINOMA IN SITU -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="carcinoma_in_situ" id="pat_carcinoma_in_situ">
+                            <label for="pat_carcinoma_in_situ" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Carcinoma in situ</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: D00-D09 - Cavidad bucal, esófago, estómago, órganos digestivos, sistema respiratorio, melanoma in situ, mama, órganos genitales, otros sitios
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES BENIGNOS CAVIDAD BUCAL Y DIGESTIVO -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="tumor_benigno_boca_digestivo" id="pat_tumor_benigno_boca_digestivo">
+                            <label for="pat_tumor_benigno_boca_digestivo" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor benigno de boca, faringe y sistema digestivo</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: D10-D13 - Boca, faringe, glándulas salivales, colon, recto, otras partes del sistema digestivo
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES BENIGNOS SISTEMA RESPIRATORIO -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="tumor_benigno_respiratorio" id="pat_tumor_benigno_respiratorio">
+                            <label for="pat_tumor_benigno_respiratorio" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor benigno del sistema respiratorio</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: D14-D15 - Oído medio, sistema respiratorio, otros órganos intratorácicos
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES BENIGNOS HUESO Y TEJIDOS BLANDOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="tumor_benigno_hueso_tejidos_blandos" id="pat_tumor_benigno_hueso_tejidos_blandos">
+                            <label for="pat_tumor_benigno_hueso_tejidos_blandos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor benigno de hueso y tejidos blandos</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: D16, D18-D21, D23 - Hueso, cartílago articular, hemangioma, linfangioma, tejido mesotelial, tejidos blandos, piel
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES BENIGNOS ÓRGANOS GENITALES FEMENINOS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="tumor_benigno_genitales_femeninos" id="pat_tumor_benigno_genitales_femeninos">
+                            <label for="pat_tumor_benigno_genitales_femeninos" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor benigno de órganos genitales femeninos</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: D25, D27-D28 - Leiomioma del útero, ovario, otros órganos genitales femeninos
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES BENIGNOS SISTEMA NERVIOSO Y OTROS -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="tumor_benigno_sistema_nervioso_otros" id="pat_tumor_benigno_sistema_nervioso_otros">
+                            <label for="pat_tumor_benigno_sistema_nervioso_otros" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor benigno del sistema nervioso y otros sitios</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: D30, D32-D33, D35-D36 - Órganos urinarios, meninges, encéfalo, glándulas endocrinas, otros sitios
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- TUMORES DE COMPORTAMIENTO INCIERTO -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="tumor_comportamiento_incierto" id="pat_tumor_comportamiento_incierto">
+                            <label for="pat_tumor_comportamiento_incierto" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Tumor de comportamiento incierto o desconocido</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: D37-D48 - Cavidad bucal, órganos digestivos, respiratorios, genitales, urinarios, meninges, encéfalo, glándulas endocrinas, síndromes mielodisplásicos
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content oncologicas -->
+                    </div> <!-- Fin categoria-seccion oncologicas -->
+
+                    <!-- ENFERMEDADES DERMATOLÓGICAS -->
+                    <div class="categoria-seccion">
+                        <div class="categoria-header" onclick="toggleCategoria('dermatologicas')">
+                            <h4 style="color: #0d6efd; margin: 0; font-size: 14px; font-weight: 600;">
+                                🩹 ENFERMEDADES DERMATOLÓGICAS
+                                <span class="categoria-badge" id="badge-dermatologicas">0</span>
+                            </h4>
+                            <button type="button" class="categoria-toggle" id="toggle-dermatologicas">−</button>
+                        </div>
+                        
+                        <div class="categoria-content" id="content-dermatologicas">
+                        
+                        <!-- VENAS VARICOSAS CON ÚLCERA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="venas_varicosas_ulcera" id="pat_venas_varicosas_ulcera">
+                            <label for="pat_venas_varicosas_ulcera" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Venas varicosas con úlcera</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I83.0 - Venas varicosas de miembros inferiores con úlcera
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- VENAS VARICOSAS CON INFLAMACIÓN -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="venas_varicosas_inflamacion" id="pat_venas_varicosas_inflamacion">
+                            <label for="pat_venas_varicosas_inflamacion" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Venas varicosas con inflamación</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I83.1 - Venas varicosas de miembros inferiores con inflamación
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- VENAS VARICOSAS CON ÚLCERA E INFLAMACIÓN -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="venas_varicosas_ulcera_inflamacion" id="pat_venas_varicosas_ulcera_inflamacion">
+                            <label for="pat_venas_varicosas_ulcera_inflamacion" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Venas varicosas con úlcera e inflamación</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I83.2 - Venas varicosas de miembros inferiores con úlcera e inflamación
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- VENAS VARICOSAS SIN ÚLCERA NI INFLAMACIÓN -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="venas_varicosas_sin_complicaciones" id="pat_venas_varicosas_sin_complicaciones">
+                            <label for="pat_venas_varicosas_sin_complicaciones" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Venas varicosas sin úlcera ni inflamación</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: I83, I83.9 - Venas varicosas de miembros inferiores sin úlcera ni inflamación
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ÚLCERA CRÓNICA DE LA PIEL -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="ulcera_cronica_piel" id="pat_ulcera_cronica_piel">
+                            <label for="pat_ulcera_cronica_piel" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Úlcera crónica de la piel</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: L97 - Úlcera de miembro inferior, no clasificada en otra parte
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- OTRAS ÚLCERAS CRÓNICAS DE LA PIEL -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="2" name="patologia[]" value="otras_ulceras_cronicas_piel" id="pat_otras_ulceras_cronicas_piel">
+                            <label for="pat_otras_ulceras_cronicas_piel" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Otras úlceras crónicas de la piel</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    CIE10: L98.4 - Úlcera crónica de la piel, no clasificada en otra parte
+                                </small>
+                            </label>
+                        </div>
+                        
+                        <!-- ÚLCERA DE MIEMBRO INFERIOR NO CLASIFICADA -->
+                        <div class="patologia-item">
+                            <input type="checkbox" class="patologia-checkbox" data-points="1" name="patologia[]" value="ulcera_miembro_inferior_no_clasificada" id="pat_ulcera_miembro_inferior_no_clasificada">
+                            <label for="pat_ulcera_miembro_inferior_no_clasificada" style="display: inline; margin: 0; font-weight: normal;">
+                                <strong>Úlcera de miembro inferior no clasificada</strong>
+                                <small style="display: block; color: #666; font-size: 11px;">
+                                    Úlcera de miembro inferior no especificada en otras categorías
+                                </small>
+                            </label>
+                        </div>
+                        </div> <!-- Fin categoria-content dermatologicas -->
+                    </div> <!-- Fin categoria-seccion dermatologicas -->
+                </div>
+                
+                <!-- Cálculo automático de riesgo - SIEMPRE VISIBLE -->
+                <div class="calculo-riesgo" style="margin: 16px 0; padding: 15px; border: 2px solid #0d6efd; border-radius: 8px; background: #f0f8ff; box-shadow: 0 2px 8px rgba(13, 110, 253, 0.1);">
+                    <h5 style="color: #0d6efd; margin: 0 0 10px 0;">📊 Cálculo de Riesgo ECICEP</h5>
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-weight: 600;">Total de puntos: <strong id="total-puntos" style="font-size: 18px;">0</strong></span>
+                        <span style="font-weight: 600;">Categoría: <strong id="categoria-resultado" style="font-size: 18px; padding: 4px 8px; border-radius: 4px; background: #e9ecef;">G0</strong></span>
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 8px;">
+                        <span style="color: #198754;">🟢 1 punto = G1 (Riesgo Leve)</span> | 
+                        <span style="color: #ffc107;">🟡 2-4 puntos = G2 (Riesgo Moderado)</span> | 
+                        <span style="color: #dc3545;">🔴 ≥5 puntos = G3 (Riesgo Alto)</span>
+                    </small>
+                </div>
+                
+                <small>Selecciona las patologías que correspondan.</small>
+                <hr>
+                <label for="fecha_acuerdo">Fecha del acuerdo:</label>
+                <input type="date" name="fecha_acuerdo" id="fecha_acuerdo" style="margin-bottom:8px;width:200px;"
+                    value="{% if acuerdos and acuerdos|length > 0 and acuerdos[0]["fecha_creacion"] %}{{ acuerdos[0]["fecha_creacion"].strftime('%Y-%m-%d') }}{% else %}{{ '' }}{% endif %}">
+                {% if acuerdos and acuerdos|length > 0 and acuerdos[0]["fecha_creacion"] %}
+                <div style="margin-bottom: 4px;">
+                    <span style="color:#0d6efd;font-weight:bold;">Fecha de creación del acuerdo actual:</span>
+                    <span style="color:#222;">{{ acuerdos[0]["fecha_creacion"].strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                {% endif %}
+                <label for="acuerdos">Acuerdos (puedes modificar o agregar):</label>
+                <textarea name="acuerdos" id="acuerdos" rows="5" style="width:100%">{% if acuerdos and acuerdos|length > 0 %}{{ acuerdos[0]["acuerdos"] }}{% endif %}</textarea>
+                <label for="cumplimiento">Cumplimiento:</label>
+                <select name="cumplimiento" id="cumplimiento" style="width:100%">
+                    <option value="" selected disabled>Seleccionar opción de cumplimiento</option>
+                    <option value="cumple">Cumple</option>
+                    <option value="cumple parcialmente">Cumple parcialmente</option>
+                    <option value="no cumple">No cumple</option>
+                    <option value="inicio de acuerdos consensuados">Inicio de acuerdos consensuados</option>
+                </select>
+                                <script>
+                                // Cambia el color del select según la opción elegida
+                                function setCumplimientoColor() {
+                                    var sel = document.getElementById('cumplimiento');
+                                    var color = '';
+                                    switch(sel.value) {
+                                        case 'cumple': color = '#4caf50'; break; // verde
+                                        case 'cumple parcialmente': color = '#ffc107'; break; // amarillo
+                                        case 'no cumple': color = '#f44336'; break; // rojo
+                                        default: color = '';
+                                    }
+                                    sel.style.backgroundColor = color;
+                                    sel.style.color = (sel.value === 'cumple parcialmente') ? '#222' : '#fff';
+                                }
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    var sel = document.getElementById('cumplimiento');
+                                    setCumplimientoColor();
+                                    sel.addEventListener('change', setCumplimientoColor);
+                                });
+                                </script>
+                <label for="observaciones">Observaciones:</label>
+                <textarea name="observaciones" id="observaciones" rows="2" style="width:100%"></textarea>
+                <small>Historial de acuerdos previos:</small>
+                <ul>
+                    {% for ac in acuerdos %}
+                        <li>
+                            <span style="color:#0d6efd;font-weight:bold;">Fecha de creación del acuerdo:</span> 
+                            <span style="color:#222;">{{ ac.fecha_creacion.strftime('%Y-%m-%d %H:%M') if ac.fecha_creacion else '' }}</span><br>
+                            <span>{{ ac.acuerdos|e }}</span>
+                            <span style="color: #888;">({{ ac.cumplimiento }})</span>
+                            {% if ac.observaciones %}<br><i>Obs: {{ ac.observaciones }}</i>{% endif %}
+                        </li>
+                    {% else %}
+                        <li>No hay acuerdos previos.</li>
+                    {% endfor %}
+                </ul>
+            </fieldset>
+            
+            <fieldset>
+                <legend>Control inicial</legend>
+                <label>Fecha control: <input type="date" name="fecha"></label>
+                <label>Profesional:
+                    <select name="profesional" id="profesional">
+                        <option value="">-- Seleccione --</option>
+                        <option value="dupla">Dupla</option>
+                        <option value="enfermero">Enfermero</option>
+                        <option value="medico">Médico</option>
+                        <option value="nutricionista">Nutricionista</option>
+                        <option value="tens">TENS</option>
+                        <option value="matrona">Matrona</option>
+                        <option value="psicologo">Psicólogo</option>
+                        <option value="asistente social">Asistente Social</option>
+                        <option value="sala era">Sala Era</option>
+                        <option value="urgencias">Urgencias</option>
+                        <option value="dentista">Dentista</option>
+                        <option value="oftalmologo">Oftalmólogo</option>
+                        <option value="uapo">UAPO</option>
+                        <option value="medicina interna">Medicina Interna</option>
+                        <option value="nefrologo">Nefrólogo</option>
+                        <option value="telediabetes">Telediabetes</option>
+                        <option value="ginecologo">Ginecólogo</option>
+                        <option value="politaco">POLITACO</option>
+                        <option value="receta">Receta</option>
+                        <option value="cirujano">Cirujano</option>
+                        <option value="hosp chue">Hosp CHUE</option>
+                        <option value="h lebu">H Lebu</option>
+                        <option value="h arauco">H Arauco</option>
+                    </select>
+                </label>
+                
+                <div class="campos-linea">
+                    <label>Peso: <input type="number" step="0.01" name="peso"></label>
+                    <label>Talla (m): <input type="number" step="0.01" name="talla" placeholder="1.70" min="0.50" max="2.30"></label>
+                    <label>P. Sistólica: <input type="number" name="presion_sistolica"></label>
+                    <label>P. Diastólica: <input type="number" name="presion_diastolica"></label>
+                    <label>HGT: <input type="number" step="0.01" name="hgt"></label>
+                    <label>CC: <input type="number" step="0.01" name="cc"></label>
+                    <label>HbA1c: <input type="number" step="0.01" name="hba1c"></label>
+                </div>
+            </fieldset>
+            
+            <div class="buttons-container">
+                <button type="submit">Guardar Usuario y Control</button>
+                <button type="button" class="btn-secondary" onclick="limpiarFormulario()">Limpiar Formulario</button>
+                <button type="button" class="btn-secondary" onclick="window.location.href='/'">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // ========= (1) Máscara RUN =========
+        function formatearRun(run) {
+            let v = run.replace(/[^0-9kK]/g, '').toUpperCase();
+            if (v.length > 1) {
+                const cuerpo = v.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                const dv = v.slice(-1);
+                return cuerpo + '-' + dv;
+            } else {
+                return v;
+            }
+        }
+
+        // ========= (2) Normalizar para API (12345678-9) =========
+        function normalizarRun(s) {
+            s = (s || "").toUpperCase().replace(/[^0-9K]/g, '');
+            if (s.length < 2) return s;
+            return s.slice(0, -1) + '-' + s.slice(-1);
+        }
+
+        // ========= (3) Validador DV =========
+        function dvValido(runNorm) {
+            const m = /^(\d{7,8})-([\dK])$/.exec(runNorm);
+            if (!m) return false;
+            const cuerpo = m[1], dv = m[2];
+            const factores = [2,3,4,5,6,7];
+            let s = 0;
+            for (let i = 0; i < cuerpo.length; i++) {
+                s += parseInt(cuerpo[cuerpo.length - 1 - i], 10) * factores[i % factores.length];
+            }
+            const resto = 11 - (s % 11);
+            const dvCalc = (resto === 11) ? '0' : (resto === 10) ? 'K' : String(resto);
+            return dv === dvCalc;
+        }
+
+        // ========= CÁLCULO DE RIESGO ECICEP =========
+        function calcularRiesgo() {
+            let total = 0;
+            document.querySelectorAll('.patologia-checkbox:checked').forEach(cb => {
+                total += parseInt(cb.getAttribute('data-points')) || 0;
+            });
+            
+            document.getElementById('total-puntos').textContent = total;
+            
+            let categoria = 'G0';
+            let colorCategoria = '#e9ecef';
+            
+            if (total === 1) {
+                categoria = 'G1';
+                colorCategoria = '#198754'; // Verde
+            } else if (total >= 2 && total <= 4) {
+                categoria = 'G2';
+                colorCategoria = '#ffc107'; // Amarillo
+            } else if (total >= 5) {
+                categoria = 'G3';
+                colorCategoria = '#dc3545'; // Rojo
+            }
+            
+            const categoriaElement = document.getElementById('categoria-resultado');
+            categoriaElement.textContent = categoria;
+            categoriaElement.style.backgroundColor = colorCategoria;
+            categoriaElement.style.color = (categoria === 'G2') ? '#000' : '#fff';
+        }
+
+        // ========= (4) Función para actualizar resumen de patologías =========
+        function actualizarResumenPatologias() {
+            const container = document.getElementById('patologias-badges');
+            if (!container) return; // Si no existe el contenedor, no hacer nada
+            
+            const checkboxes = document.querySelectorAll('input[name="patologia_id"]:checked');
+            
+            container.innerHTML = '';
+            
+            if (checkboxes.length === 0) {
+                container.innerHTML = '<span class="pat-empty">Sin patologías seleccionadas</span>';
+            } else {
+                checkboxes.forEach(cb => {
+                    const label = cb.parentElement.textContent.trim();
+                    const pnorm = label.toLowerCase();
+                    
+                    let clasePatologia = 'pat';
+                    if (pnorm.includes('diabet')) {
+                        clasePatologia += ' pat-diabetes';
+                    } else if (pnorm.includes('hipert')) {
+                        clasePatologia += ' pat-hta';
+                    } else if (pnorm.includes('dislip')) {
+                        clasePatologia += ' pat-dislipidemia';
+                    }
+                    
+                    const span = document.createElement('span');
+                    span.className = clasePatologia;
+                    span.textContent = label;
+                    container.appendChild(span);
+                });
+            }
+
+            // Habilitar solo si hay alguna patología relacionada con diabetes
+            try {
+                const hbaInput = document.querySelector('input[name="hba1c"]');
+                if (hbaInput) {
+                    const hasDiabetes = Array.from(checkboxes).some(cb => cb.parentElement.textContent.toLowerCase().includes('diabet'));
+                    hbaInput.disabled = !hasDiabetes;
+                }
+            } catch (e) {
+                // no hacer nada si algo falla aquí
+            }
+        }
+
+        function buscarUsuario(run) {
+            if (!run || run.length < 8) return;
+            
+            const loading = document.getElementById('loading');
+            const encontrado = document.getElementById('usuario-encontrado');
+            
+            loading.style.display = 'block';
+            encontrado.style.display = 'none';
+            
+            fetch('/usuario/buscar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ run: run })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.encontrado) {
+                    // Llenar los campos con los datos encontrados
+                    document.getElementById('nombre').value = data.nombre || '';
+                    document.getElementById('fecha_nacimiento').value = data.fecha_nacimiento || '';
+                    document.getElementById('direccion').value = data.direccion || '';
+                    document.getElementById('telefono').value = data.telefono || '';
+                    document.getElementById('fecha_ingreso').value = data.fecha_ingreso || '';
+                    document.getElementById('sexo').value = data.sexo || '';
+                    document.getElementById('categoria_id').value = data.categoria_id || '';
+                    document.getElementById('sector_id').value = data.sector_id || '';
+                    
+                    // Marcar patologías
+                    const checkboxes = document.querySelectorAll('input[name="patologia_id"]');
+                    checkboxes.forEach(cb => {
+                        cb.checked = data.patologias.includes(parseInt(cb.value));
+                    });
+                    
+                    // Actualizar resumen de patologías
+                    actualizarResumenPatologias();
+                    
+                    encontrado.style.display = 'block';
+                } else {
+                    // Limpiar campos si no se encuentra
+                    document.getElementById('nombre').value = '';
+                    document.getElementById('fecha_nacimiento').value = '';
+                    document.getElementById('direccion').value = '';
+                    document.getElementById('telefono').value = '';
+                    document.getElementById('fecha_ingreso').value = '';
+                    document.getElementById('sexo').value = '';
+                    document.getElementById('categoria_id').value = '';
+                    document.getElementById('sector_id').value = '';
+                    const checkboxes = document.querySelectorAll('input[name="patologia_id"]');
+                    checkboxes.forEach(cb => cb.checked = false);
+                    
+                    // Actualizar resumen de patologías (limpiar)
+                    actualizarResumenPatologias();
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                console.error('Error buscando usuario:', error);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const runInput = document.getElementById('run');
+            let timeoutId;
+            
+            // Función mejorada para manejar entrada del RUN con validación
+            function manejarBusquedaRun(e) {
+                // Aplicar máscara de formato
+                let v = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
+                if (v.length > 1) {
+                    const cuerpo = v.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                    const dv = v.slice(-1);
+                    e.target.value = cuerpo + '-' + dv;
+                } else {
+                    e.target.value = v;
+                }
+                
+                // Validar RUN si está completo
+                const runNormalizado = normalizarRun(e.target.value);
+                const runLimpio = e.target.value.replace(/[^0-9kK]/g, '');
+                
+                // Cambiar color según validación
+                if (runLimpio.length >= 8) {
+                    if (dvValido(runNormalizado)) {
+                        e.target.style.color = 'green';
+                        e.target.title = 'RUN válido';
+                        
+                        // Limpiar timeout anterior
+                        clearTimeout(timeoutId);
+                        
+                        // Buscar después de 500ms de inactividad
+                        timeoutId = setTimeout(() => {
+                            buscarUsuario(e.target.value);
+                        }, 500);
+                    } else {
+                        e.target.style.color = 'red';
+                        e.target.title = 'RUN inválido - Dígito verificador incorrecto';
+                    }
+                } else {
+                    e.target.style.color = '';
+                    e.target.title = '';
+                }
+            }
+            
+            // Eventos para RUN con validación
+            runInput.addEventListener('input', manejarBusquedaRun);
+            runInput.addEventListener('paste', function() {
+                setTimeout(() => {
+                    manejarBusquedaRun({ target: runInput });
+                }, 100); // Esperar que se complete el paste
+            });
+            runInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    const runNormalizado = normalizarRun(runInput.value);
+                    const runLimpio = runInput.value.replace(/[^0-9kK]/g, '');
+                    if (runLimpio.length >= 8 && dvValido(runNormalizado)) {
+                        buscarUsuario(runInput.value);
+                    }
+                }
+            });
+        });
+
+        // Función para limpiar el formulario
+        function limpiarFormulario() {
+            // Limpiar todos los inputs de texto, number, date
+            const inputs = document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]');
+            inputs.forEach(input => input.value = '');
+            
+            // Limpiar selects
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => select.selectedIndex = 0);
+            
+            // Desmarcar checkboxes (incluyendo patologías ECICEP)
+            const checkboxes = document.querySelectorAll('input[type="checkbox"], .patologia-checkbox');
+            checkboxes.forEach(checkbox => checkbox.checked = false);
+            
+            // Ocultar mensajes
+            const loading = document.getElementById('loading');
+            const encontrado = document.getElementById('usuario-encontrado');
+            if (loading) loading.style.display = 'none';
+            if (encontrado) encontrado.style.display = 'none';
+            
+            // Enfocar el primer campo (RUN)
+            const runInput = document.getElementById('run');
+            if (runInput) runInput.focus();
+            
+            // Actualizar cálculo de riesgo
+            if (typeof calcularRiesgo === 'function') {
+                calcularRiesgo();
+            }
+        }
+
+        // Función para validar rangos de valores médicos
+        function validarRangosMedicos() {
+            // Presión sistólica >= 140 (rojo)
+            const presionSistolica = document.querySelector('input[name="presion_sistolica"]');
+            if (presionSistolica) {
+                presionSistolica.addEventListener('input', function() {
+                    const valor = parseFloat(this.value);
+                    if (valor >= 140) {
+                        this.style.color = '#e53935';
+                        this.style.fontWeight = 'bold';
+                    } else {
+                        this.style.color = '';
+                        this.style.fontWeight = '';
+                    }
+                });
+            }
+
+            // Presión diastólica >= 90 (rojo)
+            const presionDiastolica = document.querySelector('input[name="presion_diastolica"]');
+            if (presionDiastolica) {
+                presionDiastolica.addEventListener('input', function() {
+                    const valor = parseFloat(this.value);
+                    if (valor >= 90) {
+                        this.style.color = '#e53935';
+                        this.style.fontWeight = 'bold';
+                    } else {
+                        this.style.color = '';
+                        this.style.fontWeight = '';
+                    }
+                });
+            }
+
+            // HbA1c >= 7 (rojo)
+            const hba1c = document.querySelector('input[name="hba1c"]');
+            if (hba1c) {
+                hba1c.addEventListener('input', function() {
+                    const valor = parseFloat(this.value);
+                    if (valor >= 7) {
+                        this.style.color = '#e53935';
+                        this.style.fontWeight = 'bold';
+                    } else {
+                        this.style.color = '';
+                        this.style.fontWeight = '';
+                    }
+                });
+            }
+
+            // HGT >= 130 (rojo)
+            const hgt = document.querySelector('input[name="hgt"]');
+            if (hgt) {
+                hgt.addEventListener('input', function() {
+                    const valor = parseFloat(this.value);
+                    if (valor >= 130) {
+                        this.style.color = '#e53935';
+                        this.style.fontWeight = 'bold';
+                    } else {
+                        this.style.color = '';
+                        this.style.fontWeight = '';
+                    }
+                });
+            }
+
+            // Talla >= 2.30 (rojo) - debe ser menor a 2.30
+            const talla = document.querySelector('input[name="talla"]');
+            if (talla) {
+                talla.addEventListener('input', function() {
+                    const valor = parseFloat(this.value);
+                    if (valor >= 2.30) {
+                        this.style.color = '#e53935';
+                        this.style.fontWeight = 'bold';
+                    } else {
+                        this.style.color = '';
+                        this.style.fontWeight = '';
+                    }
+                });
+            }
+        }
+
+        // Función para alternar categorías
+        function toggleCategoria(categoriaId) {
+            const content = document.getElementById('content-' + categoriaId);
+            const toggle = document.getElementById('toggle-' + categoriaId);
+            
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                toggle.textContent = '−';
+            } else {
+                content.classList.add('collapsed');
+                toggle.textContent = '+';
+            }
+        }
+
+        // Función para expandir todas las categorías
+        function expandirTodasCategorias() {
+            const categorias = [
+                'salud-mental',
+                'metabolicas-endocrinas', 
+                'cardiovasculares',
+                'respiratorias',
+                'renales-urologicas',
+                'digestivas',
+                'musculo-esqueleticas',
+                'neurologicas',
+                'inmunologicas-hematologicas',
+                'oftalmologicas',
+                'otorrinolaringologicas',
+                'socioeconomicas-psicosociales',
+                'funcionalidad-discapacidad',
+                'oncologicas',
+                'dermatologicas'
+            ];
+
+            categorias.forEach(categoriaId => {
+                const content = document.getElementById('content-' + categoriaId);
+                const toggle = document.getElementById('toggle-' + categoriaId);
+                
+                if (content && toggle) {
+                    content.classList.remove('collapsed');
+                    toggle.textContent = '−';
+                }
+            });
+        }
+
+        // Función para contraer todas las categorías
+        function contraerTodasCategorias() {
+            const categorias = [
+                'salud-mental',
+                'metabolicas-endocrinas',
+                'cardiovasculares', 
+                'respiratorias',
+                'renales-urologicas',
+                'digestivas',
+                'musculo-esqueleticas',
+                'neurologicas',
+                'inmunologicas-hematologicas',
+                'oftalmologicas',
+                'otorrinolaringologicas',
+                'socioeconomicas-psicosociales',
+                'funcionalidad-discapacidad',
+                'oncologicas',
+                'dermatologicas'
+            ];
+
+            categorias.forEach(categoriaId => {
+                const content = document.getElementById('content-' + categoriaId);
+                const toggle = document.getElementById('toggle-' + categoriaId);
+                
+                if (content && toggle) {
+                    content.classList.add('collapsed');
+                    toggle.textContent = '+';
+                }
+            });
+        }
+
+        // Función para expandir solo categorías con patologías seleccionadas
+        function expandirSoloSeleccionadas() {
+            const categorias = [
+                'salud-mental',
+                'metabolicas-endocrinas',
+                'cardiovasculares',
+                'respiratorias', 
+                'renales-urologicas',
+                'digestivas',
+                'musculo-esqueleticas',
+                'neurologicas',
+                'inmunologicas-hematologicas',
+                'oftalmologicas',
+                'otorrinolaringologicas',
+                'socioeconomicas-psicosociales',
+                'funcionalidad-discapacidad',
+                'oncologicas',
+                'dermatologicas'
+            ];
+
+            // Primero contraer todas
+            contraerTodasCategorias();
+
+            // Luego expandir solo las que tienen patologías seleccionadas
+            categorias.forEach(categoriaId => {
+                const content = document.getElementById('content-' + categoriaId);
+                const toggle = document.getElementById('toggle-' + categoriaId);
+                
+                if (content && toggle) {
+                    const checkboxes = content.querySelectorAll('.patologia-checkbox:checked');
+                    if (checkboxes.length > 0) {
+                        content.classList.remove('collapsed');
+                        toggle.textContent = '−';
+                    }
+                }
+            });
+        }
+
+        // Función para actualizar contadores de categorías
+        function actualizarContadoresCategorias() {
+            const categorias = [
+                'salud-mental',
+                'metabolicas-endocrinas',
+                'cardiovasculares',
+                'respiratorias',
+                'renales-urologicas',
+                'digestivas',
+                'musculo-esqueleticas',
+                'neurologicas',
+                'inmunologicas-hematologicas',
+                'oftalmologicas',
+                'otorrinolaringologicas',
+                'socioeconomicas-psicosociales',
+                'funcionalidad-discapacidad',
+                'oncologicas',
+                'dermatologicas'
+            ];
+
+            categorias.forEach(categoriaId => {
+                const content = document.getElementById('content-' + categoriaId);
+                const badge = document.getElementById('badge-' + categoriaId);
+                
+                if (content && badge) {
+                    const checkboxes = content.querySelectorAll('.patologia-checkbox:checked');
+                    const count = checkboxes.length;
+                    badge.textContent = count;
+                    badge.style.display = count > 0 ? 'inline' : 'none';
+                }
+            });
+        }
+
+        // Inicializar validaciones cuando la página esté lista
+        document.addEventListener('DOMContentLoaded', function() {
+            validarRangosMedicos();
+            
+            // Agregar event listeners a checkboxes de patologías ECICEP
+            const checkboxesPatologias = document.querySelectorAll('.patologia-checkbox');
+            checkboxesPatologias.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    calcularRiesgo();
+                    actualizarResumenPatologias();
+                    actualizarContadoresCategorias();
+                });
+            });
+            
+            // Inicializar cálculo de riesgo y contadores
+            calcularRiesgo();
+            actualizarContadoresCategorias();
+            
+            // Función para limpiar formulario también debe actualizar resumen y cálculo
+            const originalLimpiar = window.limpiarFormulario;
+            window.limpiarFormulario = function() {
+                if (originalLimpiar) originalLimpiar();
+                
+                // Limpiar checkboxes de patologías ECICEP
+                document.querySelectorAll('.patologia-checkbox').forEach(cb => cb.checked = false);
+                
+                calcularRiesgo();
+                actualizarResumenPatologias();
+                actualizarContadoresCategorias();
+            };
+        });
+    </script>
+</body>
+</html>

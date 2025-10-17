@@ -1,0 +1,23 @@
+<section id="{{ id_root|default('mod-alertas') }}" class="card">
+  <div class="card-header"><h3 class="card-title">Alertas de vigencia</h3></div>
+  <div class="card-body">
+    <div class="alerts-tabs">
+      <button class="alert-tab active" data-target="alert-examenes">
+        Exámenes
+      </button>
+      <button class="alert-tab" data-target="alert-screening">Screening</button>
+      <button class="alert-tab" data-target="alert-tratamientos">
+        Tratamientos
+      </button>
+      <button class="alert-tab" data-target="alert-cardiovascular">
+        Cardiovascular
+      </button>
+    </div>
+    <div class="alerts-content">
+      <div id="alert-examenes" class="alert-category active"></div>
+      <div id="alert-screening" class="alert-category"></div>
+      <div id="alert-tratamientos" class="alert-category"></div>
+      <div id="alert-cardiovascular" class="alert-category"></div>
+    </div>
+  </div>
+</section>

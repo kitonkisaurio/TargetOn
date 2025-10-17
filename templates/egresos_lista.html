@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista de Egresos - ECICEP 2025</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body {
+        font-size: 13px;
+      }
+      .navbar-brand img {
+        height: 36px;
+      }
+      .table-responsive {
+        border-radius: 0.375rem;
+      }
+      .badge-fallecimiento {
+        background-color: #dc3545;
+      }
+      .badge-traslado {
+        background-color: #fd7e14;
+      }
+      .card {
+        border-left: 4px solid #0d6efd;
+      }
+      .badge-sector-amarillo {
+        background-color: #fde047;
+        color: #1f2937;
+      }
+      .badge-sector-trespinos {
+        background-color: #1d4ed8;
+        color: #fff;
+      }
+      .badge-sector-antihuala {
+        background-color: #38bdf8;
+        color: #1f2937;
+      }
+      .badge-sector-verde {
+        background-color: #16a34a;
+        color: #fff;
+      }
+      .badge-sector-pangue {
+        background-color: #86efac;
+        color: #1f2937;
+      }
+      .badge-sector-rojo {
+        background-color: #dc2626;
+        color: #fff;
+      }
+      .badge-sector-ranquilco {
+        background-color: #22c55e;
+        color: #fff;
+      }
+      .badge-sector-default {
+        background-color: #e5e7eb;
+        color: #111827;
+      }
+      .badge-categoria-1,
+      .badge-categoria-g1 {
+        background-color: #16a34a;
+        color: #fff;
+      }
+      .badge-categoria-2,
+      .badge-categoria-g2 {
+        background-color: #fde047;
+        color: #78350f;
+      }
+      .badge-categoria-3,
+      .badge-categoria-g3 {
+        background-color: #dc2626;
+        color: #fff;
+      }
+      .badge-categoria-4 {
+        background-color: #fd7e14;
+        color: #fff;
+      }
+      .badge-categoria-5 {
+        background-color: #198754;
+        color: #fff;
+      }
+      .badge-categoria-default {
+        background-color: #adb5bd;
+        color: #fff;
+      }
+      .grupo-g1 {
+        background: #16a34a;
+        color: #fff;
+        border-radius: 6px;
+        padding: 2px 7px;
+        font-weight: 600;
+        display: inline-block;
+      }
+      .grupo-g2 {
+        background: #fde047;
+        color: #78350f;
+        border-radius: 6px;
+        padding: 2px 7px;
+        font-weight: 600;
+        display: inline-block;
+      }
+      .grupo-g3 {
+        background: #dc2626;
+        color: #fff;
+        border-radius: 6px;
+        padding: 2px 7px;
+        font-weight: 600;
+        display: inline-block;
+      }
+      .nowrap {
+        white-space: nowrap;
+      }
+      th,
+      td {
+        font-size: 13px !important;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img src="/static/logo_ecicep.jpg" alt="ECICEP" class="me-2" />
+          <span>ECICEP 2025</span>
+        </a>
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link" href="/">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Inicio</title>
+              <path
+                d="M12 3l8 6v11a1 1 0 0 1-1 1h-5v-7H10v7H5a1 1 0 0 1-1-1V9l8-6z"
+              />
+            </svg>
+            Inicio
+          </a>
+          <a class="nav-link" href="/estadisticas">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Estadísticas</title>
+              <path
+                d="M3 3h3v18H3V3zm6 6h3v12H9V9zm6-4h3v16h-3V5zm6 8h3v8h-3v-8z"
+              />
+            </svg>
+            Estadísticas
+          </a>
+          <a class="nav-link" href="/usuario/nuevo">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Nuevo Usuario</title>
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              />
+            </svg>
+            Nuevo Usuario
+          </a>
+          {% if session.is_admin %}
+          <a
+            class="nav-link text-warning"
+            href="{{ url_for('admin.admin_usuarios') }}"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #ffc107;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Admin Usuarios</title>
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              />
+            </svg>
+            Admin Usuarios
+          </a>
+          {% endif %}
+          <a class="nav-link" href="/egresos">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Egresos</title>
+              <path
+                d="M3 5v14a2 2 0 0 0 2 2h14V5H3zm4 2h10v2H7V7zm0 4h10v2H7v-2z"
+              />
+            </svg>
+            Egresos
+          </a>
+          <a class="nav-link active" href="/egresos/listar">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Lista Egresos</title>
+              <path d="M3 3h18v2H3V3zm0 6h18v2H3V9zm0 6h18v2H3v-2z" />
+            </svg>
+            Lista Egresos
+          </a>
+          <a class="nav-link" href="/logout">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Salir</title>
+              <path
+                d="M16 13v-2H7V8l-5 4 5 4v-3h9zM20 3h-8v2h8v14h-8v2h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"
+              />
+            </svg>
+            Salir
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+      <div class="card shadow">
+        <div
+          class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+        >
+          <h4 class="mb-0">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1.15rem;
+                height: 1.15rem;
+                vertical-align: -0.12em;
+                margin-right: 8px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Lista de Egresos</title>
+              <path d="M3 3h18v2H3V3zm0 6h18v2H3V9zm0 6h18v2H3v-2z" />
+            </svg>
+            Lista de Egresos
+          </h4>
+          <a href="/egresos" class="btn btn-light btn-sm">➕ Nuevo Egreso</a>
+        </div>
+        <div class="card-body p-0">
+          {% if egresos %}
+          <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0">
+              <thead class="table-dark">
+                <tr>
+                  <th>RUN</th>
+                  <th>Nombre</th>
+                  <th>Causa Egreso</th>
+                  <th>Fecha Egreso</th>
+                  <th>Edad</th>
+                  <th>Sexo</th>
+                  <th>Categoría</th>
+                  <th>Sector</th>
+                  <th>Grupo Etáreo</th>
+                  <th>Fecha Ingreso</th>
+                  <th>Registrado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for egreso in egresos %}
+                <tr>
+                  <td class="text-monospace nowrap">{{ egreso.run }}</td>
+                  <td>{{ egreso.nombre or '-' }}</td>
+                  <td>
+                    {% if egreso.causa_egreso == 'Fallecimiento' %}
+                    <span class="badge badge-fallecimiento"
+                      >💀 Fallecimiento</span
+                    >
+                    {% elif egreso.causa_egreso == 'Traslado' %}
+                    <span class="badge badge-traslado">🏥 Traslado</span>
+                    {% else %}
+                    <span class="badge bg-secondary"
+                      >{{ egreso.causa_egreso }}</span
+                    >
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if egreso.fecha_egreso %} {{
+                    egreso.fecha_egreso.strftime('%d/%m/%Y') }} {% else %} - {%
+                    endif %}
+                  </td>
+                  <td>{{ egreso.edad_egreso or '-' }}</td>
+                  <td>
+                    {% if egreso.sexo %} {% if egreso.sexo.lower() ==
+                    'masculino' %}
+                    <span class="text-primary">♂ M</span>
+                    {% elif egreso.sexo.lower() == 'femenino' %}
+                    <span class="text-danger">♀ F</span>
+                    {% else %} {{ egreso.sexo }} {% endif %} {% else %} - {%
+                    endif %}
+                  </td>
+                  <td>
+                    {% if egreso.categoria_nombre %} {% set cat_norm =
+                    egreso.categoria_nombre|lower|trim %}
+                    <span
+                      class="badge {% if cat_norm.startswith('g1') or cat_norm == '1' %}badge-categoria-g1 {% elif cat_norm.startswith('g2') or cat_norm == '2' %}badge-categoria-g2 {% elif cat_norm.startswith('g3') or cat_norm == '3' %}badge-categoria-g3 {% elif '4' in cat_norm or 'd' in cat_norm %}badge-categoria-4 {% elif '5' in cat_norm or 'e' in cat_norm %}badge-categoria-5 {% else %}badge-categoria-default{% endif %}"
+                    >
+                      {{ egreso.categoria_nombre }}
+                    </span>
+                    {% else %} - {% endif %}
+                  </td>
+                  <td>
+                    {% if egreso.sector_nombre %} {% set sector_norm =
+                    egreso.sector_nombre|trim|upper %}
+                    <span
+                      class="badge {% if sector_norm == 'AMARILLO' %}badge-sector-amarillo {% elif sector_norm == 'TRES PINOS' %}badge-sector-trespinos {% elif sector_norm == 'ANTIHUALA' %}badge-sector-antihuala {% elif sector_norm == 'VERDE' %}badge-sector-verde {% elif sector_norm == 'PANGUE' %}badge-sector-pangue {% elif sector_norm == 'ROJO' %}badge-sector-rojo {% elif sector_norm == 'RANQUILCO' %}badge-sector-ranquilco {% else %}badge-sector-default{% endif %}"
+                    >
+                      {{ egreso.sector_nombre }}
+                    </span>
+                    {% else %} - {% endif %}
+                  </td>
+                  <td>
+                    {% if egreso.grupo_etareo %} {% set grupo =
+                    egreso.grupo_etareo|string|lower|trim %} {% if
+                    grupo.startswith('g1') %}
+                    <span class="grupo-g1">{{ egreso.grupo_etareo }}</span>
+                    {% elif grupo.startswith('g2') %}
+                    <span class="grupo-g2">{{ egreso.grupo_etareo }}</span>
+                    {% elif grupo.startswith('g3') %}
+                    <span class="grupo-g3">{{ egreso.grupo_etareo }}</span>
+                    {% else %}
+                    <small class="text-muted">{{ egreso.grupo_etareo }}</small>
+                    {% endif %} {% else %} - {% endif %}
+                  </td>
+                  <td>
+                    {% if egreso.fecha_ingreso %}
+                    <small
+                      >{{ egreso.fecha_ingreso.strftime('%d/%m/%Y') }}</small
+                    >
+                    {% else %} - {% endif %}
+                  </td>
+                  <td>
+                    {% if egreso.registrado_en %}
+                    <small class="text-muted"
+                      >{{ egreso.registrado_en.strftime('%d/%m/%Y') }}</small
+                    >
+                    {% else %} - {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <div class="mb-3">
+              <i class="display-1 text-muted"
+                ><svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  style="width: 2.4rem; height: 2.4rem; color: #c7c9cc"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <title>Lista vacía</title>
+                  <path d="M3 3h18v2H3V3zm0 6h18v2H3V9zm0 6h18v2H3v-2z" /></svg
+              ></i>
+            </div>
+            <h5 class="text-muted">No hay egresos registrados</h5>
+            <p class="text-muted">Los egresos registrados aparecerán aquí.</p>
+            <a href="/egresos" class="btn btn-primary"
+              >➕ Registrar primer egreso</a
+            >
+          </div>
+          {% endif %}
+        </div>
+        {% if egresos %}
+        <div class="card-footer text-muted text-center">
+          <small>Mostrando los últimos 100 egresos registrados</small>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

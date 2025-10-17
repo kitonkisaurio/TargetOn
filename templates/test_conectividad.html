@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Test Servidor</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+  </head>
+  <body>
+    <h1>Test de Conectividad</h1>
+    <div id="resultado"></div>
+    <script>
+      console.log("🚀 Iniciando test...");
+
+      // Test 1: Endpoint básico
+      fetch("/api/test")
+        .then((response) => {
+          console.log("✅ Test básico:", response.status);
+          return response.json();
+        })
+        .then((data) => {
+          console.log("📊 Test básico data:", data);
+          document.getElementById("resultado").innerHTML +=
+            "<p>✅ Servidor básico: OK</p>";
+        })
+        .catch((error) => {
+          console.error("❌ Test básico error:", error);
+          document.getElementById("resultado").innerHTML +=
+            "<p>❌ Servidor básico: ERROR</p>";
+        });
+
+      // Test 2: Endpoint de patologías
+      fetch("/api/patologias/83711868")
+        .then((response) => {
+          console.log("✅ Test patologías:", response.status);
+          return response.json();
+        })
+        .then((data) => {
+          console.log("📊 Test patologías data:", data);
+          document.getElementById("resultado").innerHTML +=
+            "<p>✅ Patologías: " + data.total + " encontradas</p>";
+        })
+        .catch((error) => {
+          console.error("❌ Test patologías error:", error);
+          document.getElementById("resultado").innerHTML +=
+            "<p>❌ Patologías: ERROR</p>";
+        });
+    </script>
+  </body>
+</html>

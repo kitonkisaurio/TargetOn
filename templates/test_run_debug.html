@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <title>🔧 Test RUN Formatter - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 600px;
+      }
+      .test-field {
+        margin: 15px 0;
+      }
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      input {
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        width: 200px;
+        font-size: 16px;
+      }
+      .run-valid {
+        border-color: #28a745;
+        background: #d4edda;
+      }
+      .run-invalid {
+        border-color: #dc3545;
+        background: #f8d7da;
+      }
+      .result {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+        background: #f8f9fa;
+      }
+      .btn {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .logs {
+        background: #1e1e1e;
+        color: #00ff00;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Test RUN Formatter - Funciones JavaScript</h1>
+
+      <div class="test-field">
+        <label>🆔 Ingrese RUN para probar:</label>
+        <input
+          type="text"
+          id="run-test"
+          placeholder="Ej: 100001411"
+          maxlength="13"
+        />
+        <button class="btn" onclick="testRun()">🔍 Probar</button>
+      </div>
+
+      <div id="results" class="result" style="display: none">
+        <h3>📊 Resultados:</h3>
+        <div id="result-content"></div>
+      </div>
+
+      <div class="test-field">
+        <button class="btn" onclick="testBusqueda()">
+          🌐 Test Búsqueda Usuario
+        </button>
+        <button class="btn" onclick="clearLogs()">🗑️ Limpiar Logs</button>
+      </div>
+
+      <div class="logs" id="logs">Logs aparecerán aquí...</div>
+    </div>
+
+    <script>
+      // ===== FUNCIONES DE RUN (COPIADAS DEL FORMULARIO ORIGINAL) =====
+
+      // Función para normalizar RUN
+      function normalizarRun(s) {
+        s = (s || "").toUpperCase().replace(/[^0-9K]/g, "");
+        if (s.length < 2) return s;
+        return s.slice(0, -1) + "-" + s.slice(-1);
+      }
+
+      // Función para validar dígito verificador
+      function dvValido(runNorm) {
+        runNorm = (runNorm || "").toUpperCase();
+        const m = /^(\d{7,8})-([\dK])$/.exec(runNorm);
+        if (!m) return false;
+
+        const cuerpo = m[1];
+        const dv = m[2];
+
+        const factores = [2, 3, 4, 5, 6, 7];
+        let s = 0;
+        for (let i = 0; i < cuerpo.length; i++) {
+          const dig = parseInt(cuerpo[cuerpo.length - 1 - i], 10);
+          s += dig * factores[i % factores.length];
+        }
+        const resto = 11 - (s % 11);
+        const dvCalc = resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+        return dv === dvCalc;
+      }
+
+      // Función para formatear RUN con puntos
+      function formatearRun(valor) {
+        let v = valor.replace(/[^0-9kK]/g, "").toUpperCase();
+
+        if (v.length >= 2) {
+          const cuerpo = v.slice(0, -1);
+          const dv = v.slice(-1);
+          const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          return cuerpoFormateado + "-" + dv;
+        } else {
+          return v;
+        }
+      }
+
+      // ===== FUNCIONES DE TEST =====
+
+      let logs = [];
+
+      function addLog(mensaje, tipo = "info") {
+        const timestamp = new Date().toLocaleTimeString();
+        const emoji =
+          tipo === "error"
+            ? "❌"
+            : tipo === "success"
+              ? "✅"
+              : tipo === "warning"
+                ? "⚠️"
+                : "ℹ️";
+        const logEntry = `[${timestamp}] ${emoji} ${mensaje}`;
+        logs.push(logEntry);
+        updateLogs();
+      }
+
+      function updateLogs() {
+        document.getElementById("logs").textContent = logs
+          .slice(-20)
+          .join("\\n");
+        document.getElementById("logs").scrollTop =
+          document.getElementById("logs").scrollHeight;
+      }
+
+      function clearLogs() {
+        logs = [];
+        updateLogs();
+      }
+
+      function testRun() {
+        const input = document.getElementById("run-test");
+        const runValue = input.value.trim();
+
+        addLog(`Test iniciado con RUN: "${runValue}"`);
+
+        if (!runValue) {
+          addLog("RUN vacío", "error");
+          return;
+        }
+
+        try {
+          // Test formateo
+          const formateado = formatearRun(runValue);
+          addLog(`RUN formateado: "${formateado}"`);
+          input.value = formateado;
+
+          // Test normalización
+          const normalizado = normalizarRun(formateado);
+          addLog(`RUN normalizado: "${normalizado}"`);
+
+          // Test validación
+          const runLimpio = formateado.replace(/[^0-9kK]/g, "");
+          addLog(`RUN limpio: "${runLimpio}" (${runLimpio.length} chars)`);
+
+          if (runLimpio.length >= 8) {
+            const esValido = dvValido(normalizado);
+            addLog(
+              `Validación DV: ${esValido ? "VÁLIDO" : "INVÁLIDO"}`,
+              esValido ? "success" : "error",
+            );
+
+            // Cambiar estilo visual
+            input.classList.remove("run-valid", "run-invalid");
+            input.classList.add(esValido ? "run-valid" : "run-invalid");
+
+            // Mostrar resultados
+            const results = document.getElementById("results");
+            const content = document.getElementById("result-content");
+            content.innerHTML = `
+                        <div><strong>RUN Original:</strong> ${runValue}</div>
+                        <div><strong>RUN Formateado:</strong> ${formateado}</div>
+                        <div><strong>RUN Normalizado:</strong> ${normalizado}</div>
+                        <div><strong>RUN Limpio:</strong> ${runLimpio}</div>
+                        <div><strong>Longitud:</strong> ${runLimpio.length} caracteres</div>
+                        <div><strong>Validación:</strong> <span style="color: ${esValido ? "green" : "red"}">${esValido ? "✅ VÁLIDO" : "❌ INVÁLIDO"}</span></div>
+                    `;
+            results.style.display = "block";
+          } else {
+            addLog("RUN muy corto para validar", "warning");
+            input.classList.remove("run-valid", "run-invalid");
+          }
+        } catch (error) {
+          addLog(`Error en test: ${error.message}`, "error");
+        }
+      }
+
+      function testBusqueda() {
+        const input = document.getElementById("run-test");
+        const runValue = input.value.trim();
+
+        if (!runValue) {
+          addLog("Ingrese un RUN para probar búsqueda", "error");
+          return;
+        }
+
+        addLog(`Iniciando búsqueda para RUN: ${runValue}`);
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ run: runValue }),
+        })
+          .then((response) => {
+            addLog(`Respuesta del servidor: ${response.status}`);
+            return response.json();
+          })
+          .then((data) => {
+            addLog(
+              `Datos recibidos: ${JSON.stringify(data).substring(0, 100)}...`,
+            );
+            if (data.nombre) {
+              addLog(`Usuario encontrado: ${data.nombre}`, "success");
+            } else if (data.error) {
+              addLog(`Error en búsqueda: ${data.error}`, "error");
+            } else {
+              addLog("Usuario no encontrado", "warning");
+            }
+          })
+          .catch((error) => {
+            addLog(`Error en fetch: ${error.message}`, "error");
+          });
+      }
+
+      // ===== EVENTOS =====
+
+      document.addEventListener("DOMContentLoaded", function () {
+        addLog("Test de RUN cargado correctamente", "success");
+
+        const input = document.getElementById("run-test");
+        input.addEventListener("input", function (e) {
+          // Aplicar formateo automático mientras escribe
+          const valor = e.target.value;
+          const formateado = formatearRun(valor);
+          if (formateado !== valor) {
+            e.target.value = formateado;
+          }
+        });
+
+        input.addEventListener("keyup", function (e) {
+          if (e.key === "Enter") {
+            testRun();
+          }
+        });
+      });
+
+      addLog("Script de test cargado", "success");
+    </script>
+  </body>
+</html>

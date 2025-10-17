@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Descargar Listado de Patologías - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f8fafc;
+      }
+      .container {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 3px solid #3b82f6;
+        padding-bottom: 20px;
+      }
+      .header h1 {
+        color: #1f2937;
+        margin: 0;
+        font-size: 28px;
+      }
+      .header p {
+        color: #6b7280;
+        margin: 8px 0 0 0;
+        font-size: 16px;
+      }
+      .download-section {
+        margin: 20px 0;
+        padding: 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f9fafb;
+      }
+      .download-section h2 {
+        margin-top: 0;
+        color: #374151;
+        font-size: 20px;
+      }
+      .download-button {
+        display: inline-block;
+        background: #3b82f6;
+        color: white;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: 600;
+        margin: 8px 8px 8px 0;
+        transition: background-color 0.2s;
+      }
+      .download-button:hover {
+        background: #2563eb;
+      }
+      .download-button.csv {
+        background: #059669;
+      }
+      .download-button.csv:hover {
+        background: #047857;
+      }
+      .download-button.json {
+        background: #dc2626;
+      }
+      .download-button.json:hover {
+        background: #b91c1c;
+      }
+      .info-box {
+        background: #dbeafe;
+        border: 1px solid #93c5fd;
+        border-radius: 6px;
+        padding: 16px;
+        margin: 20px 0;
+      }
+      .info-box h3 {
+        margin-top: 0;
+        color: #1e40af;
+      }
+      .info-box ul {
+        margin-bottom: 0;
+        color: #1e3a8a;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin: 20px 0;
+      }
+      .stat-card {
+        background: #f3f4f6;
+        padding: 16px;
+        border-radius: 8px;
+        text-align: center;
+      }
+      .stat-number {
+        font-size: 32px;
+        font-weight: bold;
+        color: #3b82f6;
+      }
+      .stat-label {
+        color: #6b7280;
+        font-size: 14px;
+        margin-top: 4px;
+      }
+      .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #3b82f6;
+        text-decoration: none;
+      }
+      .back-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📋 Listado de Patologías</h1>
+        <p>
+          Descarga el listado completo categorizado por familias y diagnósticos
+        </p>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number">268</div>
+          <div class="stat-label">Patologías totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">16</div>
+          <div class="stat-label">Categorías</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">39</div>
+          <div class="stat-label">Familias</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <h3>📊 Contenido del listado</h3>
+        <ul>
+          <li>
+            <strong>Categoría:</strong> Agrupación principal (ej: PATOLOGÍAS
+            CARDIOVASCULARES)
+          </li>
+          <li>
+            <strong>Familia:</strong> Subgrupo específico (ej: Hipertensión,
+            Diabetes mellitus)
+          </li>
+          <li>
+            <strong>Código CIE10:</strong> Código internacional de clasificación
+          </li>
+          <li><strong>ID Checkbox:</strong> Identificador del formulario</li>
+          <li>
+            <strong>Diagnóstico:</strong> Descripción completa de la patología
+          </li>
+        </ul>
+      </div>
+
+      <div class="download-section">
+        <h2>💾 Descargar en formato CSV</h2>
+        <p>
+          Ideal para abrir en Excel, Google Sheets o cualquier programa de hojas
+          de cálculo.
+        </p>
+        <a
+          href="/api/descargar-listado-patologias/csv"
+          class="download-button csv"
+        >
+          📊 Descargar CSV
+        </a>
+      </div>
+
+      <div class="download-section">
+        <h2>🔧 Descargar en formato JSON</h2>
+        <p>Ideal para desarrolladores y sistemas de información.</p>
+        <a
+          href="/api/descargar-listado-patologias/json"
+          class="download-button json"
+        >
+          💻 Descargar JSON
+        </a>
+      </div>
+
+      <div class="info-box">
+        <h3>ℹ️ Información adicional</h3>
+        <ul>
+          <li>Los archivos se generan automáticamente con timestamp</li>
+          <li>
+            El formato CSV incluye encabezados y está optimizado para Excel
+          </li>
+          <li>El formato JSON es estructurado y listo para APIs</li>
+          <li>
+            Los datos se extraen directamente del formulario de patologías
+          </li>
+        </ul>
+      </div>
+
+      <a href="/usuario/nuevo" class="back-link"
+        >← Volver al formulario de usuario</a
+      >
+    </div>
+  </body>
+</html>

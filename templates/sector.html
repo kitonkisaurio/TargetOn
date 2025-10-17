@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>
+      {% if sector and sector.nombre %} {{ sector.nombre }} {% elif
+      sector_nombre %} {{ sector_nombre }} {% elif sector and sector.id %}
+      Sector ID {{ sector.id }} {% elif sector_id %} Sector ID {{ sector_id }}
+      {% else %} Planilla por sector {% endif %}
+    </title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/semaforos.css" />
+    <style>
+      :root {
+        --bg: #f8fafc;
+      }
+      body {
+        background: var(--bg);
+      }
+      .table thead th {
+        white-space: nowrap;
+        padding: 8px 4px;
+      }
+      .table tbody td {
+        padding: 8px 4px;
+      }
+      .nowrap {
+        white-space: nowrap;
+      }
+      .header-actions {
+        gap: 0.5rem;
+      }
+      .col-nombre {
+        min-width: 280px;
+        white-space: nowrap;
+      }
+      .table {
+        min-width: 100%;
+      }
+      .table th,
+      .table td {
+        font-size: 0.85rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid px-5 py-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <a class="btn btn-link p-0" href="{{ url_for('index') }}">← Volver</a>
+          <h3 class="m-0">Planilla de usuarios del sector</h3>
+          <div class="text-muted">
+            Sector:
+            <strong>
+              {% if sector and sector.nombre %} {{ sector.nombre }} {% elif
+              sector_nombre %} {{ sector_nombre }} {% else %} ID {{ (sector.id
+              if sector and sector.id else sector_id) }} {% endif %}
+            </strong>
+            <br />
+            <span class="badge bg-primary">{{ items|length }} usuarios</span>
+          </div>
+        </div>
+
+        <div class="d-flex header-actions">
+          <!-- Botón Excel por sector -->
+          <a
+            class="btn btn-success btn-sm"
+            href="{{ url_for('excel_sector', sector_id=(sector.id if sector and sector.id else sector_id)) }}"
+            target="_blank"
+            title="Descargar Excel"
+          >
+            Descargar Excel
+          </a>
+          <a
+            class="btn btn-outline-secondary btn-sm"
+            href="{{ url_for('logout') }}"
+            >Cerrar sesión</a
+          >
+        </div>
+      </div>
+
+      {% if error %}
+      <div class="alert alert-danger">{{ error }}</div>
+      {% endif %} {% set mapa = { 1:'ROJO', 2:'ANTIHUALA', 3:'TRES PINOS',
+      4:'PANGUE', 5:'RANQUILCO', 6:'AMARILLO', 7:'VERDE' } %}
+
+      <div class="table-responsive">
+        <table class="table table-striped table-hover table-sm align-middle">
+          <thead class="table-light">
+            <tr>
+              <th class="nowrap">RUN</th>
+              <th class="col-nombre">Nombre</th>
+              <th class="nowrap">Ingreso</th>
+              <th>Sexo</th>
+              <th class="nowrap">Cat</th>
+              <th>Grupo</th>
+              <th>Sector</th>
+              <th class="nowrap">Últ. control</th>
+              <th class="nowrap">Profesional</th>
+              <th class="nowrap">IMC</th>
+              <th class="nowrap">PA</th>
+              <th class="nowrap">Pie DM</th>
+              <th class="nowrap">Detalle</th>
+              <th class="text-center" style="width: 60px">AM</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for it in items %} {% set sector_txt = it.sector_nombre or
+            mapa.get(it.sector_id) or it.sector_id %}
+            <tr data-run="{{ it.run | replace('.','') | replace('-','') }}">
+              <td class="nowrap">{{ it.run }}</td>
+              <td class="col-nombre">{{ it.nombre }}</td>
+              <td class="nowrap">
+                {% if it.fecha_ingreso %}{{ (it.fecha_ingreso|string)[:10] }}{%
+                endif %}
+              </td>
+              <td>{{ it.sexo }}</td>
+              <td class="nowrap">{{ it.categoria_nombre or it.categoria_id }}</td>
+              <td>{{ it.grupo_etareo or '' }}</td>
+              <td>{{ sector_txt }}</td>
+              <td class="nowrap">
+                {% if it.ultima_fecha_control %}{{
+                (it.ultima_fecha_control|string)[:10] }}{% endif %}
+              </td>
+              <td class="nowrap">{{ it.ultimo_profesional or '' }}</td>
+              <td class="nowrap">{{ it.imc or '' }}</td>
+              <td class="nowrap">
+                {{ (it.presion_sistolica if it.presion_sistolica is not none
+                else '') }} / {{ (it.presion_diastolica if it.presion_diastolica
+                is not none else '') }}
+              </td>
+              <td class="nowrap piedm-cell">
+                <span class="piedm-list-semaforo" title="Sin datos"></span>
+              </td>
+              <td class="nowrap">
+                <a
+                  class="btn btn-outline-secondary btn-sm"
+                  href="{{ url_for('usuario_detalle', run=(it.run | replace('.','') | replace('-',''))) }}"
+                  target="_blank"
+                  >Ver</a
+                >
+                <a
+                  class="btn btn-outline-success btn-sm ms-1"
+                  href="{{ url_for('excel_usuario', run=(it.run | replace('.','') | replace('-',''))) }}"
+                  target="_blank"
+                  >Excel</a
+                >
+              </td>
+              <td data-piedm style="text-align: center">
+                <span class="sem-dot" data-piedm-dot></span>
+              </td>
+              <td data-am style="text-align: center">
+                <span class="sem-dot" data-am-dot></span>
+              </td>
+            </tr>
+            {% endfor %} {% if not items %}
+            <tr>
+              <td colspan="13" class="text-muted">
+                Sin usuarios en este sector.
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      /* ============================================================
+         ratefetch.js — Defensa anti-429
+         - Limita concurrencia (MAX_CONCURRENCY)
+         - Reintenta 429/503 con backoff exponencial
+         - Respeta Retry-After
+         - Desduplica requests idénticas en vuelo
+         ============================================================ */
+
+      (function () {
+        const MAX_CONCURRENCY = 6; // ajusta según tu API/CDN
+        const MAX_RETRIES = 5;
+        const BASE_DELAY_MS = 400; // backoff base
+        const IN_FLIGHT = new Map(); // dedupe por URL+options
+        let running = 0;
+        const queue = [];
+
+        function sleep(ms) {
+          return new Promise((r) => setTimeout(r, ms));
+        }
+
+        function keyFrom(input, init) {
+          // Genera clave de dedupe simple; si pasas headers dinámicos, añade aquí
+          const url = typeof input === "string" ? input : input.url || "";
+          const m =
+            (init && init.method) ||
+            (typeof input !== "string" && input.method) ||
+            "GET";
+          const body = (init && init.body) || "";
+          return m + " " + url + " " + (typeof body === "string" ? body : "");
+        }
+
+        async function run(task) {
+          running++;
+          try {
+            const res = await task();
+            return res;
+          } finally {
+            running--;
+            tick();
+          }
+        }
+
+        function tick() {
+          while (running < MAX_CONCURRENCY && queue.length) {
+            const next = queue.shift();
+            run(next.exec).then(next.resolve, next.reject);
+          }
+        }
+
+        async function rateLimitedFetch(input, init = {}, attempt = 0) {
+          // Dedupe: si ya hay request idéntica, cuélgate de ella
+          const key = keyFrom(input, init);
+          if (IN_FLIGHT.has(key)) return IN_FLIGHT.get(key);
+
+          let resolveOuter, rejectOuter;
+          const p = new Promise((res, rej) => {
+            resolveOuter = res;
+            rejectOuter = rej;
+          });
+          IN_FLIGHT.set(key, p);
+
+          const exec = async () => {
+            try {
+              const resp = await window._nativeFetch(input, init);
+              if (resp.status === 429 || resp.status === 503) {
+                if (attempt >= MAX_RETRIES) return resp; // permite que el caller maneje error final
+                const retryAfter = resp.headers.get("Retry-After");
+                let wait = retryAfter
+                  ? Number(retryAfter) * 1000
+                  : Math.round(
+                      BASE_DELAY_MS * Math.pow(2, attempt) * (1 + Math.random())
+                    );
+                // Evita “stampede”
+                wait = Math.min(wait, 8000);
+                await sleep(wait);
+                return rateLimitedFetch(input, init, attempt + 1);
+              }
+              return resp;
+            } catch (err) {
+              // Reintenta redes intermitentes
+              if (attempt < MAX_RETRIES) {
+                const wait = Math.round(
+                  BASE_DELAY_MS * Math.pow(2, attempt) * (1 + Math.random())
+                );
+                await sleep(wait);
+                return rateLimitedFetch(input, init, attempt + 1);
+              }
+              throw err;
+            } finally {
+              // Limpia dedupe sólo cuando termina en este nivel (no en recursivo)
+              if (attempt === 0) IN_FLIGHT.delete(key);
+            }
+          };
+
+          // Encola
+          queue.push({ exec, resolve: resolveOuter, reject: rejectOuter });
+          tick();
+          return p;
+        }
+
+        // Engancha fetch global
+        if (!window._nativeFetch) {
+          window._nativeFetch = window.fetch.bind(window);
+          window.fetch = rateLimitedFetch;
+        }
+      })();
+    </script>
+    <script>
+      (function () {
+        // Quitar estilos inline previos y usar semaforos.css
+        const filas = [...document.querySelectorAll("tr[data-run]")];
+        if (!filas.length) return;
+        const runs = filas.map((tr) => tr.getAttribute("data-run"));
+        async function cargarPieDm(run, span) {
+          try {
+            const r = await fetch("/api/examenes/pie_dm/" + run);
+            const d = await r.json();
+            if (!d.success || !d.found) {
+              span.title = "Sin evaluación Pie DM";
+              return;
+            }
+            const info = d.data;
+            const nivel = (info.riesgo_nivel || "").toLowerCase();
+            if (nivel) span.classList.add("sem-piedm-" + nivel);
+            span.title = "Pie DM " + nivel.toUpperCase();
+            if (info.proxima_evaluacion) {
+              const hoy = new Date();
+              hoy.setHours(0, 0, 0, 0);
+              const prox = new Date(info.proxima_evaluacion + "T00:00:00");
+              const diff = Math.round((prox - hoy) / 86400000);
+              if (diff < 0) span.classList.add("sem-pulse-overdue");
+              else if (diff === 0) span.classList.add("sem-pulse-today");
+              span.title +=
+                " • Próx " +
+                info.proxima_evaluacion +
+                (diff < 0
+                  ? " (Vencido hace " + Math.abs(diff) + "d)"
+                  : diff === 0
+                    ? " (Hoy)"
+                    : " (en " + diff + "d)");
+            }
+          } catch (e) {
+            span.title = "Error";
+          }
+        }
+        async function cargarAm(run, span) {
+          try {
+            const r = await fetch("/api/examenes/adulto_mayor/" + run);
+            const d = await r.json();
+            if (!d.success || !d.found) {
+              span.title = "Sin evaluación AM";
+              return;
+            }
+            const info = d.data;
+            if (info.vigencia_hasta) {
+              const hoy = new Date();
+              hoy.setHours(0, 0, 0, 0);
+              const vig = new Date(info.vigencia_hasta + "T00:00:00");
+              const diff = Math.round((vig - hoy) / 86400000);
+              let estado = "vigente";
+              if (diff < 0) estado = "vencido";
+              else if (diff <= 30) estado = "expira-pronto";
+              span.classList.add("sem-am-" + estado);
+              if (diff < 0) span.classList.add("sem-pulse-overdue");
+              else if (diff === 0) span.classList.add("sem-pulse-today");
+              span.title =
+                "AM " +
+                (info.resultado || "") +
+                " • Vigencia " +
+                info.vigencia_hasta +
+                (diff < 0
+                  ? " (Vencido hace " + Math.abs(diff) + "d)"
+                  : diff === 0
+                    ? " (Hoy)"
+                    : " (en " + diff + "d)");
+            } else {
+              span.title = "AM sin vigencia";
+            }
+          } catch (e) {
+            span.title = "Error";
+          }
+        }
+        filas.forEach((tr) => {
+          const run = tr.getAttribute("data-run");
+          const pd = tr.querySelector("[data-piedm-dot]");
+          const am = tr.querySelector("[data-am-dot]");
+          if (pd) cargarPieDm(run, pd);
+          if (am) cargarAm(run, am);
+        });
+      })();
+    </script>
+  </body>
+</html>

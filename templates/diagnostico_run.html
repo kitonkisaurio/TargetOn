@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <title>Diagnóstico RUN - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .debug-box {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .success {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+      .warning {
+        color: orange;
+      }
+      input[type="text"] {
+        padding: 8px;
+        font-size: 16px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        width: 200px;
+      }
+      .run-valid {
+        border-color: green !important;
+      }
+      .run-invalid {
+        border-color: red !important;
+      }
+      button {
+        padding: 10px 15px;
+        font-size: 16px;
+        background: #007cba;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #005a87;
+      }
+      #resultado {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔧 Diagnóstico de Búsqueda RUN - ECICEP</h1>
+
+    <div class="debug-box">
+      <h3>Prueba de Funcionalidad</h3>
+      <label
+        >Ingresa un RUN:
+        <input
+          type="text"
+          id="runTest"
+          placeholder="Ej: 12345678-9"
+          maxlength="13"
+        />
+      </label>
+      <button onclick="probarBusqueda()">🔍 Probar Búsqueda</button>
+      <button onclick="probarValidacion()">✅ Probar Validación</button>
+    </div>
+
+    <div class="debug-box">
+      <h3>Estado de Funciones JavaScript</h3>
+      <div id="estadoFunciones"></div>
+    </div>
+
+    <div class="debug-box">
+      <h3>Log de Eventos</h3>
+      <div
+        id="logEventos"
+        style="
+          height: 200px;
+          overflow-y: auto;
+          background: #000;
+          color: #0f0;
+          padding: 10px;
+          font-family: monospace;
+        "
+      ></div>
+    </div>
+
+    <div id="resultado"></div>
+
+    <script>
+      // Log function
+      function log(mensaje) {
+        const timestamp = new Date().toLocaleTimeString();
+        const logDiv = document.getElementById("logEventos");
+        logDiv.innerHTML += `[${timestamp}] ${mensaje}\n`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        console.log(mensaje);
+      }
+
+      // Funciones de RUN del formulario principal
+      function normalizarRun(s) {
+        s = (s || "").toUpperCase().replace(/[^0-9K]/g, "");
+        if (s.length < 2) return s;
+        return s.slice(0, -1) + "-" + s.slice(-1);
+      }
+
+      function dvValido(runNorm) {
+        runNorm = (runNorm || "").toUpperCase();
+        const m = /^(\d{7,8})-([\dK])$/.exec(runNorm);
+        if (!m) return false;
+
+        const cuerpo = m[1];
+        const dv = m[2];
+
+        const factores = [2, 3, 4, 5, 6, 7];
+        let s = 0;
+        for (let i = 0; i < cuerpo.length; i++) {
+          const dig = parseInt(cuerpo[cuerpo.length - 1 - i], 10);
+          s += dig * factores[i % factores.length];
+        }
+        const resto = 11 - (s % 11);
+        const dvCalc = resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+        return dv === dvCalc;
+      }
+
+      function buscarUsuario(run) {
+        log(`🔍 Iniciando búsqueda para RUN: ${run}`);
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ run: run }),
+        })
+          .then((response) => {
+            log(`📡 Respuesta HTTP: ${response.status} ${response.statusText}`);
+            return response.json();
+          })
+          .then((data) => {
+            log(`✅ Datos recibidos: ${JSON.stringify(data)}`);
+            mostrarResultado(data, "success");
+          })
+          .catch((error) => {
+            log(`❌ Error: ${error.message}`);
+            mostrarResultado({ error: error.message }, "error");
+          });
+      }
+
+      function mostrarResultado(data, tipo) {
+        const div = document.getElementById("resultado");
+        div.className = tipo;
+        div.innerHTML = `
+                <h3>Resultado de la Búsqueda</h3>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+      }
+
+      function probarBusqueda() {
+        const runInput = document.getElementById("runTest");
+        const run = runInput.value.trim();
+
+        if (!run) {
+          log("⚠️ No se ingresó ningún RUN");
+          return;
+        }
+
+        log(`🚀 Probando búsqueda con RUN: ${run}`);
+        buscarUsuario(run);
+      }
+
+      function probarValidacion() {
+        const runInput = document.getElementById("runTest");
+        const run = runInput.value.trim();
+
+        if (!run) {
+          log("⚠️ No se ingresó ningún RUN");
+          return;
+        }
+
+        const runNormalizado = normalizarRun(run);
+        const esValido = dvValido(runNormalizado);
+
+        log(`📝 RUN original: ${run}`);
+        log(`🔄 RUN normalizado: ${runNormalizado}`);
+        log(`✅ Es válido: ${esValido}`);
+
+        runInput.className = esValido ? "run-valid" : "run-invalid";
+      }
+
+      function verificarEstadoFunciones() {
+        const funciones = {
+          normalizarRun: typeof normalizarRun === "function",
+          dvValido: typeof dvValido === "function",
+          buscarUsuario: typeof buscarUsuario === "function",
+          fetch: typeof fetch === "function",
+        };
+
+        let html = "";
+        for (const [nombre, existe] of Object.entries(funciones)) {
+          const estado = existe
+            ? '<span class="success">✅ OK</span>'
+            : '<span class="error">❌ FALTA</span>';
+          html += `${nombre}: ${estado}<br>`;
+        }
+
+        document.getElementById("estadoFunciones").innerHTML = html;
+      }
+
+      // Configurar formateo automático
+      document
+        .getElementById("runTest")
+        .addEventListener("input", function (e) {
+          let v = e.target.value.replace(/[^0-9kK]/g, "").toUpperCase();
+
+          if (v.length >= 2) {
+            const cuerpo = v.slice(0, -1);
+            const dv = v.slice(-1);
+            const cuerpoFormateado = cuerpo.replace(
+              /\B(?=(\d{3})+(?!\d))/g,
+              ".",
+            );
+            e.target.value = cuerpoFormateado + "-" + dv;
+          } else {
+            e.target.value = v;
+          }
+
+          // Validar automáticamente
+          const runNormalizado = normalizarRun(e.target.value);
+          const runLimpio = e.target.value.replace(/[^0-9kK]/g, "");
+
+          if (runLimpio.length >= 8) {
+            const esValido = dvValido(runNormalizado);
+            e.target.className = esValido ? "run-valid" : "run-invalid";
+            if (esValido) {
+              log(`✅ RUN válido detectado: ${e.target.value}`);
+            }
+          } else {
+            e.target.className = "";
+          }
+        });
+
+      // Inicializar
+      document.addEventListener("DOMContentLoaded", function () {
+        log("🚀 Página de diagnóstico cargada");
+        verificarEstadoFunciones();
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestión de Acompañamiento - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Scripts para fechas españolas -->
+  <script src="/static/js/fecha-espanol.js"></script>
+  
+  <style>
+    :root{
+      --bg:#f8fafc; --ink:#222; --muted:#6c757d; --line:#e5e7eb;
+      --brand:#0d6efd; --brand-600:#0b5ed7; --success:#198754; --card:#fff;
+      --danger:#dc3545; --warning:#fd7e14;
+    }
+    *{box-sizing:border-box}
+    body {
+      margin:0;padding:0;background:var(--bg);color:var(--ink);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial;
+      font-size:14px;
+    }
+    .container {
+      max-width:1700px;margin:0 auto;background:var(--card);
+      padding:32px;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.10)
+    }
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid var(--line)}
+    .header h1{color:var(--ink);margin:0;font-size:28px;font-weight:700}
+    .btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .btn-primary{background:var(--brand);color:#fff}.btn-primary:hover{background:var(--brand-600)}
+    .btn-secondary{background:var(--muted);color:#fff}
+    .btn-success{background:var(--success);color:#fff}
+    .btn-danger{background:var(--danger);color:#fff}
+    .btn-warning{background:var(--warning);color:#fff}
+    fieldset{border:1px solid var(--line);border-radius:8px;margin:20px 0;padding:20px;background:#fafafa}
+    legend{font-weight:600;color:var(--brand);padding:0 12px;font-size:16px}
+    label{display:block;margin:12px 0 6px;font-weight:600;font-size:14px;color:#374151}
+    input,select,textarea{width:100%;padding:12px 14px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font-size:14px;font-family:inherit;line-height:1.4}
+    textarea{resize:vertical;min-height:120px;padding:14px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:20px}
+    .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:20px}
+    .form-full{margin-bottom:20px}
+    input[name="usuario_run"]{width:200px!important}
+    input[name="fecha_ingreso"]{width:200px!important}
+    input[name="fecha_seguimiento"]{width:200px!important}
+    select[name="tipo_contacto"]{width:200px!important}
+    input[name="profesional_nombre"]{width:250px!important}
+    input[name="duracion_minutos"]{width:120px!important}
+    #fecha_termino_container{transition:all .3s ease;border-width:2px!important;font-size:14px;line-height:1.4}
+    #tiempo_restante{display:block;font-weight:normal;opacity:.8;margin-top:4px}
+    .alert{padding:12px 16px;border-radius:6px;margin:16px 0}
+    .alert-success{background:#d1e7dd;color:#0f5132;border:1px solid #badbcc}
+    .alert-danger{background:#f8d7da;color:#842029;border:1px solid #f5c2c7}
+    .alert-info{background:#d1ecf1;color:#055160;border:1px solid #b8daff}
+    .section-grid{display:grid;grid-template-columns:1fr;gap:30px;max-width:1200px;margin:0 auto}
+    @media(min-width:1024px){.section-grid{grid-template-columns:1fr 1fr}}
+    .usuario-info-card{background:linear-gradient(135deg,#e3f2fd 0%,#f3e5f5 100%);border:2px solid #2196f3;border-radius:10px;padding:20px;margin:20px 0;box-shadow:0 4px 12px rgba(33,150,243,.1);animation:slideIn .3s ease-out}
+    .usuario-info-card h3{margin:0 0 15px;color:#1565c0;font-size:18px;font-weight:600}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px}
+    .info-row{display:flex;align-items:center;padding:8px 0}
+    .info-label{font-weight:600;color:#424242;margin-right:8px;min-width:80px}
+    .info-row span:last-child{color:#1565c0;font-weight:500}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:768px){.form-row,.form-row-3,.section-grid{grid-template-columns:1fr}.container{margin:10px;padding:15px}}
+    .back-btn{background:var(--muted);color:#fff;padding:8px 16px;text-decoration:none;border-radius:6px;display:inline-flex;align-items:center;gap:8px}
+    .back-btn:hover{background:#5c636a}
+    .form-actions{margin-top:36px;padding-top:24px;border-top:1px solid var(--line);display:flex;gap:18px;justify-content:flex-end}
+    .seguimientos-container{background:var(--card);border-radius:8px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.08);border:1px solid var(--line)}
+    .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid var(--brand)}
+    .section-header h3{margin:0;color:var(--brand);font-size:18px}
+    .table-container{overflow-x:auto;border-radius:8px;border:1px solid var(--line)}
+    .seguimientos-table,.planes-accion-table{width:100%;border-collapse:collapse;background:#fff;font-size:15px;table-layout:auto}
+    .seguimientos-table th,.planes-accion-table th{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-600) 100%);color:#fff;padding:14px 12px;text-align:left;font-weight:600;border-bottom:2px solid var(--brand-600)}
+    .seguimientos-table td,.planes-accion-table td{padding:12px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+    .seguimientos-table tbody tr:hover{background:#f8f9fa}
+    .seguimientos-table tbody tr:nth-child(even){background:#fafbfc}
+    .seguimientos-table tbody tr:nth-child(even):hover{background:#f0f2f5}
+    .no-data{text-align:center;color:var(--muted);font-style:italic;padding:40px!important}
+    .status-badge{padding:4px 8px;border-radius:12px;font-size:11px;font-weight:600;text-transform:uppercase}
+    .status-inicio_plan{background:#cce5ff;color:#004085}
+    .status-realizado{background:#d4edda;color:#155724}
+    .status-programado{background:#d1ecf1;color:#0c5460}
+    .status-cancelado{background:#f8d7da;color:#721c24}
+    .status-reagendado{background:#fff3cd;color:#856404}
+    .status-no_contactado{background:#e2e3e5;color:#495057}
+    .table-pagination{display:flex;justify-content:space-between;align-items:center;margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}
+    .pagination-buttons{display:flex;gap:8px}
+    .btn-sm{padding:6px 12px;font-size:12px}
+    .action-buttons{display:flex;gap:5px}
+    .btn-xs{padding:4px 8px;font-size:11px;border-radius:4px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Gestión de Acompañamiento</h1>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button type="button" id="btn-listado-acomp" class="btn btn-secondary" style="background:#334155;">📄 Listado</button>
+        <a href="{{ url_for('index') }}" class="back-btn">← Volver al Inicio</a>
+      </div>
+    </div>
+
+    {% if mensaje %}
+    <div class="alert alert-{{ 'success' if 'exitosamente' in mensaje or 'correctamente' in mensaje else 'danger' }}">
+      {{ mensaje }}
+    </div>
+    {% endif %}
+
+    <!-- Tarjeta: Información del Usuario -->
+    <div id="usuario-info" style="display:none" class="usuario-info-card">
+      <h3>👤 Información del Usuario</h3>
+      <div class="info-grid">
+        <div class="info-row"><span class="info-label">Nombre:</span><span id="usuario-nombre">-</span></div>
+        <div class="info-row"><span class="info-label">Edad:</span><span id="usuario-edad">-</span></div>
+        <div class="info-row"><span class="info-label">Sector:</span><span id="usuario-sector">-</span></div>
+        <div class="info-row"><span class="info-label">Categoría:</span><span id="usuario-categoria">-</span></div>
+        <div class="info-row"><span class="info-label">Patologías:</span><span id="usuario-patologias">-</span></div>
+        <div class="info-row"><span class="info-label">Fecha de Ingreso:</span><span id="usuario-fecha-ingreso">-</span></div>
+        <div class="info-row"><span class="info-label">Fecha de Término:</span><span id="usuario-fecha-termino">-</span></div>
+      </div>
+    </div>
+
+    <form method="POST">
+      <div class="section-grid">
+        <!-- Columna 1: Información del seguimiento -->
+        <div>
+          <fieldset>
+            <legend>📋 Información del Seguimiento</legend>
+            <div class="form-row">
+              <div>
+                <label for="usuario_run">RUN del Usuario *</label>
+                <input
+                  type="text" id="usuario_run" name="usuario_run" maxlength="12" autocomplete="off"
+                  placeholder="Ejemplo: 00.000.000-0" required
+                  pattern="[0-9]{1,2}\.[0-9]{3}\.[0-9]{3}-[0-9kK]"
+                  style="width:260px;min-width:220px;max-width:320px;font-size:18px;"
+                  value="{{ request.form.get('usuario_run', '') }}"
+                />
+                <!-- Indicador de carga para búsqueda de usuario -->
+                <div id="usuario-loading" style="display:none;margin-top:8px;color:#0d6efd;font-size:14px;">
+                  <span>🔍 Buscando usuario...</span>
+                </div>
+              </div>
+              <div>
+                <label for="fecha_ingreso">Fecha de Ingreso *</label>
+                <input
+                  type="date" id="fecha_ingreso" name="fecha_ingreso" required
+                  style="width:200px;min-width:180px;max-width:260px;font-size:16px;"
+                  value="{{ request.form.get('fecha_ingreso', '') }}" onchange="calcularFechaTermino()"
+                />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="fecha_seguimiento">Fecha de Seguimiento *</label>
+                <input
+                  type="date" id="fecha_seguimiento" name="fecha_seguimiento" required
+                  style="width:200px;min-width:180px;max-width:260px;font-size:16px;"
+                  value="{{ request.form.get('fecha_seguimiento', '') }}"
+                />
+              </div>
+              <div>
+                <label for="fecha_termino_display">Fecha de Término de Gestión del Acompañamiento</label>
+                <div id="fecha_termino_container" style="padding:12px 14px;border:1px solid #cbd5e1;border-radius:8px;background:#f8f9fa;font-weight:600;min-width:180px;max-width:260px;width:200px;">
+                  <span id="fecha_termino_display">Ingrese fecha de inicio</span>
+                  <span id="tiempo_restante" style="font-size:12px;margin-left:10px;"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="tipo_contacto">Tipo de Contacto *</label>
+                <select id="tipo_contacto" name="tipo_contacto" required>
+                  <option value="">Seleccionar...</option>
+                  <option value="presencial"  {{ 'selected' if request.form.get('tipo_contacto') == 'presencial' }}>Presencial</option>
+                  <option value="telefonico"  {{ 'selected' if request.form.get('tipo_contacto') == 'telefonico' }}>Telefónico</option>
+                  <option value="videollamada"{{ 'selected' if request.form.get('tipo_contacto') == 'videollamada' }}>Videollamada</option>
+                  <option value="domiciliario"{{ 'selected' if request.form.get('tipo_contacto') == 'domiciliario' }}>Domiciliario</option>
+                  <option value="mensaje"     {{ 'selected' if request.form.get('tipo_contacto') == 'mensaje' }}>Mensaje/WhatsApp</option>
+                </select>
+              </div>
+              <div>
+                <label for="duracion_minutos">Duración (minutos)</label>
+                <input type="number" id="duracion_minutos" name="duracion_minutos" min="1" max="300" placeholder="30"
+                  value="{{ request.form.get('duracion_minutos', '') }}"/>
+              </div>
+            </div>
+
+            <div class="form-full">
+              <label for="profesional_nombre">Responsable *</label>
+              <input type="text" id="profesional_nombre" name="profesional_nombre" required
+                placeholder="Ingrese nombre del responsable..."
+                value="{{ request.form.get('profesional_nombre', '') }}"/>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>🎯 Estado y Cumplimiento</legend>
+            <div class="form-row">
+              <div>
+                <label for="estado_seguimiento">Estado del Seguimiento *</label>
+                <select id="estado_seguimiento" name="estado_seguimiento" required>
+                  <option value="">Seleccionar...</option>
+                  <option value="programado"   {{ 'selected' if request.form.get('estado_seguimiento') == 'programado' }}>Programado</option>
+                  <option value="realizado"    {{ 'selected' if request.form.get('estado_seguimiento') == 'realizado' }}>Realizado</option>
+                  <option value="no_contactado"{{ 'selected' if request.form.get('estado_seguimiento') == 'no_contactado' }}>No Contactado</option>
+                  <option value="cancelado"    {{ 'selected' if request.form.get('estado_seguimiento') == 'cancelado' }}>Cancelado</option>
+                  <option value="reagendado"   {{ 'selected' if request.form.get('estado_seguimiento') == 'reagendado' }}>Reagendado</option>
+                </select>
+              </div>
+              <div>
+                <label for="cumplimiento_tratamiento">Cumplimiento del Tratamiento</label>
+                <select id="cumplimiento_tratamiento" name="cumplimiento_tratamiento">
+                  <option value="">No evaluado</option>
+                  <option value="excelente" {{ 'selected' if request.form.get('cumplimiento_tratamiento') == 'excelente' }}>Excelente (90-100%)</option>
+                  <option value="bueno"     {{ 'selected' if request.form.get('cumplimiento_tratamiento') == 'bueno' }}>Bueno (70-89%)</option>
+                  <option value="regular"   {{ 'selected' if request.form.get('cumplimiento_tratamiento') == 'regular' }}>Regular (50-69%)</option>
+                  <option value="deficiente"{{ 'selected' if request.form.get('cumplimiento_tratamiento') == 'deficiente' }}>Deficiente (&lt;50%)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="asistencia_citas">Asistencia a Citas</label>
+                <select id="asistencia_citas" name="asistencia_citas">
+                  <option value="">No evaluado</option>
+                  <option value="regular"   {{ 'selected' if request.form.get('asistencia_citas') == 'regular' }}>Regular</option>
+                  <option value="irregular" {{ 'selected' if request.form.get('asistencia_citas') == 'irregular' }}>Irregular</option>
+                  <option value="no_asiste" {{ 'selected' if request.form.get('asistencia_citas') == 'no_asiste' }}>No Asiste</option>
+                </select>
+              </div>
+              <div>
+                <label for="adherencia_medicamentos">Adherencia a Medicamentos</label>
+                <select id="adherencia_medicamentos" name="adherencia_medicamentos">
+                  <option value="">No evaluado</option>
+                  <option value="total"   {{ 'selected' if request.form.get('adherencia_medicamentos') == 'total' }}>Total</option>
+                  <option value="parcial" {{ 'selected' if request.form.get('adherencia_medicamentos') == 'parcial' }}>Parcial</option>
+                  <option value="nula"    {{ 'selected' if request.form.get('adherencia_medicamentos') == 'nula' }}>Nula</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- Columna 2: Evaluaciones y observaciones -->
+        <div>
+          <fieldset>
+            <legend>📊 Evaluaciones</legend>
+            <div class="form-row">
+              <div>
+                <label for="control_presion">Control de Presión Arterial</label>
+                <select id="control_presion" name="control_presion">
+                  <option value="">No evaluado</option>
+                  <option value="controlado"   {{ 'selected' if request.form.get('control_presion') == 'controlado' }}>Controlado</option>
+                  <option value="descontrolado"{{ 'selected' if request.form.get('control_presion') == 'descontrolado' }}>Descontrolado</option>
+                  <option value="en_meta"      {{ 'selected' if request.form.get('control_presion') == 'en_meta' }}>En Meta</option>
+                </select>
+              </div>
+              <div>
+                <label for="control_glicemia">Control Glicémico</label>
+                <select id="control_glicemia" name="control_glicemia">
+                  <option value="">No evaluado</option>
+                  <option value="controlado"   {{ 'selected' if request.form.get('control_glicemia') == 'controlado' }}>Controlado</option>
+                  <option value="descontrolado"{{ 'selected' if request.form.get('control_glicemia') == 'descontrolado' }}>Descontrolado</option>
+                  <option value="en_meta"      {{ 'selected' if request.form.get('control_glicemia') == 'en_meta' }}>En Meta</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="cambio_peso">Cambio de Peso</label>
+                <select id="cambio_peso" name="cambio_peso">
+                  <option value="">No evaluado</option>
+                  <option value="perdida"    {{ 'selected' if request.form.get('cambio_peso') == 'perdida' }}>Pérdida de Peso</option>
+                  <option value="mantencion" {{ 'selected' if request.form.get('cambio_peso') == 'mantencion' }}>Mantención</option>
+                  <option value="aumento"    {{ 'selected' if request.form.get('cambio_peso') == 'aumento' }}>Aumento de Peso</option>
+                </select>
+              </div>
+              <div>
+                <label for="actividad_fisica">Actividad Física</label>
+                <select id="actividad_fisica" name="actividad_fisica">
+                  <option value="">No evaluado</option>
+                  <option value="regular"   {{ 'selected' if request.form.get('actividad_fisica') == 'regular' }}>Regular</option>
+                  <option value="ocasional" {{ 'selected' if request.form.get('actividad_fisica') == 'ocasional' }}>Ocasional</option>
+                  <option value="sedentario"{{ 'selected' if request.form.get('actividad_fisica') == 'sedentario' }}>Sedentario</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-full">
+              <label for="habitos_alimentarios">Hábitos Alimentarios</label>
+              <select id="habitos_alimentarios" name="habitos_alimentarios">
+                <option value="">No evaluado</option>
+                <option value="saludables" {{ 'selected' if request.form.get('habitos_alimentarios') == 'saludables' }}>Saludables</option>
+                <option value="en_mejora"  {{ 'selected' if request.form.get('habitos_alimentarios') == 'en_mejora' }}>En Mejora</option>
+                <option value="deficientes"{{ 'selected' if request.form.get('habitos_alimentarios') == 'deficientes' }}>Deficientes</option>
+              </select>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>📝 Observaciones y Seguimiento</legend>
+            <div class="form-full">
+              <label for="observacion_seguimiento">Observación Detallada del Seguimiento</label>
+              <textarea id="observacion_seguimiento" name="observacion_seguimiento" rows="6"
+                placeholder="Aquí puedes escribir varias líneas o párrafos sobre el seguimiento clínico, evolución, dificultades, acuerdos, etc.">{{ request.form.get('observacion_seguimiento', '') }}</textarea>
+            </div>
+
+            <div class="form-full">
+              <label for="plan_accion">Plan de Acción</label>
+              <textarea id="plan_accion" name="plan_accion" rows="6"
+                placeholder="Ejemplo:
+• Ajustar horario de medicamentos según rutina laboral
+• Programar próximo control en 4 semanas
+• Reforzar educación sobre importancia de controles
+• Coordinar con equipo de nutrición para apoyo dietético">{{ request.form.get('plan_accion', '') }}</textarea>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label for="proxima_cita">Próxima Cita</label>
+                <input type="date" id="proxima_cita" name="proxima_cita" value="{{ request.form.get('proxima_cita', '') }}"/>
+              </div>
+              <div>
+                <label for="prioridad">Prioridad del Seguimiento</label>
+                <select id="prioridad" name="prioridad">
+                  <option value="normal"  {{ 'selected' if request.form.get('prioridad') == 'normal' }}>Normal</option>
+                  <option value="alta"    {{ 'selected' if request.form.get('prioridad') == 'alta' }}>Alta</option>
+                  <option value="urgente" {{ 'selected' if request.form.get('prioridad') == 'urgente' }}>Urgente</option>
+                </select>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="{{ url_for('index') }}" class="btn btn-secondary">Cancelar</a>
+        <button type="button" onclick="generarPDF()" class="btn btn-success">📄 Generar PDF</button>
+        <button type="submit" class="btn btn-primary">💾 Guardar Seguimiento</button>
+      </div>
+    </form>
+
+    <div class="alert alert-info" style="margin-top:30px;">
+      <strong>ℹ️ Información:</strong>
+      Este formulario permite registrar el seguimiento y acompañamiento de usuarios del programa ECICEP.
+      Los campos marcados con (*) son obligatorios. El sistema validará automáticamente la existencia del RUN ingresado.
+    </div>
+
+    <!-- Tabla de Seguimientos Guardados -->
+    <div class="seguimientos-container" style="margin-top: 40px;">
+      <div class="section-header">
+        <h3>📋 Seguimientos Registrados del Usuario</h3>
+        <button type="button" onclick="cargarSeguimientos()" class="btn btn-secondary btn-sm">🔄 Actualizar</button>
+      </div>
+
+      <div class="table-container">
+        <table id="tabla-seguimientos" class="seguimientos-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>RUN Usuario</th>
+              <th>Nombre</th>
+              <th>Tipo Contacto</th>
+              <th>Responsable</th>
+              <th>Estado</th>
+              <th>Duración</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="seguimientos-tbody">
+            <tr><td colspan="8" class="no-data">No hay seguimientos registrados</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-pagination" id="pagination-container" style="display:none;">
+        <span id="pagination-info"></span>
+        <div class="pagination-buttons">
+          <button onclick="cambiarPagina(-1)" class="btn btn-sm">← Anterior</button>
+          <button onclick="cambiarPagina(1)" class="btn btn-sm">Siguiente →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Plan de Acción (ÚNICA, fuera de las filas de seguimientos) -->
+    <div class="planes-accion-container" style="margin-top: 40px; width: 100%; max-width: 100%;">
+      <div class="section-header">
+        <h3>📝 Plan de Acción del Usuario</h3>
+        <button type="button" onclick="cargarPlanesAccion()" class="btn btn-secondary btn-sm">🔄 Actualizar</button>
+      </div>
+      <div class="table-container" style="width:100%;max-width:100%;">
+        <table id="tabla-planes-accion" class="planes-accion-table" style="width:100%;max-width:100%;">
+          <colgroup>
+            <col style="width: 180px;">
+            <col style="width: auto; min-width: 600px;">
+            <col style="width: 260px;">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Plan de Acción</th>
+              <th>Responsable</th>
+            </tr>
+          </thead>
+          <tbody id="planes-accion-tbody">
+            <tr><td colspan="3" class="no-data">No hay planes registrados</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Listado Overlay -->
+  <div id="overlay-listado" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);z-index:999;align-items:flex-start;overflow:auto;padding:40px 20px;">
+    <div style="background:#fff;width:100%;max-width:1200px;margin:0 auto;border-radius:14px;box-shadow:0 10px 40px -5px rgba(0,0,0,.3);padding:24px;position:relative;animation:fadeIn .25s;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <h2 style="margin:0;font-size:20px;display:flex;align-items:center;gap:8px;">📄 Listado Acompañamientos</h2>
+        <button id="cerrar-overlay-listado" class="btn btn-danger btn-sm" type="button" style="font-size:12px;">Cerrar ✕</button>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+        <input type="text" id="filtroListado" placeholder="Filtrar por RUN o nombre" style="padding:8px 10px;border:1px solid #cbd5e1;border-radius:6px;min-width:260px;">
+        <span id="estadoListado" style="font-size:12px;opacity:.7;">—</span>
+      </div>
+      <div class="table-container" style="max-height:520px;overflow:auto;border:1px solid #e2e8f0;border-radius:10px;">
+        <table id="tablaListadoAcomp" class="seguimientos-table" style="font-size:13px;">
+          <thead>
+            <tr>
+              <th style="position:sticky;top:0;">RUN</th>
+              <th style="position:sticky;top:0;">Nombre</th>
+              <th style="position:sticky;top:0;">Edad</th>
+              <th style="position:sticky;top:0;">Sector</th>
+              <th style="position:sticky;top:0;">Fecha Ingreso</th>
+              <th style="position:sticky;top:0;">Fecha Término</th>
+              <th style="position:sticky;top:0;">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="7" class="no-data">Sin datos</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const btn = document.getElementById('btn-listado-acomp');
+      const overlay = document.getElementById('overlay-listado');
+      const cerrar = document.getElementById('cerrar-overlay-listado');
+      const tbody = document.querySelector('#tablaListadoAcomp tbody');
+      const estado = document.getElementById('estadoListado');
+      const filtro = document.getElementById('filtroListado');
+      const runInput = document.getElementById('usuario_run');
+      let cacheFilas = [];
+
+      function formatearRun(r){return r||'';}
+      function aplicarFiltro(){
+        const q = (filtro.value||'').trim().toLowerCase();
+        const filas = !q ? cacheFilas : cacheFilas.filter(x => (x.run||'').toLowerCase().includes(q) || (x.nombre||'').toLowerCase().includes(q));
+        render(filas);
+      }
+      filtro?.addEventListener('input', aplicarFiltro);
+
+      function seleccionarRun(run){
+        if(!runInput) return;
+        runInput.value = run;
+        // Disparar evento input para reutilizar lógica existente de carga
+        const ev = new Event('input');
+        runInput.dispatchEvent(ev);
+        overlay.style.display='none';
+        runInput.scrollIntoView({behavior:'smooth',block:'center'});
+        runInput.focus();
+      }
+
+      function render(data){
+        tbody.innerHTML='';
+        if(!data.length){
+          tbody.innerHTML = '<tr><td colspan="7" class="no-data">Sin datos</td></tr>';
+          return;
+        }
+        const frag = document.createDocumentFragment();
+        data.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td style="white-space:nowrap;">${formatearRun(row.run)}</td>
+            <td>${row.nombre||''}</td>
+            <td>${row.edad!=null?row.edad:''}</td>
+            <td>${row.sector||''}</td>
+            <td>${row.fecha_ingreso||''}</td>
+            <td>${row.fecha_termino||''}</td>
+            <td><button type="button" data-run="${row.run||''}" class="btn btn-sm btn-primary" style="padding:4px 10px;font-size:11px;">Ver</button></td>
+          `;
+          frag.appendChild(tr);
+        });
+        tbody.appendChild(frag);
+        tbody.querySelectorAll('button[data-run]').forEach(b => {
+          b.addEventListener('click', () => seleccionarRun(b.getAttribute('data-run')));
+        });
+      }
+
+      async function cargar(){
+        estado.textContent='Cargando...';
+        try{
+          const r = await fetch('/api/gestion-acompanamiento/listado');
+            const data = await r.json();
+            if(!data.success){throw new Error(data.error||'Error');}
+            cacheFilas = data.items||[];
+            estado.textContent = `${cacheFilas.length} registros`;
+            aplicarFiltro();
+        }catch(e){
+          console.error(e); estado.textContent='Error';
+          tbody.innerHTML = '<tr><td colspan="7" class="no-data">Error al cargar</td></tr>';
+        }
+      }
+
+      btn?.addEventListener('click', () => { overlay.style.display='flex'; if(!cacheFilas.length) cargar(); });
+      cerrar?.addEventListener('click', () => { overlay.style.display='none'; });
+      overlay?.addEventListener('click', e => { if(e.target===overlay){ overlay.style.display='none'; }});
+
+      // Autocarga silenciosa al iniciar (solo carga y cachea, no abre overlay)
+      window.addEventListener('DOMContentLoaded', () => {
+        cargar();
+      });
+    })();
+  </script>
+  <script src="/static/js/common.js"></script>
+  <script src="/static/js/run-formatter.js"></script>
+  <script>
+    // --- Autoformateo y búsqueda de RUN ---
+    document.getElementById('usuario_run').addEventListener('input', function(e) {
+      let value = e.target.value.replace(/[^0-9kK]/g, '').toUpperCase();
+      // Formatear a XX.XXX.XXX-X en tiempo real
+      if (value.length > 1) {
+        let cuerpo = value.slice(0, -1);
+        let dv = value.slice(-1);
+        let conPuntos = '';
+        while (cuerpo.length > 3) {
+          conPuntos = '.' + cuerpo.slice(-3) + conPuntos;
+          cuerpo = cuerpo.slice(0, -3);
+        }
+        conPuntos = cuerpo + conPuntos;
+        value = conPuntos + '-' + dv;
+      }
+      e.target.value = value;
+
+      // Solo buscar si el formato es XX.XXX.XXX-X
+      if (/^\d{1,2}\.\d{3}\.\d{3}-[0-9K]$/i.test(value)) {
+        buscarUsuario(value);
+      } else {
+        ocultarInfoUsuario();
+      }
+    });
+
+    // Datos demo locales para fallback
+    const usuariosDemo = {
+      "123456789": {
+        "run":"12.345.678-9","nombre":"Juan Pérez González","fecha_nacimiento":"1980-05-15",
+        "sector_nombre":"Sector Norte","categoria_nombre":"Paciente Crónico",
+        "patologias_nombres":["Diabetes Mellitus Tipo 2","Hipertensión Arterial","Dislipidemia"]
+      },
+      "87654321K": {
+        "run":"8.765.432-1K","nombre":"María Carmen Silva","fecha_nacimiento":"1975-11-22",
+        "sector_nombre":"Sector Centro","categoria_nombre":"Control Preventivo",
+        "patologias_nombres":["Obesidad","Síndrome Metabólico"]
+      },
+      "111111111": {
+        "run":"11.111.111-1","nombre":"Pedro López Martínez","fecha_nacimiento":"1965-03-08",
+        "sector_nombre":"Sector Sur","categoria_nombre":"Adulto Mayor",
+        "patologias_nombres":["EPOC","Cardiopatía Coronaria","Diabetes Mellitus Tipo 2"]
+      }
+    };
+
+    async function buscarUsuario(run) {
+      const loadingElement = document.getElementById('usuario-loading');
+      const usuarioInfo = document.getElementById('usuario-info');
+      
+      try {
+        console.log('🔍 [BUSCAR USUARIO] Iniciando búsqueda para RUN:', run);
+        
+        // Mostrar indicador de carga
+        if (loadingElement) loadingElement.style.display = 'block';
+        if (usuarioInfo) usuarioInfo.style.display = 'none';
+        
+        const runFormateado = Common.formatearRUN(run);
+        console.log('🔍 [BUSCAR USUARIO] RUN formateado:', runFormateado);
+        
+        const claveDemo = runFormateado.replace(/\./g,'').replace(/-/g,'');
+        const usuarioDemo = usuariosDemo[claveDemo];
+        if (usuarioDemo) {
+          console.log('✅ [BUSCAR USUARIO] Usuario encontrado en datos demo:', usuarioDemo.nombre);
+          // Ocultar indicador de carga
+          if (loadingElement) loadingElement.style.display = 'none';
+          mostrarInfoUsuario(usuarioDemo);
+          cargarSeguimientos();
+          cargarPlanesAccion();
+          return;
+        }
+        
+        console.log('🌐 [BUSCAR USUARIO] Buscando en base de datos...');
+        // Enviar al backend el RUN normalizado XX.XXX.XXX-X
+        const response = await fetch('/usuario/buscar', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ run: runFormateado })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Error HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('📄 [BUSCAR USUARIO] Respuesta del servidor:', data);
+        
+        // Ocultar indicador de carga
+        if (loadingElement) loadingElement.style.display = 'none';
+        
+        if (data.encontrado) {
+          console.log('✅ [BUSCAR USUARIO] Usuario encontrado en BD:', data.nombre);
+          mostrarInfoUsuario(data);
+          cargarSeguimientos();
+          cargarPlanesAccion();
+        } else {
+          console.log('❌ [BUSCAR USUARIO] Usuario no encontrado en BD');
+          mostrarUsuarioNoEncontrado(run);
+        }
+      } catch (error) {
+        console.error('💥 [BUSCAR USUARIO] Error:', error);
+        // Ocultar indicador de carga en caso de error
+        if (loadingElement) loadingElement.style.display = 'none';
+        alert('❌ Error al buscar usuario: ' + error.message + '\n\nVerifique la conexión y que el servidor esté funcionando.');
+        mostrarUsuarioNoEncontrado(run);
+      }
+    }
+
+    function mostrarInfoUsuario(usuario){
+      document.getElementById('usuario-nombre').textContent = usuario.nombre || 'No especificado';
+      let edad = '-';
+      if (usuario.fecha_nacimiento) {
+        const nacimiento = new Date(usuario.fecha_nacimiento);
+        const hoy = new Date();
+        edad = Math.floor((hoy - nacimiento) / (365.25*24*60*60*1000)) + ' años';
+      }
+      document.getElementById('usuario-edad').textContent = edad;
+      document.getElementById('usuario-sector').textContent = usuario.sector_nombre || 'No especificado';
+      document.getElementById('usuario-categoria').textContent = usuario.categoria_nombre || 'No especificado';
+      const patologiasTexto = (usuario.patologias_nombres && usuario.patologias_nombres.length)
+        ? usuario.patologias_nombres.join(', ') : 'Sin patologías registradas';
+      document.getElementById('usuario-patologias').textContent = patologiasTexto;
+
+      // --- Fechas ---
+      // Fecha de ingreso
+      if (usuario.fecha_ingreso) {
+        document.getElementById('fecha_ingreso').value = usuario.fecha_ingreso;
+        document.getElementById('usuario-fecha-ingreso').textContent = usuario.fecha_ingreso;
+      } else {
+        document.getElementById('usuario-fecha-ingreso').textContent = document.getElementById('fecha_ingreso').value || '-';
+      }
+      // Fecha de término: usar la que venga o calcular +6 meses
+      let fechaTermino = usuario.fecha_termino;
+      if (!fechaTermino && usuario.fecha_ingreso) {
+        let fecha = new Date(usuario.fecha_ingreso);
+        fecha.setMonth(fecha.getMonth() + 6);
+        // Ajustar día si el mes siguiente no tiene ese día
+        if (fecha.getDate() !== new Date(usuario.fecha_ingreso).getDate()) {
+          fecha.setDate(0); // último día del mes anterior
+        }
+        fechaTermino = fecha.toISOString().slice(0,10);
+      }
+      if (fechaTermino) {
+        document.getElementById('fecha_termino_display').textContent = fechaTermino;
+        document.getElementById('usuario-fecha-termino').textContent = fechaTermino;
+      } else {
+        document.getElementById('usuario-fecha-termino').textContent = document.getElementById('fecha_termino_display').textContent || '-';
+      }
+
+      const card = document.getElementById('usuario-info');
+      card.style.display = 'block';
+      card.style.background = 'linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)';
+      card.style.borderColor = '#2196f3';
+      const titulo = card.querySelector('h3');
+      if (titulo) { titulo.textContent = '👤 Información del Usuario'; titulo.style.color = '#1565c0'; }
+      cargarSeguimientos();
+    }
+
+    function ocultarInfoUsuario(){ 
+      document.getElementById('usuario-info').style.display='none'; 
+      const loadingElement = document.getElementById('usuario-loading');
+      if (loadingElement) loadingElement.style.display = 'none';
+    }
+
+    function mostrarUsuarioNoEncontrado(run){
+      document.getElementById('usuario-nombre').textContent = 'Usuario no encontrado';
+      document.getElementById('usuario-edad').textContent = '-';
+      document.getElementById('usuario-sector').textContent = '-';
+      document.getElementById('usuario-categoria').textContent = '-';
+      document.getElementById('usuario-patologias').textContent = 'RUN válido - Puede proceder a ingresar los datos';
+      document.getElementById('usuario-fecha-ingreso').textContent = document.getElementById('fecha_ingreso').value || '-';
+      document.getElementById('usuario-fecha-termino').textContent = document.getElementById('fecha_termino_display').textContent || '-';
+
+      const card = document.getElementById('usuario-info');
+      card.style.display = 'block';
+      card.style.background = 'linear-gradient(135deg,#fff3cd 0%,#ffeaa7 100%)';
+      card.style.borderColor = '#ffc107';
+      const titulo = card.querySelector('h3');
+      if (titulo) { titulo.textContent = '⚠️ Usuario No Encontrado'; titulo.style.color = '#856404'; }
+      cargarSeguimientos();
+      cargarPlanesAccion();
+    }
+
+    // Validación duración
+    document.getElementById('duracion_minutos').addEventListener('input', function(e){
+      const v = parseInt(e.target.value || '0',10);
+      if (v < 1) e.target.value = 1;
+      if (v > 300) e.target.value = 300;
+    });
+
+    // Fecha por defecto en seguimiento
+    document.getElementById('fecha_seguimiento').valueAsDate = new Date();
+
+    // Confirmación guardado
+    document.querySelector('form').addEventListener('submit', function(e){
+      const run = document.getElementById('usuario_run').value;
+      const fechaIngreso = document.getElementById('fecha_ingreso').value;
+      const fecha = document.getElementById('fecha_seguimiento').value;
+      const tipo = document.getElementById('tipo_contacto').value;
+      const responsable = document.getElementById('profesional_nombre').value;
+      const estado = document.getElementById('estado_seguimiento').value;
+      if (!run || !fechaIngreso || !fecha || !tipo || !responsable || !estado) {
+        alert('Por favor complete todos los campos obligatorios (*)');
+        e.preventDefault();
+        return;
+      }
+      if (!confirm('¿Está seguro de guardar este registro de seguimiento?')) {
+        e.preventDefault();
+      }
+    });
+
+    // Cálculo de fecha término (6 meses desde ingreso)
+    function calcularFechaTermino(){
+      const fechaIngreso = document.getElementById('fecha_ingreso').value;
+      const displayElement = document.getElementById('fecha_termino_display');
+      const tiempoElement = document.getElementById('tiempo_restante');
+      const containerElement = document.getElementById('fecha_termino_container');
+      if (!fechaIngreso) {
+        displayElement.textContent = 'Ingrese fecha de inicio';
+        tiempoElement.textContent = '';
+        containerElement.style.backgroundColor = '#f8f9fa';
+        containerElement.style.borderColor = '#cbd5e1';
+        containerElement.style.color = '#6b7280';
+        return;
+      }
+      const inicio = new Date(fechaIngreso);
+      const termino = new Date(inicio); termino.setMonth(termino.getMonth()+6);
+      const hoy = new Date();
+      const tiempoTranscurrido = hoy - inicio;
+      const mesesTranscurridos = Math.floor(tiempoTranscurrido / (1000*60*60*24*30.44));
+      const diasRestantes = Math.ceil((termino - hoy)/(1000*60*60*24));
+      const opcionesFecha = {year:'numeric',month:'long',day:'numeric'};
+      displayElement.textContent = termino.toLocaleDateString('es-ES', opcionesFecha);
+
+      let bg, bc, tc, estadoTexto;
+      if (mesesTranscurridos < 2){ bg='#d1fae5'; bc='#10b981'; tc='#065f46'; estadoTexto='Período inicial'; }
+      else if (mesesTranscurridos < 4){ bg='#fef3c7'; bc='#f59e0b'; tc='#92400e'; estadoTexto='Período intermedio'; }
+      else if (mesesTranscurridos < 5){ bg='#fed7aa'; bc='#ea580c'; tc='#c2410c'; estadoTexto='Período avanzado'; }
+      else { bg='#fecaca'; bc='#dc2626'; tc='#991b1b'; estadoTexto='Período final'; }
+
+      containerElement.style.backgroundColor = bg;
+      containerElement.style.borderColor = bc;
+      containerElement.style.color = tc;
+
+      if (diasRestantes > 0){
+        tiempoElement.textContent = `(${estadoTexto} - ${diasRestantes} días restantes)`;
+      } else {
+        tiempoElement.textContent = `(${estadoTexto} - Programa terminado)`;
+        containerElement.style.backgroundColor = '#fee2e2';
+        containerElement.style.borderColor = '#dc2626';
+        containerElement.style.color = '#991b1b';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      calcularFechaTermino();
+      cargarSeguimientos();
+    });
+
+    // --- PDF ÚNICO (sin bloques duplicados) ---
+    function generarPDF(){
+      try {
+        // Validar que los datos del usuario estén cargados
+        const runInput = document.getElementById('usuario_run');
+        const nombreUsuario = document.getElementById('usuario-nombre').textContent;
+        
+        if (!runInput.value.trim()) {
+          alert('❌ Error: Debe ingresar un RUN de usuario antes de generar el PDF.');
+          runInput.focus();
+          return;
+        }
+        
+        if (!nombreUsuario || nombreUsuario === '-' || nombreUsuario === 'Usuario no encontrado') {
+          alert('❌ Error: Los datos del usuario no están cargados. Por favor, ingrese un RUN válido y espere a que se carguen los datos antes de generar el PDF.');
+          runInput.focus();
+          return;
+        }
+        
+        console.log('📄 Generando PDF con datos de usuario:', nombreUsuario);
+        
+        if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('jsPDF no está cargado.');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p','mm','letter');
+        doc.setFont('helvetica');
+
+        // Logo y título
+        const logoPath = '/static/logo_ecicep.jpg';
+        try { doc.addImage(logoPath,'JPEG',10,10,30,30); } catch(e){ console.warn('Logo no cargado:', e); }
+        doc.setFontSize(18); doc.setFont('helvetica','bold');
+        const titulo = 'Gestión del Acompañamiento';
+        const anchoTitulo = doc.getTextWidth(titulo);
+        const xCentro = 45 + (200-45)/2 - anchoTitulo/2;
+        doc.text(titulo, xCentro, 20);
+        doc.setLineWidth(0.5);
+        doc.setDrawColor(255, 149, 0);
+        doc.line(45,35,200,35);
+
+        let yPos = 45;
+        function agregarCampo(label,value,x=15,avanzarY=true){
+          doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.text(label+':',x,yPos);
+          doc.setFont('helvetica','normal'); doc.text(value || 'No especificado', x+40, yPos);
+          if (avanzarY) yPos += 7;
+        }
+
+        // Información del Usuario
+        doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.text('Información del Usuario',15,yPos); yPos+=9;
+        agregarCampo('Nombre', document.getElementById('usuario-nombre').textContent);
+        agregarCampo('Edad', document.getElementById('usuario-edad').textContent);
+        agregarCampo('Sector', document.getElementById('usuario-sector').textContent);
+        agregarCampo('Categoría', document.getElementById('usuario-categoria').textContent);
+        agregarCampo('Patologías', document.getElementById('usuario-patologias').textContent);
+        const fechaIngreso = document.getElementById('fecha_ingreso')?.value || '-';
+        let fechaTermino = document.getElementById('fecha_termino_display')?.textContent || '-';
+        agregarCampo('Fecha de Ingreso', fechaIngreso);
+        agregarCampo('Fecha de Término', fechaTermino);
+        yPos += 5;
+
+        // Datos del seguimiento
+        doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.text('Datos del Seguimiento',15,yPos); yPos+=8;
+        agregarCampo('Fecha Seguimiento', document.getElementById('fecha_seguimiento').value);
+        agregarCampo('Tipo Contacto', document.querySelector('select[name="tipo_contacto"]').value);
+        agregarCampo('Duración (min)', document.getElementById('duracion_minutos').value);
+        agregarCampo('Responsable', document.getElementById('profesional_nombre').value);
+        agregarCampo('Estado', document.querySelector('select[name="estado_seguimiento"]').value);
+        yPos += 5;
+
+        // Tabla: Seguimientos
+        doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.text('Seguimientos Registrados del Usuario',15,yPos); yPos+=8;
+        doc.setFontSize(9); doc.setFont('helvetica','bold');
+        const headers = ['Fecha','RUN','Nombre','Tipo','Responsable','Estado','Duración'];
+        let colWidths = [22, 28, 45, 22, 32, 22, 18];
+        let x = 15;
+        headers.forEach((h,i)=>{ doc.text(h,x,yPos); x+=colWidths[i]; });
+        yPos+=6;
+        doc.setFont('helvetica','normal');
+        const filas = Array.from(document.querySelectorAll('#seguimientos-tbody tr'));
+        filas.forEach(tr=>{
+          const tds = tr.querySelectorAll('td');
+          if(tds.length>=7){
+            x=15;
+            const rowHeights = [];
+            for(let i=0;i<7;i++){
+              let txt = tds[i].textContent.trim();
+              let split = doc.splitTextToSize(txt, colWidths[i]-2);
+              rowHeights.push(split.length);
+              doc.text(split, x, yPos);
+              x+=colWidths[i];
+            }
+            yPos+=Math.max(...rowHeights)*5+1;
+          }
+        });
+        yPos+=8;
+
+        // Tabla: Plan de Acción
+        doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.text('Plan de Acción del Usuario',15,yPos); yPos+=8;
+        doc.setFontSize(9); doc.setFont('helvetica','bold');
+        const planHeaders = ['Fecha','Plan de Acción','Responsable'];
+        const planColWidths = [32, 110, 40];
+        x = 15;
+        planHeaders.forEach((h,i)=>{ doc.text(h,x,yPos); x+=planColWidths[i]; });
+        yPos+=6;
+        doc.setFont('helvetica','normal');
+        const filasPlan = Array.from(document.querySelectorAll('#planes-accion-tbody tr'));
+        filasPlan.forEach(tr=>{
+          const tds = tr.querySelectorAll('td');
+          if(tds.length>=3){
+            x=15;
+            const rowHeights = [];
+            for(let i=0;i<3;i++){
+              let txt = tds[i].textContent.trim();
+              let split = doc.splitTextToSize(txt, planColWidths[i]-2);
+              rowHeights.push(split.length);
+              doc.text(split, x, yPos);
+              x+=planColWidths[i];
+            }
+            yPos+=Math.max(...rowHeights)*5+1;
+          }
+        });
+        yPos+=8;
+
+
+  // Footer
+  doc.setFontSize(8); doc.setFont('helvetica','italic');
+  doc.text('Documento generado el: ' + new Date().toLocaleDateString('es-CL'), 15, 270);
+  doc.text('Sistema ECICEP - Gestión de Acompañamiento', 15, 275);
+  doc.text('Powered por Hernando Gayoso Navarrete', 15, 280);
+
+        const fecha = new Date().toISOString().split('T')[0];
+        doc.save(`Gestion_Acompanamiento_${fecha}.pdf`);
+      } catch (err) {
+        alert('Error al generar PDF: ' + (err.message || err));
+        console.error('Error al generar PDF:', err);
+      }
+    }
+
+    // --- Tabla de Plan de Acción ---
+    let planesAccionData = [];
+    async function cargarPlanesAccion(){
+      const runInput = document.getElementById('usuario_run');
+      let run = runInput ? runInput.value.trim() : '';
+      const tbody = document.getElementById('planes-accion-tbody');
+      if (!run){
+        tbody.innerHTML = '<tr><td colspan="3" class="no-data">Ingrese un RUN para ver los planes</td></tr>';
+        return;
+      }
+      run = run.replace(/[^0-9kK]/g,'').toUpperCase();
+      try{
+        const response = await fetch(`/api/seguimientos?run=${encodeURIComponent(run)}`);
+        if (response.ok){
+          const data = await response.json();
+          planesAccionData = (data || []).sort((a,b)=> (b.fecha_seguimiento||'').localeCompare(a.fecha_seguimiento||''));
+          mostrarPlanesAccion();
+        } else {
+          tbody.innerHTML = '<tr><td colspan="3" class="no-data">Error al cargar planes</td></tr>';
+        }
+      }catch(e){
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="3" class="no-data">Error de conexión</td></tr>';
+      }
+    }
+
+    function mostrarPlanesAccion(){
+      const tbody = document.getElementById('planes-accion-tbody');
+      if (!planesAccionData.length){
+        tbody.innerHTML = '<tr><td colspan="3" class="no-data">No hay planes registrados</td></tr>';
+        return;
+      }
+      tbody.innerHTML = planesAccionData.map(plan => `
+        <tr>
+          <td>${plan.creado_en ? new Date(plan.creado_en).toLocaleDateString('es-CL') : ''}</td>
+          <td style="white-space:pre-line;">${plan.plan_accion ? plan.plan_accion.replace(/\n/g,'<br>') : ''}</td>
+          <td>${plan.profesional_nombre || ''}</td>
+        </tr>
+      `).join('');
+    }
+
+    // --- Tabla de Seguimientos ---
+    let seguimientosData = [];
+    let paginaActual = 1;
+    const registrosPorPagina = 10;
+
+    async function cargarSeguimientos(){
+      const runInput = document.getElementById('usuario_run');
+      let run = runInput ? runInput.value.trim() : '';
+      const tbody = document.getElementById('seguimientos-tbody');
+      if (!run){
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">Ingrese un RUN para ver los seguimientos</td></tr>';
+        document.getElementById('pagination-container').style.display = 'none';
+        return;
+      }
+      run = run.replace(/[^0-9kK]/g,'').toUpperCase();
+      try{
+        const response = await fetch(`/api/seguimientos?run=${encodeURIComponent(run)}`);
+        if (response.ok){
+          seguimientosData = await response.json();
+          mostrarSeguimientos();
+        } else {
+          tbody.innerHTML = '<tr><td colspan="8" class="no-data">Error al cargar seguimientos</td></tr>';
+        }
+      }catch(error){
+        console.error('Error cargarSeguimientos:', error);
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">Error de conexión</td></tr>';
+      }
+    }
+
+    function mostrarSeguimientos(){
+      const tbody = document.getElementById('seguimientos-tbody');
+      const paginationContainer = document.getElementById('pagination-container');
+      const paginationInfo = document.getElementById('pagination-info');
+
+      if (!Array.isArray(seguimientosData) || seguimientosData.length === 0){
+        tbody.innerHTML = '<tr><td colspan="8" class="no-data">No hay seguimientos registrados</td></tr>';
+        paginationContainer.style.display = 'none';
+        return;
+      }
+
+      const inicio = (paginaActual - 1) * registrosPorPagina;
+      const fin = inicio + registrosPorPagina;
+      const registrosPagina = seguimientosData.slice(inicio, fin);
+      const totalPaginas = Math.ceil(seguimientosData.length / registrosPorPagina);
+
+      const nombreFallback = document.getElementById('usuario-nombre')?.textContent || '';
+
+      tbody.innerHTML = registrosPagina.map(seguimiento => `
+        <tr>
+          <td>${formatearFecha(seguimiento.fecha_seguimiento)}</td>
+          <td>${seguimiento.usuario_run || ''}</td>
+          <td>${seguimiento.usuario_nombre || nombreFallback}</td>
+          <td>${formatearTipoContacto(seguimiento.tipo_contacto || '')}</td>
+          <td>${seguimiento.profesional_responsable || seguimiento.profesional_nombre || ''}</td>
+          <td><span class="status-badge status-${seguimiento.estado_seguimiento}">${formatearEstado(seguimiento.estado_seguimiento)}</span></td>
+          <td>${(seguimiento.duracion_minutos ?? 0)} min</td>
+          <td>
+            <div class="action-buttons">
+              <button onclick="verDetalles(${seguimiento.id})" class="btn btn-primary btn-xs" title="Ver detalles">👁️</button>
+              <button onclick="editarSeguimiento(${seguimiento.id})" class="btn btn-warning btn-xs" title="Editar">✏️</button>
+              <button onclick="eliminarSeguimiento(${seguimiento.id})" class="btn btn-danger btn-xs" title="Eliminar">🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      paginationInfo.textContent = `Página ${paginaActual} de ${totalPaginas} (${seguimientosData.length} registros total)`;
+      paginationContainer.style.display = seguimientosData.length > registrosPorPagina ? 'flex' : 'none';
+      const btnAnterior = paginationContainer.querySelector('button:first-child');
+      const btnSiguiente = paginationContainer.querySelector('button:last-child');
+      btnAnterior.disabled = paginaActual === 1;
+      btnSiguiente.disabled = paginaActual === totalPaginas;
+    }
+
+    function cambiarPagina(dir){
+      const totalPaginas = Math.ceil(seguimientosData.length / registrosPorPagina);
+      const nueva = paginaActual + dir;
+      if (nueva >=1 && nueva <= totalPaginas){
+        paginaActual = nueva; mostrarSeguimientos();
+      }
+    }
+
+    function formatearFecha(f){ return f ? new Date(f+'T00:00:00').toLocaleDateString('es-CL') : ''; }
+    function formatearTipoContacto(t){
+      const m={presencial:'Presencial',telefonico:'Telefónico',videollamada:'Videollamada',domiciliario:'Domiciliario',mensaje:'Mensaje'};
+      return m[t] || t;
+    }
+    function formatearEstado(e){
+      const m={inicio_plan:'Inicio Plan',programado:'Programado',realizado:'Realizado',no_contactado:'No Contactado',cancelado:'Cancelado',reagendado:'Reagendado'};
+      return m[e] || e;
+    }
+
+    function verDetalles(id){
+      const s = seguimientosData.find(x=>x.id===id);
+      if (s){
+        alert(`Detalles del seguimiento:\n\nFecha: ${s.fecha_seguimiento}\nUsuario: ${s.usuario_nombre || ''}\nResponsable: ${s.profesional_responsable || s.profesional_nombre || ''}\nEstado: ${formatearEstado(s.estado_seguimiento)}`);
+      }
+    }
+
+    function editarSeguimiento(id){
+      const s = seguimientosData.find(x=>x.id===id);
+      if (s && confirm('¿Desea cargar este seguimiento en el formulario para editarlo?')){
+        document.getElementById('usuario_run').value = s.usuario_run || '';
+        document.getElementById('fecha_seguimiento').value = s.fecha_seguimiento || '';
+        document.querySelector('select[name="tipo_contacto"]').value = s.tipo_contacto || '';
+        document.getElementById('profesional_nombre').value = s.profesional_responsable || s.profesional_nombre || '';
+        document.querySelector('select[name="estado_seguimiento"]').value = s.estado_seguimiento || '';
+        document.getElementById('duracion_minutos').value = s.duracion_minutos ?? '';
+        document.querySelector('form').scrollIntoView({ behavior:'smooth' });
+      }
+    }
+
+    function eliminarSeguimiento(id){
+      if (confirm('¿Está seguro de que desea eliminar este seguimiento?')){
+        // Aquí iría DELETE al backend
+        seguimientosData = seguimientosData.filter(s=>s.id!==id);
+        const totalPaginas = Math.ceil(seguimientosData.length / registrosPorPagina);
+        if (paginaActual > totalPaginas && totalPaginas > 0) paginaActual = totalPaginas;
+        mostrarSeguimientos();
+        alert('Seguimiento eliminado correctamente');
+      }
+    }
+  </script>
+</body>
+</html>

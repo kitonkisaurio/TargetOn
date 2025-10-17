@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug Charts</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
+    <style>
+      body {
+        margin: 20px;
+        font-family: Arial, sans-serif;
+      }
+      .chart-container {
+        margin: 20px 0;
+        padding: 20px;
+        border: 1px solid #ccc;
+        width: 600px;
+        height: 350px;
+      }
+      .debug-info {
+        background: #f0f0f0;
+        padding: 10px;
+        margin: 10px 0;
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Debug Chart.js</h1>
+
+    <div class="debug-info" id="debug-info">
+      <p>Loading debug information...</p>
+    </div>
+
+    <div class="chart-container">
+      <h3>Test Chart</h3>
+      <canvas id="testChart" width="600" height="300"></canvas>
+    </div>
+
+    <!-- Datos del backend como JSON seguro -->
+    <script id="chart-data" type="application/json">
+      {{ chart_data|tojson }}
+    </script>
+
+    <script>
+      const debugInfo = document.getElementById("debug-info");
+
+      function log(message) {
+        console.log(message);
+        debugInfo.innerHTML += "<p>" + message + "</p>";
+      }
+
+      // Datos de prueba del usuario real (JSON seguro)
+      function getJson(id) {
+        try {
+          const el = document.getElementById(id);
+          return el ? JSON.parse(el.textContent || "null") || {} : {};
+        } catch (e) {
+          return {};
+        }
+      }
+      const chartData = getJson("chart-data");
+      log(
+        "Chart data loaded: " +
+          JSON.stringify(chartData).substring(0, 100) +
+          "...",
+      );
+
+      // Verificar Chart.js
+      log("Chart.js available: " + (typeof Chart !== "undefined"));
+      if (typeof Chart !== "undefined") {
+        log("Chart.js version: " + Chart.version);
+      }
+
+      // Función buildXY
+      function buildXY(fechas, valores) {
+        const result = { xs: [], ys: [] };
+        for (let i = 0; i < fechas.length && i < valores.length; i++) {
+          if (
+            valores[i] !== null &&
+            valores[i] !== undefined &&
+            valores[i] !== ""
+          ) {
+            result.xs.push(fechas[i]);
+            result.ys.push(parseFloat(valores[i]));
+          }
+        }
+        return result;
+      }
+
+      // Crear gráfico de prueba
+      window.addEventListener("load", function () {
+        log("Page loaded, creating chart...");
+
+        const canvas = document.getElementById("testChart");
+        if (!canvas) {
+          log("ERROR: Canvas not found!");
+          return;
+        }
+
+        log("Canvas found: " + canvas.tagName);
+
+        if (typeof Chart === "undefined") {
+          log("ERROR: Chart.js not loaded!");
+          return;
+        }
+
+        try {
+          // Usar datos reales de peso
+          const pesoData = buildXY(
+            chartData.fechas || [],
+            chartData.peso || [],
+          );
+          log("Peso data points: " + pesoData.xs.length);
+
+          if (pesoData.xs.length === 0) {
+            log("WARNING: No peso data points found");
+          }
+
+          const chart = new Chart(canvas.getContext("2d"), {
+            type: "line",
+            data: {
+              labels: pesoData.xs.map((x) => new Date(x).toLocaleDateString()),
+              datasets: [
+                {
+                  label: "Peso (kg)",
+                  data: pesoData.ys,
+                  borderColor: "rgb(75, 192, 192)",
+                  backgroundColor: "rgba(75, 192, 192, 0.2)",
+                  borderWidth: 2,
+                  fill: false,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: {
+                  beginAtZero: false,
+                },
+              },
+            },
+          });
+
+          log("✅ Chart created successfully!");
+          log("Chart instance: " + chart.constructor.name);
+        } catch (error) {
+          log("❌ ERROR creating chart: " + error.message);
+          console.error("Chart creation error:", error);
+        }
+      });
+    </script>
+  </body>
+</html>

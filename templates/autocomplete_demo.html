@@ -1,0 +1,310 @@
+<!doctype html>
+<!--
+ECICEP - Ejemplo de integración de autocompletado robusto
+Autor: Sistema ECICEP
+Fecha: 2025-10-06
+
+Descripción:
+  Ejemplo de integración del autocompletado en frontend con:
+  - Select2 para UI/UX mejorada
+  - Búsqueda contextual (sexo/edad del paciente)
+  - Logging de selecciones
+  - Manejo de errores
+-->
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ECICEP - Ejemplo Autocompletado</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+
+    <!-- Select2 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+          Cantarell, sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      .select2-container {
+        width: 100% !important;
+      }
+      .info {
+        background: #e3f2fd;
+        border-left: 4px solid #2196f3;
+        padding: 12px;
+        margin: 20px 0;
+      }
+      .success {
+        background: #e8f5e9;
+        border-left: 4px solid #4caf50;
+        padding: 12px;
+        margin: 20px 0;
+      }
+      .error {
+        background: #ffebee;
+        border-left: 4px solid #f44336;
+        padding: 12px;
+        margin: 20px 0;
+      }
+      .metadata {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔍 ECICEP - Autocompletado Robusto</h1>
+
+    <div class="info">
+      <strong>Características:</strong>
+      <ul style="margin: 8px 0 0 20px">
+        <li>Búsqueda fuzzy (tolerante a errores de tipeo)</li>
+        <li>Sin tildes necesarias (hipertension = hipertensión)</li>
+        <li>Ranking contextual por sexo/edad del paciente</li>
+        <li>Cache automático (90s TTL)</li>
+        <li>Latencia &lt;150ms p95</li>
+      </ul>
+    </div>
+
+    <form id="patologia-form">
+      <!-- Datos del paciente (para ranking contextual) -->
+      <h3>Datos del Paciente</h3>
+
+      <div class="form-group">
+        <label for="paciente-sexo">Sexo:</label>
+        <select id="paciente-sexo">
+          <option value="">No especificado</option>
+          <option value="F">Femenino</option>
+          <option value="M">Masculino</option>
+          <option value="X">Otro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="paciente-edad">Edad (años):</label>
+        <input
+          type="number"
+          id="paciente-edad"
+          min="0"
+          max="120"
+          placeholder="Ej: 65"
+        />
+      </div>
+
+      <!-- Campo de autocompletado -->
+      <h3>Diagnóstico / Patología</h3>
+
+      <div class="form-group">
+        <label for="patologia-select">Buscar patología:</label>
+        <select id="patologia-select" style="width: 100%"></select>
+        <div class="metadata" id="metadata"></div>
+      </div>
+
+      <!-- Resultado seleccionado -->
+      <div id="result" style="display: none"></div>
+    </form>
+
+    <!-- Ejemplos de búsqueda -->
+    <div class="info" style="margin-top: 40px">
+      <strong>💡 Ejemplos de búsqueda:</strong>
+      <ul style="margin: 8px 0 0 20px">
+        <li><code>hipert</code> → Hipertensión</li>
+        <li><code>diabtes</code> → Diabetes (tolerancia a error de tipeo)</li>
+        <li><code>asma</code> → Asma</li>
+        <li><code>obesi</code> → Obesidad</li>
+        <li><code>ansied</code> → Ansiedad</li>
+      </ul>
+    </div>
+
+    <!-- jQuery (requerido por Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        // Configurar Select2 con autocompletado
+        $("#patologia-select").select2({
+          placeholder:
+            "Escriba para buscar patología (ej: hipert, diab, asma)...",
+          allowClear: true,
+          minimumInputLength: 2,
+          language: {
+            inputTooShort: function () {
+              return "Escriba al menos 2 caracteres...";
+            },
+            noResults: function () {
+              return "No se encontraron resultados";
+            },
+            searching: function () {
+              return "Buscando...";
+            },
+          },
+          ajax: {
+            url: "/api/autocomplete/patologia",
+            dataType: "json",
+            delay: 250, // Debounce
+            cache: true,
+            data: function (params) {
+              // Obtener contexto del paciente
+              const sexo = $("#paciente-sexo").val() || "";
+              const edad = $("#paciente-edad").val() || "";
+
+              return {
+                q: params.term || "", // Query de búsqueda
+                sexo: sexo,
+                edad: edad,
+                k: 15, // Máximo 15 resultados
+              };
+            },
+            processResults: function (data) {
+              // Mostrar metadata
+              const metadata = $("#metadata");
+              if (data.latency_ms) {
+                const cached = data.cached ? " (cache)" : "";
+                metadata.text(
+                  `${data.count} resultado(s) en ${data.latency_ms}ms${cached}`,
+                );
+              }
+
+              // Transformar respuesta para Select2
+              return {
+                results: data.items.map((item) => ({
+                  id: item.id,
+                  text: `${item.code} - ${item.text}`,
+                  code: item.code,
+                  name: item.text,
+                  rank: item.rank,
+                })),
+              };
+            },
+            error: function (xhr, status, error) {
+              console.error("Error en autocompletado:", error);
+
+              // Mostrar error al usuario
+              if (xhr.status === 429) {
+                alert("Demasiadas búsquedas. Por favor espere un momento.");
+              } else {
+                $("#metadata").text("Error al buscar. Intente nuevamente.");
+              }
+            },
+          },
+          templateResult: function (item) {
+            // Personalizar visualización de resultados
+            if (!item.id) return item.text;
+
+            return $(`
+                        <div style="padding: 4px 0;">
+                            <div style="font-weight: 600; color: #1976d2;">${item.code}</div>
+                            <div style="font-size: 13px; color: #424242;">${item.name}</div>
+                        </div>
+                    `);
+          },
+          templateSelection: function (item) {
+            // Personalizar visualización de selección
+            if (!item.code) return item.text;
+            return `${item.code} - ${item.name}`;
+          },
+        });
+
+        // Manejar selección
+        $("#patologia-select").on("select2:select", function (e) {
+          const data = e.params.data;
+
+          console.log("Seleccionado:", data);
+
+          // Mostrar resultado
+          $("#result")
+            .html(
+              `
+                    <div class="success">
+                        <strong>✓ Patología seleccionada:</strong><br>
+                        <strong>CIE10:</strong> ${data.code}<br>
+                        <strong>Nombre:</strong> ${data.name}<br>
+                        <strong>ID:</strong> ${data.id}
+                    </div>
+                `,
+            )
+            .show();
+
+          // Registrar selección en telemetría
+          logSelection(
+            e.params.data,
+            $("#patologia-select")
+              .data("select2")
+              .$dropdown.find("input")
+              .val(),
+          );
+        });
+
+        // Manejar limpieza
+        $("#patologia-select").on("select2:clear", function (e) {
+          $("#result").hide();
+          $("#metadata").text("");
+        });
+
+        // Función para registrar selección en backend
+        function logSelection(item, query) {
+          // Enviar a endpoint de telemetría
+          fetch("/api/autocomplete/patologia/select", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query: query || "",
+              selected_id: item.id,
+              selected_text: item.name,
+            }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("Selección registrada:", data);
+            })
+            .catch((error) => {
+              console.warn("Error registrando selección:", error);
+              // No mostrar error al usuario (no es crítico)
+            });
+        }
+
+        // Auto-actualizar metadata al cambiar contexto del paciente
+        $("#paciente-sexo, #paciente-edad").on("change", function () {
+          const $select = $("#patologia-select");
+          if ($select.val()) {
+            // Re-trigger búsqueda con nuevo contexto
+            $select.val(null).trigger("change");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,2670 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ficha de usuario - ECICEP 2025</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+      :root {
+        --bg: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        --card: #ffffff;
+        --text: #1e293b;
+        --muted: #64748b;
+        --primary: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        --primary-ink: #ffffff;
+        --ring: rgba(59, 130, 246, 0.15);
+        --border: #e2e8f0;
+        --row: linear-gradient(135deg, #fafbfc 0%, #f8fafc 100%);
+        --danger: #ef4444;
+        --danger-bg: #fee2e2;
+        --ok: #10b981;
+        --ok-bg: #dcfce7;
+        --warn: #f59e0b;
+        --warn-bg: #fef3c7;
+        --neon-red: #ff1744;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          Noto Sans,
+          Helvetica,
+          Arial;
+        font-weight: 400;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .wrap {
+        max-width: 1600px;
+        margin: 24px auto;
+        padding: 0 20px;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        padding: 32px;
+        margin-bottom: 24px;
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow:
+          0 10px 25px -3px rgba(0, 0, 0, 0.1),
+          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      h1 {
+        font-size: 2rem;
+        margin: 0 0 24px 0;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+      }
+
+      /* Nombres de usuario con estilos según sexo pero manteniendo legibilidad */
+      h1.sexo-masculino {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        padding: 16px 24px;
+        border-radius: 12px;
+        color: #1e40af;
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.1);
+        border: 2px solid #93c5fd;
+      }
+
+      h1.sexo-femenino {
+        background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+        padding: 16px 24px;
+        border-radius: 12px;
+        color: #be185d;
+        box-shadow: 0 4px 6px rgba(190, 24, 93, 0.1);
+        border: 2px solid #f3b9e0;
+      }
+
+      /* Para nombres sin clasificación de sexo */
+      h1:not(.sexo-masculino):not(.sexo-femenino) {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 16px 24px;
+        border-radius: 12px;
+        color: var(--text);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: 2px solid #e2e8f0;
+      }
+
+      /* Sexo con diseño moderno - actualizado para consistencia */
+      .sexo-masculino:not(h1) {
+        background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        padding: 8px 16px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 600;
+        color: #1e40af;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+      }
+      .sexo-femenino:not(h1) {
+        background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+        padding: 8px 16px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        font-weight: 600;
+        color: #be185d;
+        box-shadow: 0 2px 4px rgba(190, 24, 93, 0.1);
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 12px 24px;
+        align-items: start;
+      }
+
+      .k {
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .btns {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 24px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 12px 20px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        text-decoration: none;
+        color: var(--text);
+        background: #ffffff;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .btn.primary {
+        background: var(--primary);
+        color: var(--primary-ink);
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn.primary:hover {
+        box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.3);
+      }
+
+      .mt-12 {
+        margin-top: 16px;
+      }
+
+      .mt-20 {
+        margin-top: 24px;
+      }
+
+      /* Tabla moderna */
+      .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--border);
+      }
+
+      table {
+        width: 100%;
+        min-width: 1200px;
+        border-collapse: collapse;
+        margin-top: 0;
+        border: none;
+        background: #ffffff;
+      }
+
+      th,
+      td {
+        padding: 16px 12px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.4;
+      }
+
+      thead th {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        font-weight: 700;
+        color: var(--text);
+        font-size: 0.9rem;
+        position: sticky;
+        top: 0;
+        border-bottom: 2px solid var(--border);
+      }
+
+      tbody tr {
+        transition: all 0.2s ease;
+      }
+
+      tbody tr:nth-child(even) {
+        background: var(--row);
+      }
+
+      tbody tr:hover {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        transform: translateX(2px);
+      }
+
+      /* Etapas HTA modernas */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: 1px solid transparent;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      .etapa-normo {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        color: #065f46;
+        border-color: #86efac;
+      }
+
+      .etapa-hta1 {
+        background: linear-gradient(135deg, #fef3c7, #fed7aa);
+        color: #7c4a03;
+        border-color: #fcd34d;
+      }
+
+      .etapa-hta2 {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        color: #7c2d12;
+        border-color: #f87171;
+      }
+      .etapa-hta3 {
+        background: #ffe5e5;
+        color: #7f1d1d;
+      }
+
+      /* Sector */
+      .sector-pill {
+        display: inline-block;
+        padding: 4px 6px;
+        border-radius: 6px;
+        font-weight: 600;
+        line-height: 1;
+      }
+      .sector-amarillo {
+        background: #fde047;
+        color: #1f2937;
+      }
+      .sector-trespinos {
+        background: #1d4ed8;
+        color: #fff;
+      }
+      .sector-antihuala {
+        background: #38bdf8;
+        color: #1f2937;
+      }
+      .sector-verde {
+        background: #16a34a;
+        color: #fff;
+      }
+      .sector-pangue {
+        background: #86efac;
+        color: #1f2937;
+      }
+      .sector-rojo {
+        background: #dc2626;
+        color: #fff;
+      }
+      .sector-ranquilco {
+        background: #22c55e;
+        color: #fff;
+      }
+      .sector-default {
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      /* Profesional */
+      .prof-pill {
+        display: inline-block;
+        padding: 3px 4px;
+        border-radius: 6px;
+        font-weight: 600;
+        line-height: 1;
+        font-size: 0.85rem;
+      }
+      .prof-enfermero {
+        background: #1d4ed8;
+        color: #fff;
+      }
+      .prof-medico {
+        background: #111827;
+        color: #fff;
+      }
+      .prof-nutricionista {
+        background: #7e22ce;
+        color: #fff;
+      }
+      .prof-matrona {
+        background: #dc2626;
+        color: #fff;
+      }
+      .prof-dupla {
+        background: #38bdf8;
+        color: #1f2937;
+      }
+      .prof-asistente {
+        background: #6b7280;
+        color: #fff;
+      }
+      .prof-vdi {
+        color: #dc2626;
+      }
+      .prof-uapo {
+        color: #16a34a;
+      }
+
+      /* Grupo etario colores en el texto */
+      .ge-adulto {
+        color: #1d4ed8;
+        font-weight: 700;
+      }
+      .ge-adulto-mayor {
+        color: #dc2626;
+        font-weight: 700;
+      }
+
+      /* Categorías de riesgo */
+      .categoria-riesgo {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.9rem;
+      }
+      .categoria-g1 {
+        background: #dcfce7;
+        color: #16a34a;
+      }
+      .categoria-g2 {
+        background: #fef3c7;
+        color: #d97706;
+      }
+      .categoria-g3 {
+        background: #fee2e2;
+        color: #dc2626;
+      }
+      .categoria-default {
+        background: #f3f4f6;
+        color: #4b5563;
+      }
+
+      /* IMC colores */
+      .imc-morado {
+        background: #d8b4fe;
+        color: #111827;
+        border-radius: 6px;
+        padding: 2px 4px;
+      }
+      .imc-verde {
+        background: #86efac;
+        color: #064e3b;
+        border-radius: 6px;
+        padding: 2px 4px;
+      }
+      .imc-amarillo {
+        background: #fde047;
+        color: #78350f;
+        border-radius: 6px;
+        padding: 2px 4px;
+      }
+      .imc-rojo {
+        background: #fca5a5;
+        color: #7f1d1d;
+        border-radius: 6px;
+        padding: 2px 4px;
+      }
+
+      /* Valores */
+      .valor-critico {
+        background: var(--danger-bg);
+        color: var(--danger);
+        font-weight: 700;
+        border-radius: 4px;
+        padding: 2px 6px;
+      }
+      .val-ok {
+        background: var(--ok-bg);
+        color: var(--ok);
+        font-weight: 700;
+        border-radius: 4px;
+        padding: 2px 6px;
+      }
+      .val-warn {
+        background: var(--warn-bg);
+        color: var(--warn);
+        font-weight: 700;
+        border-radius: 4px;
+        padding: 2px 6px;
+      }
+      .val-neon {
+        color: var(--neon-red);
+        font-weight: 800;
+      }
+
+      /* Patologías badges */
+      .pat-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .pat {
+        display: inline-block;
+        padding: 4px 6px;
+        border-radius: 999px;
+        font-weight: 600;
+        border: 1px solid transparent;
+      }
+
+      /* Alertas contextuales */
+      .alertas-section {
+        margin-top: 16px;
+      }
+      .alertas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .alerta-card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 12px;
+        background: #fff;
+      }
+      .alerta-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .alerta-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin: 0;
+      }
+      .alerta-items {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .alerta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 0;
+        font-size: 13px;
+      }
+      .alerta-icon {
+        font-size: 14px;
+        width: 16px;
+        text-align: center;
+      }
+      .alerta-falta {
+        color: var(--danger);
+      }
+      .alerta-ok {
+        color: var(--ok);
+      }
+      .alerta-warn {
+        color: var(--warn);
+      }
+      .hidden {
+        display: none !important;
+      }
+      .pat-diabetes {
+        background: var(--ok-bg);
+        color: var(--ok);
+        border-color: #86efac;
+      }
+      .pat-hta {
+        background: #fee2e2;
+        color: #991b1b;
+        border-color: #fca5a5;
+      }
+      .pat-dislipidemia {
+        background: #fef3c7;
+        color: #92400e;
+        border-color: #fde68a;
+      }
+
+      /* Colores aplicados SOLO al cuadro 'Promedio PA' según clasificación */
+      .promedio-hta {
+        position: relative;
+      }
+      /* Fondos por etapa: normotensión=verde, hta1=amarillo, hta2=naranja, hta3=rojo */
+      .promedio-hta.promedio-etapa-normo {
+        background-color: #29a744;
+        border-left: 6px solid #29a744;
+      }
+      .promedio-hta.promedio-etapa-hta1 {
+        background-color: #fde047;
+        border-left: 6px solid #fde047;
+      }
+      .promedio-hta.promedio-etapa-hta2 {
+        background-color: #f96d16ff;
+        border-left: 6px solid #f96d16ff;
+      }
+      .promedio-hta.promedio-etapa-hta3 {
+        background-color: #ed3e3c;
+        border-left: 6px solid #ed3e3c;
+      }
+
+      /* Color del texto interno del cuadro Promedio PA según etapa */
+      .promedio-hta .promedio-clasificacion {
+        font-weight: 700;
+        margin: 8px 0;
+      }
+      .promedio-hta .promedio-valor {
+        font-weight: 700;
+        margin-top: 6px;
+        color: #111827;
+      }
+      .promedio-hta.promedio-etapa-normo .promedio-clasificacion {
+        color: #f1f1f1ff;
+      }
+      .promedio-hta.promedio-etapa-hta1 .promedio-clasificacion {
+        color: #1c1c1cff;
+      }
+      .promedio-hta.promedio-etapa-hta2 .promedio-clasificacion {
+        color: #000000ff;
+      }
+      .promedio-hta.promedio-etapa-hta3 .promedio-clasificacion {
+        color: #faf6f6ff;
+      }
+      /* Mensajes globales */
+      .mensaje {
+        margin: 10px 0;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+      }
+      .mensaje.error {
+        background: #fff5f5;
+        border-color: #fecaca;
+        color: #991b1b;
+      }
+      .mensaje.exito {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #065f46;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      /* Tarjetón branding encima del nombre */
+      .tarjeton-wrapper {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 0 6px 0;
+        padding-top: 4px;
+      }
+      /* Más ancho y menos alto: usamos un ancho relativo mayor y limitamos la altura */
+      .tarjeton-wrapper img {
+        width: 60%;
+        max-width: 520px;
+        min-width: 220px;
+        max-height: 135px;
+        object-fit: contain;
+        object-position: center;
+        opacity: 1;
+        mix-blend-mode: normal;
+        filter: none;
+        pointer-events: none;
+        user-select: none;
+      }
+      @media (max-width: 1100px) {
+        .tarjeton-wrapper img {
+          width: 65%;
+          max-height: 128px;
+        }
+      }
+      @media (max-width: 900px) {
+        .tarjeton-wrapper img {
+          width: 70%;
+          max-height: 120px;
+        }
+      }
+      @media (max-width: 600px) {
+        .tarjeton-wrapper img {
+          width: 80%;
+          min-width: 180px;
+          max-height: 105px;
+        }
+      }
+      /* Ajustar separación del h1 cuando existe tarjetón */
+      .has-tarjeton h1 {
+        margin-top: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        {# Banner de mensajes (acepta var de contexto o query param) #} {% set
+        _mensaje = (mensaje if mensaje is defined else
+        request.args.get('mensaje')) %} {% if _mensaje or request.args.get('ok')
+        %} {% if _mensaje and ('RUN inválido' in _mensaje or 'Error' in _mensaje
+        or 'violates' in _mensaje or 'constraint' in _mensaje or 'null value' in
+        _mensaje or 'inválido' in _mensaje or 'obligatorio' in _mensaje) %}
+        <div class="mensaje error">{{ _mensaje }}</div>
+        {% else %}
+        <div class="mensaje exito">
+          {{ _mensaje or '✅ Operación realizada correctamente.' }}
+        </div>
+        {% endif %} {% endif %}
+
+        <script>
+          // Flag global de error y control de alert único
+          window.HAS_ERROR = {% if _mensaje and ('Error' in _mensaje or 'error' in _mensaje or 'violates' in _mensaje or 'constraint' in _mensaje or 'null value' in _mensaje or 'obligatorio' in _mensaje or 'inválido' in _mensaje) %}true{% else %}false{% endif %};
+          window.__ALERT_SHOWN__ = false;
+          function showAlertOnce(msg){
+            if(window.__ALERT_SHOWN__) return; window.__ALERT_SHOWN__ = true;
+            try { alert('⚠️ Se encontró un problema:\n\n' + msg + '\n\n💡 Revisa los datos y vuelve a intentar.'); } catch(_){ }
+          }
+          try {
+            if (window.HAS_ERROR) {
+              setTimeout(function(){
+                try {
+                  var msg = {{ _mensaje|tojson|safe if _mensaje else 'null' }};
+                  if (msg) showAlertOnce(msg);
+                } catch(_){}
+              }, 200);
+            }
+            // Si viene ok=1 y no hay banner, inyectar y limpiar URL
+            (function(){
+              const params = new URLSearchParams(window.location.search);
+              if (params.get('ok') === '1'){
+                const ya = document.querySelector('.mensaje.exito, .mensaje.error');
+                if (!ya){
+                  const div = document.createElement('div');
+                  div.className = 'mensaje exito';
+                  div.textContent = '✅ Operación realizada correctamente.';
+                  const card = document.querySelector('.wrap > .card');
+                  if (card) card.insertAdjacentElement('afterbegin', div);
+                  setTimeout(()=>{ if(div&&div.parentNode) div.parentNode.removeChild(div); }, 5000);
+                }
+                const url = new URL(window.location.href);
+                url.searchParams.delete('ok');
+                history.replaceState({}, '', url.toString());
+              }
+              // Fallback: si hay banner error y HAS_ERROR=false por alguna razón, mostrar alert
+              const err = document.querySelector('.mensaje.error');
+              if (err && window.HAS_ERROR !== true){
+                setTimeout(()=>{ try { showAlertOnce(err.textContent||'Error'); } catch(_){} }, 200);
+              }
+            })();
+          } catch(_){}
+        </script>
+        {% set sexo_norm = (usuario.sexo or '')|trim|lower %}
+        <div class="tarjeton-wrapper">
+          <img
+            src="{{ url_for('static', filename='tarjeton.png') }}"
+            alt="Tarjetón"
+            aria-hidden="true"
+          />
+        </div>
+        <h1
+          class="{{ 'sexo-masculino' if sexo_norm in ['masculino','m','hombre','varon','varón'] else ('sexo-femenino' if sexo_norm in ['femenino','f','mujer'] else '') }}"
+          style="text-align: center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            style="width: 1.5rem; height: 1.5rem; margin-right: 12px"
+            fill="currentColor"
+          >
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+            />
+          </svg>
+          {% if usuario.nombre %} {{ usuario.nombre }} {% else %}
+          <span style="color: #ef4444; font-style: italic"
+            >⚠️ Nombre no disponible</span
+          >
+          {% endif %}
+        </h1>
+
+        <!-- Información de debug temporal -->
+        {% if not usuario.nombre %}
+        <div
+          style="
+            background: #fee2e2;
+            border: 1px solid #f87171;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            color: #dc2626;
+            font-size: 0.9rem;
+          "
+        >
+          <strong>🔍 Debug Info:</strong> El objeto usuario no contiene el campo
+          'nombre'. Campos disponibles: {{ usuario.keys() | list if usuario else
+          'Usuario no definido' }}
+        </div>
+        {% endif %}
+
+        <div class="grid">
+          <div class="k">RUN</div>
+          <div>{{ usuario.run }}</div>
+
+          <div class="k">Sector</div>
+          <div>
+            {% set sector_norm = (usuario.sector_nombre or usuario.sector_id or
+            '')|trim|upper %}
+            <span
+              class="sector-pill {% if sector_norm == 'AMARILLO' %}sector-amarillo {% elif sector_norm == 'TRES PINOS' %}sector-trespinos {% elif sector_norm == 'ANTIHUALA' %}sector-antihuala {% elif sector_norm == 'VERDE' %}sector-verde {% elif sector_norm == 'PANGUE' %}sector-pangue {% elif sector_norm == 'ROJO' %}sector-rojo {% elif sector_norm == 'RANQUILCO' %}sector-ranquilco {% else %}sector-default{% endif %}"
+            >
+              {{ usuario.sector_nombre or usuario.sector_id }}
+            </span>
+          </div>
+
+          <div class="k">Edad años</div>
+          <div>
+            {% if edad is not none %}{{ edad|int }}{% else %}—{% endif %}
+          </div>
+
+          <div class="k">Categoria riesgo</div>
+          <div>
+            {% if usuario.categoria_nombre %} {% set cat_norm =
+            usuario.categoria_nombre|trim|upper %}
+            <span
+              class="categoria-riesgo {% if cat_norm == 'G1' %}categoria-g1 {% elif cat_norm == 'G2' %}categoria-g2 {% elif cat_norm == 'G3' %}categoria-g3 {% else %}categoria-default{% endif %}"
+            >
+              {{ usuario.categoria_nombre }}
+            </span>
+            {% else %} — {% endif %}
+          </div>
+
+          <div class="k">Grupo etario</div>
+          <div>
+            {% set ge_norm = (grupo_etareo_calc or '')|trim|lower %}
+            <span
+              class="{% if ge_norm == 'adulto' %}ge-adulto{% elif ge_norm == 'adulto mayor' %}ge-adulto-mayor{% endif %}"
+            >
+              {{ grupo_etareo_calc or '—' }}
+            </span>
+          </div>
+
+          <div class="k">Dirección</div>
+          <div>{{ usuario.direccion or '—' }}</div>
+          <div class="k">Teléfono</div>
+          <div>{{ usuario.telefono or '—' }}</div>
+          <div class="k">Ingreso</div>
+          <div>{{ usuario.fecha_ingreso | date_dmy('—') }}</div>
+          <div class="k">Nacimiento</div>
+          <div>{{ usuario.fecha_nacimiento | date_dmy('—') }}</div>
+          <div class="k">Sexo</div>
+          <div>{{ usuario.sexo or '—' }}</div>
+        </div>
+
+        <!-- Alertas contextuales -->
+        <div id="alertasSection" class="alertas-section hidden">
+          <h2 style="margin: 0 0 8px 0; font-size: 16px; color: var(--text)">
+            🚨 Alertas y Recordatorios
+          </h2>
+          <div class="alertas-grid">
+            <div id="alertasDiabetes" class="alerta-card hidden">
+              <div class="alerta-header">
+                <span style="font-size: 18px">🩺</span>
+                <h3 class="alerta-title">Controles Diabetes</h3>
+              </div>
+              <div class="alerta-items" id="alertasDiabetesItems"></div>
+            </div>
+
+            <div id="alertasScreening" class="alerta-card hidden">
+              <div class="alerta-header">
+                <span style="font-size: 18px">🔍</span>
+                <h3 class="alerta-title">Screening Preventivo</h3>
+              </div>
+              <div class="alerta-items" id="alertasScreeningItems"></div>
+            </div>
+
+            <div id="alertasVacunas" class="alerta-card hidden">
+              <div class="alerta-header">
+                <span style="font-size: 18px">💉</span>
+                <h3 class="alerta-title">Vacunas</h3>
+              </div>
+              <div class="alerta-items" id="alertasVacunasItems"></div>
+            </div>
+
+            <div id="alertasAdultoMayor" class="alerta-card hidden">
+              <div class="alerta-header">
+                <span style="font-size: 18px">👴</span>
+                <h3 class="alerta-title">Adulto Mayor</h3>
+              </div>
+              <div class="alerta-items" id="alertasAdultoMayorItems"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Históricos -->
+        <div class="card mt-12">
+          <h2 style="margin: 0 0 8px 0; font-size: 16px">Históricos</h2>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 16px;
+              align-items: start;
+            "
+          >
+            <div>
+              <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #1f2937">
+                Riesgo y estilo de vida
+              </h3>
+              <div id="hist-riesgo-body" class="muted">Sin datos</div>
+              <h3 style="margin: 12px 0 6px 0; font-size: 14px; color: #1f2937">
+                Medicación
+              </h3>
+              <div id="hist-med-body" class="muted">Sin datos</div>
+            </div>
+            <div>
+              <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #1f2937">
+                Diabetes
+              </h3>
+              <div id="hist-diab-body" class="muted">Sin datos</div>
+              <h3 style="margin: 12px 0 6px 0; font-size: 14px; color: #1f2937">
+                Screening preventivo
+              </h3>
+              <div id="hist-screen-body" class="muted">Sin datos</div>
+            </div>
+          </div>
+        </div>
+
+        <script>
+            // --------- Históricos ---------
+            function fmtFecha(f){
+              if(!f) return '';
+              try{
+                if(/^\d{4}-\d{2}-\d{2}$/.test(f)){
+                  const [y,m,d]=f.split('-'); return `${d}/${m}/${y}`;
+                }
+                const d=new Date(f); if(!isNaN(d)) return d.toLocaleDateString('es-CL');
+              }catch(_){ }
+              return String(f);
+            }
+            function siNo(v){ return v===true? 'Sí' : v===false? 'No' : ''; }
+
+            // --------- Alertas Contextuales ---------
+            async function cargarAlertasContextuales(run){
+              if(!run) return;
+              console.log('🚨 Cargando alertas contextuales para RUN:', run);
+              try{
+                const resp = await fetch(`/api/checklist/${encodeURIComponent(run)}`);
+                if(!resp.ok) {
+                  console.warn('Error en respuesta de checklist:', resp.status);
+                  return;
+                }
+                const data = await resp.json();
+                if(!data.success) {
+                  console.warn('API checklist no exitosa:', data);
+                  return;
+                }
+
+                console.log('✅ Datos de checklist recibidos:', data);
+
+                const faltas = data.faltas || [];
+                const oks = data.ok || [];
+                const meta = data.meta || {};
+
+                console.log('📊 Meta del usuario:', meta);
+                console.log('⚠️ Faltas encontradas:', faltas.length);
+                console.log('✅ Items OK encontrados:', oks.length);
+
+                // Separar por categorías
+                const diabetesItems = [];
+                const screeningItems = [];
+                const vacunasItems = [];
+                const adultoMayorItems = [];
+
+                // Procesar faltas
+                faltas.forEach(item => {
+                  const codigo = item.codigo;
+                  const html = `<div class="alerta-item alerta-falta">
+                    <span class="alerta-icon">⚠️</span>
+                    <span>${item.nombre}: ${item.motivo}</span>
+                  </div>`;
+
+                  if(['piedm','fondo_ojos','hba1c','rac','ldl','creatinemia','vfg','ekg'].includes(codigo)){
+                    diabetesItems.push(html);
+                  } else if(['pap','mamografia','psa'].includes(codigo)){
+                    screeningItems.push(html);
+                  } else if(['influenza','covid'].includes(codigo)){
+                    vacunasItems.push(html);
+                  } else if(['empam','curaciones_piedm'].includes(codigo)){
+                    adultoMayorItems.push(html);
+                  }
+                });
+
+                // Procesar oks (solo mostrar los próximos a vencer)
+                oks.forEach(item => {
+                  const diasRestantes = item.dias_restantes;
+                  if(diasRestantes !== null && diasRestantes <= 60){ // Alerta si vence en 60 días
+                    const codigo = item.codigo;
+                    const html = `<div class="alerta-item alerta-warn">
+                      <span class="alerta-icon">⏰</span>
+                      <span>${item.nombre}: vence en ${diasRestantes} días</span>
+                    </div>`;
+
+                    if(['piedm','fondo_ojos','hba1c','rac','ldl','creatinemia','vfg','ekg'].includes(codigo)){
+                      diabetesItems.push(html);
+                    } else if(['pap','mamografia','psa'].includes(codigo)){
+                      screeningItems.push(html);
+                    } else if(['influenza','covid'].includes(codigo)){
+                      vacunasItems.push(html);
+                    } else if(['empam','curaciones_piedm'].includes(codigo)){
+                      adultoMayorItems.push(html);
+                    }
+                  }
+                });
+
+                console.log('🩺 Items diabetes:', diabetesItems.length);
+                console.log('🔍 Items screening:', screeningItems.length);
+                console.log('💉 Items vacunas:', vacunasItems.length);
+                console.log('👴 Items adulto mayor:', adultoMayorItems.length);
+
+                // Mostrar solo las secciones que tienen alertas
+                const alertasSection = document.getElementById('alertasSection');
+                let hayAlertas = false;
+
+                if(diabetesItems.length > 0 && meta.diabetes){
+                  document.getElementById('alertasDiabetesItems').innerHTML = diabetesItems.join('');
+                  document.getElementById('alertasDiabetes').classList.remove('hidden');
+                  hayAlertas = true;
+                  console.log('✅ Mostrando alertas diabetes');
+                }
+
+                if(screeningItems.length > 0){
+                  document.getElementById('alertasScreeningItems').innerHTML = screeningItems.join('');
+                  document.getElementById('alertasScreening').classList.remove('hidden');
+                  hayAlertas = true;
+                  console.log('✅ Mostrando alertas screening');
+                }
+
+                if(vacunasItems.length > 0){
+                  document.getElementById('alertasVacunasItems').innerHTML = vacunasItems.join('');
+                  document.getElementById('alertasVacunas').classList.remove('hidden');
+                  hayAlertas = true;
+                  console.log('✅ Mostrando alertas vacunas');
+                }
+
+                if(adultoMayorItems.length > 0 && meta.edad >= 65){
+                  document.getElementById('alertasAdultoMayorItems').innerHTML = adultoMayorItems.join('');
+                  document.getElementById('alertasAdultoMayor').classList.remove('hidden');
+                  hayAlertas = true;
+                  console.log('✅ Mostrando alertas adulto mayor');
+                }
+
+                if(hayAlertas){
+                  alertasSection.classList.remove('hidden');
+                  console.log('🚨 Sección de alertas mostrada');
+                } else {
+                  console.log('ℹ️ No hay alertas para mostrar');
+                }
+
+              } catch(e){
+                console.error('❌ Error cargando alertas contextuales:', e);
+              }
+            }
+
+            async function renderHistoricos(run){
+              const set = (id, html)=>{ const el=document.getElementById(id); if(el) el.innerHTML = html; };
+              if(!run){
+                set('hist-riesgo-body','<span class="muted">Sin datos</span>');
+                set('hist-med-body','<span class="muted">Sin datos</span>');
+                set('hist-diab-body','<span class="muted">Sin datos</span>');
+                set('hist-screen-body','<span class="muted">Sin datos</span>');
+                return;
+              }
+              const limp = String(run||'').replace(/\./g,'').replace(/-/g,'');
+              // Patologías del usuario (inyectadas desde backend) para checks rápidos
+          // Flag diabético entregado por backend (evita heurística en cliente)
+          const esDiabetico = {{ (tiene_diabetes|tojson) if (tiene_diabetes is defined) else 'false' }};
+              // Lanzar en paralelo
+              const reqs = [
+                fetch(`/api/cardiovascular/riesgo/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/cardiovascular/actividad/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/cardiovascular/tabaquismo/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/cardiovascular/hearts/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/medicacion/ieca_ara/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/medicacion/antiagregantes/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/medicacion/estatinas/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/examenes/pie_dm/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+          // Curaciones Pie DM solo si diabético (evitamos request innecesario)
+          esDiabetico ? fetch(`/api/examenes/curaciones_piedm/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null) : Promise.resolve(null),
+                fetch(`/api/diabetes/podologia/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/diabetes/hipoglicemias/${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/screening/normalizado?run=${encodeURIComponent(limp)}`).then(r=>r.json()).catch(()=>null),
+                fetch(`/api/demograficos/${encodeURIComponent(limp)}/vacunas`).then(r=>r.json()).catch(()=>null)
+              ];
+              const [riesgo, act, tabaq, hearts, ieca, anti, estat, piedm, curac, podo, hipo, screen, vac] = await Promise.all(reqs);
+
+              // Riesgo + estilos
+              const partsR = [];
+              if(riesgo && riesgo.found && riesgo.data){ partsR.push(`Riesgo CV: <b>${(riesgo.data.riesgo_nivel||'').toUpperCase()}</b> <small>(${fmtFecha(riesgo.data.fecha)})</small>`); }
+              if(act && act.found && act.data){ partsR.push(`Actividad física: <b>${siNo(act.data.activo)}</b> <small>(${fmtFecha(act.data.fecha)})</small>`); }
+              if(tabaq && tabaq.found && tabaq.data){ partsR.push(`Fumador: <b>${siNo(tabaq.data.fumador)}</b> <small>(${fmtFecha(tabaq.data.fecha)})</small>`); }
+              if(hearts && hearts.found && hearts.data){ partsR.push(`HEARTS: <b>${siNo(hearts.data.en_protocolo)}</b> <small>(${fmtFecha(hearts.data.fecha)})</small>`); }
+              set('hist-riesgo-body', partsR.length? partsR.map(p=>`<div>${p}</div>`).join('') : '<span class="muted">Sin datos</span>');
+
+              // Medicación
+              const partsM = [];
+              if(ieca && ieca.found && ieca.data){ partsM.push(`IECA/ARA II: <b>${ieca.data.tipo||''}</b> <small>(${fmtFecha(ieca.data.fecha)})</small>`); }
+              if(anti && anti.found && anti.data){ partsM.push(`Antiagregantes: <b>${siNo(anti.data.en_tratamiento)}</b> <small>(${fmtFecha(anti.data.fecha)})</small>`); }
+              if(estat && estat.found && estat.data){ partsM.push(`Estatinas: <b>${siNo(estat.data.en_tratamiento)}</b> <small>(${fmtFecha(estat.data.fecha)})</small>`); }
+              set('hist-med-body', partsM.length? partsM.map(p=>`<div>${p}</div>`).join('') : '<span class="muted">Sin datos</span>');
+
+              // Diabetes (Pie DM, Curaciones, Podología, Hipoglicemias)
+              const partsD = [];
+              if(piedm && piedm.found && piedm.data){
+                const rn = (piedm.data.riesgo_nivel||'').toUpperCase();
+                const prox = piedm.data.proxima_evaluacion? ` • Próx: ${fmtFecha(piedm.data.proxima_evaluacion)}`:'';
+                partsD.push(`Pie DM: <b>${rn||'—'}</b> <small>(${fmtFecha(piedm.data.fecha_realizacion)})</small>${prox}`);
+              }
+          if(esDiabetico && curac && curac.found && curac.data){
+                partsD.push(`Curaciones Pie DM: <b>${siNo(curac.data.en_curacion)}</b> <small>(${fmtFecha(curac.data.fecha)})</small>${curac.data.tipo? ' • '+curac.data.tipo: ''}`);
+              }
+              if(podo && podo.found && podo.data){ partsD.push(`Atención podológica vigente: <b>${siNo(podo.data.atencion_vigente)}</b> <small>(${fmtFecha(podo.data.fecha)})</small>`); }
+              if(hipo && hipo.found && hipo.data){ partsD.push(`Hipoglicemias recurrentes: <b>${siNo(hipo.data.recurrente)}</b> <small>(${fmtFecha(hipo.data.fecha)})</small>`); }
+              set('hist-diab-body', partsD.length? partsD.map(p=>`<div>${p}</div>`).join('') : '<span class="muted">Sin datos</span>');
+
+              // Screening Preventivo (normalizado)
+              const scBody = (function(){
+                try{
+                  if(screen && screen.success && Array.isArray(screen.rows)){
+                    const rows = screen.rows.filter(r=>['pap','mamografia','psa'].includes(r.codigo));
+                    if(!rows.length) return '<span class="muted">Sin datos</span>';
+                    return rows.map(r=>{
+                      const label = r.codigo.toUpperCase();
+                      const est = (r.estado_normalizado||r.estado_crudo||'').toUpperCase();
+                      const f = fmtFecha(r.examen_fecha);
+                      const psa = r.codigo==='psa' && r.psa_valor!=null? ` • PSA: ${r.psa_valor}`:'';
+                      return `<div>${label}: <b>${est}</b> ${f? `<small>(${f})</small>`:''}${psa}</div>`;
+                    }).join('');
+                  }
+                }catch(_){ }
+                return '<span class="muted">Sin datos</span>';
+              })();
+              set('hist-screen-body', scBody);
+
+              // ------- Añadir también estos elementos a Resultados rápidos -------
+              try{
+                // Normalizador local de fecha a 'YYYY-MM-DD'
+                const norm = (v)=>{
+                  if(!v) return '';
+                  if (Object.prototype.toString.call(v) === '[object Date]' && !isNaN(v)) {
+                    const y=v.getFullYear(); const m=String(v.getMonth()+1).padStart(2,'0'); const d=String(v.getDate()).padStart(2,'0');
+                    return `${y}-${m}-${d}`;
+                  }
+                  const s = String(v);
+                  let m = s.match(/^(\d{4}-\d{2}-\d{2})$/);
+                  if (m) return m[1];
+                  m = s.match(/^(\d{4}-\d{2}-\d{2})[T\s]\d{2}:\d{2}:\d{2}/);
+                  if (m) return m[1];
+                  const d = new Date(s);
+                  if(!isNaN(d)){
+                    const y=d.getFullYear(); const mm=String(d.getMonth()+1).padStart(2,'0'); const dd=String(d.getDate()).padStart(2,'0');
+                    return `${y}-${mm}-${dd}`;
+                  }
+                  return '';
+                };
+                // Podología: vigente si atencion_vigente === true
+                if(podo && podo.found){
+                  const ok = !!(podo.data && podo.data.atencion_vigente);
+                  appendQuickItem('Atención podológica', ok, podo.data && norm(podo.data.fecha));
+                } else if(esDiabetico){
+                  // Solo mostrar pendiente si es diabético
+                  appendQuickItem('Atención podológica (sin registro)', false, '');
+                }
+                // Pie DM: si hay próxima evaluación futura o última dentro de 365 días la consideramos vigente
+                if(piedm && piedm.found){
+                  const hoy = new Date(); hoy.setHours(0,0,0,0);
+                  const fUlt = piedm.data && norm(piedm.data.fecha_realizacion);
+                  const fProx = piedm.data && norm(piedm.data.proxima_evaluacion);
+                  let ok = false;
+                  if(fProx){
+                    const d = new Date(fProx+'T00:00:00');
+                    ok = !isNaN(d) && d >= hoy;
+                  } else if(fUlt){
+                    const d = new Date(fUlt+'T00:00:00');
+                    if(!isNaN(d)){
+                      const diff = Math.round((hoy - d)/86400000);
+                      ok = diff <= 365;
+                    }
+                  }
+                  appendQuickItem('Evaluación Pie DM', ok, fUlt);
+                } else if(esDiabetico){
+                  // Solo mostrar pendiente si es diabético
+                  appendQuickItem('Evaluación Pie DM (sin registro)', false, '');
+                }
+                // Curaciones Pie DM: si hay registro en el último año lo consideramos vigente
+          if(esDiabetico && curac && curac.found){
+                  const hoy = new Date(); hoy.setHours(0,0,0,0);
+                  const f = curac.data && norm(curac.data.fecha);
+                  let ok = false;
+                  if(f){
+                    const d = new Date(f+'T00:00:00');
+                    if(!isNaN(d)){
+                      const diff = Math.round((hoy - d)/86400000);
+                      ok = diff <= 365;
+                    }
+                  }
+                  appendQuickItem('Curaciones Pie DM', ok, f);
+                } else if(esDiabetico){
+                  // Solo mostrar pendiente si es diabético
+                  appendQuickItem('Curaciones Pie DM (sin registro)', false, '');
+                }
+
+                // Vacunas: Influenza/COVID del año en curso
+                const year = (new Date()).getFullYear();
+                if(vac && vac.vacunas){
+                  const v = vac.vacunas;
+                  // Influenza
+                  let okInf = false, fInf = '';
+                  if(v.influenza_rechaza === true && Number(v.influenza_rechaza_anio)===year){ okInf = true; fInf = norm(v.influenza_rechaza_fecha)||''; }
+                  else if (typeof v.influenza_si === 'boolean' && Number(v.influenza_anio)===year){ okInf = v.influenza_si === true; fInf = norm(v.influenza_fecha)||''; }
+                  appendQuickItem('Vacuna Influenza', okInf, fInf);
+                  // COVID
+                  let okCov = false, fCov = '';
+                  if(v.covid_rechaza === true && Number(v.covid_rechaza_anio)===year){ okCov = true; fCov = norm(v.covid_rechaza_fecha)||''; }
+                  else if (typeof v.covid_si === 'boolean' && Number(v.covid_anio)===year){ okCov = v.covid_si === true; fCov = norm(v.covid_fecha)||''; }
+                  appendQuickItem('Vacuna COVID', okCov, fCov);
+                } else {
+                  // Si no hay estructura de vacunas, marcamos como pendientes
+                  appendQuickItem('Vacuna Influenza', false, '');
+                  appendQuickItem('Vacuna COVID', false, '');
+                }
+              }catch(_e){ /* no bloquear la ficha si falla */ }
+            }
+
+            // Disparar carga de históricos al iniciar
+            document.addEventListener('DOMContentLoaded', function(){
+              try { renderHistoricos({{ (usuario.run | tojson) }}); } catch(_){}
+              try { cargarAlertasContextuales({{ (usuario.run | tojson) }}); } catch(_){}
+            });
+        </script>
+
+        <!-- Resultados rápidos (pendientes/ok) -->
+        <div class="card mt-12">
+          <h2 style="margin: 0 0 8px 0; font-size: 16px">Resultados rápidos</h2>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 18px;
+              align-items: start;
+            "
+          >
+            <div>
+              <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #1f2937">
+                Pendientes
+              </h3>
+              <ul
+                id="res-pendientes"
+                style="margin: 0; padding-left: 18px; line-height: 1.5"
+              >
+                <li class="muted">Sin datos</li>
+              </ul>
+            </div>
+            <div>
+              <h3 style="margin: 0 0 6px 0; font-size: 14px; color: #1f2937">
+                Al día
+              </h3>
+              <ul
+                id="res-ok"
+                style="margin: 0; padding-left: 18px; line-height: 1.5"
+              >
+                <li class="muted">Sin datos</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          // ------- Resultados rápidos (pendientes/ok) --------
+          function normalizeDateStr(v) {
+            if (!v) return "";
+            // Si ya es Date
+            if (
+              Object.prototype.toString.call(v) === "[object Date]" &&
+              !isNaN(v)
+            ) {
+              const y = v.getFullYear();
+              const m = String(v.getMonth() + 1).padStart(2, "0");
+              const d = String(v.getDate()).padStart(2, "0");
+              return `${y}-${m}-${d}`;
+            }
+            const s = String(v);
+            // Aceptar 'YYYY-MM-DD' directo
+            let m = s.match(/^(\d{4}-\d{2}-\d{2})$/);
+            if (m) return m[1];
+            // Aceptar 'YYYY-MM-DDTHH:mm:ss' o 'YYYY-MM-DD HH:mm:ss'
+            m = s.match(/^(\d{4}-\d{2}-\d{2})[T\s]\d{2}:\d{2}:\d{2}/);
+            if (m) return m[1];
+            // Intento final: parsear y formatear
+            const d = new Date(s);
+            if (!isNaN(d)) {
+              const yy = d.getFullYear();
+              const mm = String(d.getMonth() + 1).padStart(2, "0");
+              const dd = String(d.getDate()).padStart(2, "0");
+              return `${yy}-${mm}-${dd}`;
+            }
+            return "";
+          }
+          function fechaMasReciente(rows, campo) {
+            if (!rows || !rows.length) return "";
+            let best = "";
+            rows.forEach((r) => {
+              const f = normalizeDateStr(r[campo]);
+              if (f && (!best || f > best)) best = f;
+            });
+            return best;
+          }
+          function diasDesde(fechaISO) {
+            if (!fechaISO) return Infinity;
+            const iso = normalizeDateStr(fechaISO);
+            if (!iso) return Infinity;
+            const d = new Date(iso + "T00:00:00");
+            if (isNaN(d)) return Infinity;
+            const hoy = new Date();
+            hoy.setHours(0, 0, 0, 0);
+            return Math.round((hoy - d) / 86400000);
+          }
+          function fmtCorto(f) {
+            if (!f) return "";
+            const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f);
+            return m ? `${m[3]}/${m[2]}/${String(m[1]).slice(-2)}` : f;
+          }
+          function pushItem(arr, texto, ok, fecha) {
+            arr.push({ texto, ok, fecha });
+          }
+          function appendQuickItem(texto, ok, fecha) {
+            const ulOk = document.getElementById("res-ok");
+            const ulPen = document.getElementById("res-pendientes");
+            if (!ulOk || !ulPen) return;
+            const target = ok ? ulOk : ulPen;
+            // Eliminar placeholder "Sin datos" si está presente
+            if (
+              target.children.length === 1 &&
+              /Sin datos/.test(target.children[0].textContent || "")
+            ) {
+              target.innerHTML = "";
+            }
+            const el = document.createElement("li");
+            el.innerHTML =
+              (ok ? "✅ " : "⚠️ ") +
+              texto +
+              (fecha ? ` <span class="tag">${fmtCorto(fecha)}</span>` : "");
+            target.appendChild(el);
+          }
+          function renderList(ul, items) {
+            ul.innerHTML = "";
+            if (!items || !items.length) {
+              ul.innerHTML = '<li class="muted">Sin datos</li>';
+              return;
+            }
+            for (let i = 0; i < items.length; i++) {
+              const it = items[i];
+              const el = document.createElement("li");
+              el.innerHTML =
+                (it.ok ? "✅ " : "⚠️ ") +
+                it.texto +
+                (it.fecha
+                  ? ` <span class="tag">${fmtCorto(it.fecha)}</span>`
+                  : "");
+              ul.appendChild(el);
+            }
+          }
+          function renderResultadosRapidos({ examenes, screen }) {
+            const ulOk = document.getElementById("res-ok");
+            const ulPen = document.getElementById("res-pendientes");
+            if (!ulOk || !ulPen) return;
+            const okItems = [];
+            const penItems = [];
+            // Límite máximo de ítems visibles por lista
+            const MAX_ITEMS_PER_LIST = 8;
+
+            // HbA1c: vigente 180 días
+            const fA1c = fechaMasReciente(examenes, "examen_fecha"); // usamos examen_fecha, y chequeamos hba1c presente en ese registro
+            const a1cRows = (examenes || []).filter(
+              (e) => e.hba1c != null && e.hba1c !== "",
+            );
+            const fA1cUlt = fechaMasReciente(a1cRows, "examen_fecha");
+            const a1cVencida = !fA1cUlt || diasDesde(fA1cUlt) > 180;
+            if (a1cRows.length) {
+              pushItem(
+                a1cVencida ? penItems : okItems,
+                "HbA1c",
+                !a1cVencida,
+                fA1cUlt,
+              );
+            } else if (esDiabetico) {
+              // Solo mostramos la ausencia de HbA1c si el usuario es diabético
+              pushItem(penItems, "HbA1c (sin registro)", false, "");
+            }
+
+            // RAC: vigente 365 días si existe valor numérico
+            const racRows = (examenes || []).filter(
+              (e) => e.rac != null && String(e.rac).trim() !== "",
+            );
+            const fRac = fechaMasReciente(racRows, "examen_fecha");
+            const racVencida = !fRac || diasDesde(fRac) > 365;
+            if (racRows.length) {
+              pushItem(
+                racVencida ? penItems : okItems,
+                "RAC",
+                !racVencida,
+                fRac,
+              );
+            } else {
+              pushItem(penItems, "RAC (sin registro)", false, "");
+            }
+
+            // VFG: vigente 365 días
+            const vfgRows = (examenes || []).filter(
+              (e) => e.vfg != null && String(e.vfg).trim() !== "",
+            );
+            const fVfg = fechaMasReciente(vfgRows, "examen_fecha");
+            const vfgVencida = !fVfg || diasDesde(fVfg) > 365;
+            if (vfgRows.length) {
+              pushItem(
+                vfgVencida ? penItems : okItems,
+                "VFG",
+                !vfgVencida,
+                fVfg,
+              );
+            } else {
+              pushItem(penItems, "VFG (sin registro)", false, "");
+            }
+
+            // Creatininemia: vigente 365 días
+            const creaRows = (examenes || []).filter(
+              (e) =>
+                e.creatinemia != null && String(e.creatinemia).trim() !== "",
+            );
+            const fCrea = fechaMasReciente(creaRows, "examen_fecha");
+            const creaVencida = !fCrea || diasDesde(fCrea) > 365;
+            if (creaRows.length) {
+              pushItem(
+                creaVencida ? penItems : okItems,
+                "Creatininemia",
+                !creaVencida,
+                fCrea,
+              );
+            } else {
+              pushItem(penItems, "Creatininemia (sin registro)", false, "");
+            }
+
+            // LDL: vigente 365 días (si existe cualquier valor)
+            const ldlRows = (examenes || []).filter(
+              (e) => e.ldl != null && String(e.ldl).trim() !== "",
+            );
+            const fLdl = fechaMasReciente(ldlRows, "examen_fecha");
+            const ldlVencida = !fLdl || diasDesde(fLdl) > 365;
+            if (ldlRows.length) {
+              pushItem(
+                ldlVencida ? penItems : okItems,
+                "LDL",
+                !ldlVencida,
+                fLdl,
+              );
+            } else {
+              pushItem(penItems, "LDL (sin registro)", false, "");
+            }
+
+            // EKG: vigente 365 días
+            // Acepta: ekg truthy o presencia de ekg_fecha con formato válido
+            const isTruthy = (v) =>
+              v === true ||
+              v === 1 ||
+              v === "1" ||
+              v === "true" ||
+              v === "t" ||
+              v === "on" ||
+              v === "si" ||
+              v === "sí" ||
+              v === "SI";
+            const ekgRows = (examenes || []).filter((e) => {
+              if (isTruthy(e.ekg)) return true;
+              const f =
+                e.ekg_fecha && /^\d{4}-\d{2}-\d{2}/.test(String(e.ekg_fecha))
+                  ? true
+                  : false;
+              return f;
+            });
+            let fEkg = "";
+            if (ekgRows.length) {
+              // Tomar la fecha más reciente considerando ekg_fecha si viene, si no examen_fecha
+              let best = "";
+              ekgRows.forEach((r) => {
+                let raw = "";
+                if (r.ekg_fecha) {
+                  const s = String(r.ekg_fecha);
+                  const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+                  raw = m ? m[1] : s;
+                } else {
+                  raw = String(r.examen_fecha || "");
+                }
+                const f = normalizeDateStr(raw);
+                if (/^\d{4}-\d{2}-\d{2}$/.test(f)) {
+                  if (!best || f > best) best = f;
+                }
+              });
+              fEkg = best;
+            }
+            const ekgVencida = !fEkg || diasDesde(fEkg) > 365;
+            if (ekgRows.length) {
+              pushItem(
+                ekgVencida ? penItems : okItems,
+                "EKG",
+                !ekgVencida,
+                fEkg,
+              );
+            } else {
+              pushItem(penItems, "EKG (sin registro)", false, "");
+            }
+
+            // Fondo de Ojos / PSA podrían añadirse usando 'screen' cuando esté disponible
+
+            // Aplicar límite configurable
+            renderList(ulPen, penItems.slice(0, MAX_ITEMS_PER_LIST));
+            renderList(ulOk, okItems.slice(0, MAX_ITEMS_PER_LIST));
+          }
+        </script>
+
+        <script>
+          // Inicializar render de Resultados rápidos con datos del backend
+          document.addEventListener('DOMContentLoaded', function(){
+            try {
+              const EXAMENES_CTX = {{ examenes|tojson|safe }};
+              renderResultadosRapidos({ examenes: Array.isArray(EXAMENES_CTX) ? EXAMENES_CTX : [], screen: null });
+            } catch (e) { console.warn('No se pudo renderizar Resultados rápidos:', e); }
+          });
+        </script>
+
+        {# PATOLOGÍAS #}
+        <div class="mt-20">
+          <div class="k">Patologías</div>
+          <div class="pat-badges">
+            {% if patologias and patologias|length %} {% for p in patologias %}
+            {% set pnorm = (p.nombre or '')|lower %}
+            <span
+              class="pat {% if 'diabet' in pnorm %}pat-diabetes {% elif 'hipert' in pnorm %}pat-hta {% elif 'dislip' in pnorm %}pat-dislipidemia {% else %}{% endif %}"
+            >
+              {{ p.nombre }}
+            </span>
+            {% endfor %} {% else %} — {% endif %}
+          </div>
+        </div>
+
+        {# PROMEDIO PA #} {# Determinar etapa promedio (intenta varias fuentes
+        que puedan estar disponibles en el contexto) #} {% set _promedio_etapa =
+        None %} {% if promedio is defined and promedio and (promedio.etapa is
+        defined) %} {% set _promedio_etapa = promedio.etapa %} {% elif
+        promedio_etapa is defined and promedio_etapa %} {% set _promedio_etapa =
+        promedio_etapa %} {% elif promedio_hta is defined and promedio_hta and
+        (promedio_hta.etapa is defined) %} {% set _promedio_etapa =
+        promedio_hta.etapa %} {% endif %} {% set _cls_prom = '' %} {% if
+        _promedio_etapa %} {% set _et = (_promedio_etapa|string).strip().lower()
+        %} {% if 'normo' in _et or 'normot' in _et %} {% set _cls_prom =
+        'promedio-etapa-normo' %} {% elif 'etapa 1' in _et or 'hta 1' in _et or
+        '1' == _et %} {% set _cls_prom = 'promedio-etapa-hta1' %} {% elif 'etapa
+        2' in _et or 'hta 2' in _et or '2' == _et %} {% set _cls_prom =
+        'promedio-etapa-hta2' %} {% elif 'etapa 3' in _et or 'hta 3' in _et or
+        '3' == _et %} {% set _cls_prom = 'promedio-etapa-hta3' %} {% endif %} {%
+        endif %} {# Mostrar clasificación (coloreada) y debajo el valor
+        sistólica/diastólica en texto plano. #}
+        <div class="card mt-20 promedio-hta {{ _cls_prom }}">
+          <h2 style="margin: 0 0 8px 0; font-size: 16px">
+            Promedio PA (promedio)
+          </h2>
+          <div class="promedio-clasificacion" id="promedio-clasificacion">
+            &nbsp;
+          </div>
+          <div class="promedio-valor" id="promedio-valor">&nbsp;</div>
+        </div>
+
+        <script>
+          // Mostrar clasificación y valor del Promedio PA. Limpiar la clasificación para quitar la presión
+          (function(){
+            try {
+              const promCard = document.querySelector('.promedio-hta');
+              if (!promCard) return;
+              const clasEl = document.getElementById('promedio-clasificacion');
+              const valEl = document.getElementById('promedio-valor');
+
+              function sanitizeClas(s){
+                if (!s) return '';
+                // quitar patrones como 153/102 mmHg o 153/102 y la palabra mmhg, pero mantener 'Etapa 2'
+                return s.replace(/\d{2,3}\s*[\/]\s*\d{2,3}\s*mmhg/ig,'')
+                        .replace(/\d{2,3}\s*[\/]\s*\d{2,3}/g,'')
+                        .replace(/mmhg/ig,'')
+                        .replace(/\s+/g,' ').trim();
+              }
+
+              // Si el backend ya pasó texto/etapa, mostrarlo (limpiando la presión si viene adjunta)
+              try {
+                {% if _promedio_etapa %}
+                  clasEl.textContent = sanitizeClas({{ _promedio_etapa|string|tojson }});
+                {% endif %}
+                {% if promedio is defined and promedio and (promedio.sistolica is defined or promedio.presion_sistolica is defined) and (promedio.diastolica is defined or promedio.presion_diastolica is defined) %}
+                  const s_val = {{ (promedio.sistolica or promedio.presion_sistolica)|tojson }};
+                  const d_val = {{ (promedio.diastolica or promedio.presion_diastolica)|tojson }};
+                  valEl.textContent = s_val + '/' + d_val + ' mmHg';
+                {% endif %}
+              } catch(e) { console.warn(e); }
+
+              // Fallback: intentar obtener el fragmento por fetch (mismo origen) y extraer clasificación y presión
+              fetch({{ url_for('promedio_hta', run=usuario.run) | tojson }}, {credentials:'same-origin'})
+                .then(r=>r.text())
+                .then(html=>{
+                  try {
+                    const tmp = document.createElement('div'); tmp.innerHTML = html;
+                    const text = tmp.innerText || tmp.textContent || '';
+                    const lines = text.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+                    // buscar línea de clasificación (HTA o Normo)
+                    let clas = '';
+                    for (const L of lines) {
+                      const t = L.toLowerCase();
+                      if (/normot|normo/.test(t)) { clas = L; break; }
+                      if (/hta/.test(t)) { clas = L; break; }
+                    }
+                    if (clas) {
+                      const cleanClas = sanitizeClas(clas);
+                      clasEl.textContent = cleanClas;
+                      // Aplicar clase CSS según la clasificación detectada
+                      promCard.classList.remove('promedio-etapa-normo', 'promedio-etapa-hta1', 'promedio-etapa-hta2', 'promedio-etapa-hta3');
+                      const t = cleanClas.toLowerCase();
+                      if (/normot|normo/.test(t)) {
+                        promCard.classList.add('promedio-etapa-normo');
+                      } else if (/hta.*etapa.*1|etapa.*1/.test(t)) {
+                        promCard.classList.add('promedio-etapa-hta1');
+                      } else if (/hta.*etapa.*2|etapa.*2/.test(t)) {
+                        promCard.classList.add('promedio-etapa-hta2');
+                      } else if (/hta.*etapa.*3|etapa.*3/.test(t)) {
+                        promCard.classList.add('promedio-etapa-hta3');
+                      }
+                    }
+                    // buscar presión sistólica/diastólica
+                    const m = text.match(/(\d{2,3})\s*[\/]\s*(\d{2,3})/);
+                    if (m) valEl.textContent = m[1] + '/' + m[2] + ' mmHg';
+                  } catch(e){}
+                }).catch(()=>{});
+
+            } catch(e){ console.warn('Error mostrando promedio PA:', e); }
+          })();
+        </script>
+
+        <div class="card mt-12" id="resumen-peso-card">
+          <h2 style="margin: 0 0 8px 0; font-size: 16px">Resumen de peso</h2>
+          <div class="resumen-text" id="resumen-peso-contenido">&nbsp;</div>
+        </div>
+
+        <script>
+          // Mostrar contenido del resumen de peso con colores de fondo según diferencia
+          (function(){
+            try {
+              const contenidoEl = document.getElementById('resumen-peso-contenido');
+              const cardEl = document.getElementById('resumen-peso-card');
+              if (!contenidoEl || !cardEl) return;
+
+              // Intentar obtener el contenido del fragmento por fetch
+              fetch({{ url_for('resumen_peso', run=usuario.run) | tojson }}, {credentials:'same-origin'})
+                .then(r=>r.text())
+                .then(html=>{
+                  try {
+                    const tmp = document.createElement('div');
+                    tmp.innerHTML = html;
+                    const text = tmp.innerText || tmp.textContent || '';
+
+                    if (!text.trim()) {
+                      // Sin datos
+                      contenidoEl.innerHTML = '<span style="color:#6b7280;">Sin datos</span>';
+                      return;
+                    }
+
+                    // Mostrar el texto del resumen
+                    contenidoEl.innerHTML = text.trim().replace(/\n/g, '<br>');
+
+                    // Buscar patrones de cambio de peso en el texto
+                    // Buscar patrones como "Final+4.4 kg" o "Final-2.3 kg" o "aumentó 2.5 kg" o "disminuyó 1.8 kg"
+                    let cambio = 0;
+                    let encontroCambio = false;
+
+                    // Patrón 1: "Final+X.X kg" o "Final-X.X kg"
+                    const patronFinal = text.match(/final\s*([+\-])\s*(\d+(?:\.\d+)?)\s*kg/i);
+                    if (patronFinal) {
+                      const signo = patronFinal[1];
+                      const valor = parseFloat(patronFinal[2]);
+                      cambio = signo === '+' ? valor : -valor;
+                      encontroCambio = true;
+                    }
+
+                    // Patrón 2: "aumentó X.X kg" o "disminuyó X.X kg"
+                    if (!encontroCambio) {
+                      const patronAumento = text.match(/aumentó?\s*(\d+(?:\.\d+)?)\s*kg/i);
+                      const patronDisminucion = text.match(/disminuy[oó]?\s*(\d+(?:\.\d+)?)\s*kg/i);
+
+                      if (patronAumento) {
+                        cambio = parseFloat(patronAumento[1]);
+                        encontroCambio = true;
+                      } else if (patronDisminucion) {
+                        cambio = -parseFloat(patronDisminucion[1]);
+                        encontroCambio = true;
+                      }
+                    }
+
+                    // Patrón 3: Calcular diferencia entre pesos si hay valores específicos
+                    if (!encontroCambio) {
+                      const pesoMatches = text.match(/(\d+(?:\.\d+)?)\s*kg/gi);
+                      if (pesoMatches && pesoMatches.length >= 2) {
+                        const pesos = pesoMatches.map(match => {
+                          const num = match.replace(/kg/gi, '').trim();
+                          return parseFloat(num);
+                        }).filter(num => !isNaN(num));
+
+                        if (pesos.length >= 2) {
+                          const pesoInicial = pesos[0];
+                          const pesoFinal = pesos[pesos.length - 1];
+                          cambio = pesoFinal - pesoInicial;
+                          encontroCambio = true;
+                        }
+                      }
+                    }
+
+                    // Calcular desviación estándar de peso (STD) - usar datos de la tabla de controles
+                    let std = 0;
+
+                    // Primero intentar con el texto del resumen
+                    const pesoMatchesSTD = text.match(/(\d+(?:\.\d+)?)\s*kg/gi);
+                    let pesosSTD = [];
+
+                    if (pesoMatchesSTD && pesoMatchesSTD.length >= 2) {
+                      pesosSTD = pesoMatchesSTD.map(match => {
+                        const num = match.replace(/kg/gi, '').trim();
+                        return parseFloat(num);
+                      }).filter(num => !isNaN(num) && num > 0);
+                    }
+
+                    // Si no hay suficientes datos en el resumen, obtener de la tabla de controles
+                    if (pesosSTD.length < 2) {
+                      const tablaPesos = [];
+                      document.querySelectorAll('tbody tr').forEach(row => {
+                        const pesoCell = row.cells[2]; // columna de peso
+                        if (pesoCell && pesoCell.textContent.trim()) {
+                          const peso = parseFloat(pesoCell.textContent.trim());
+                          if (!isNaN(peso) && peso > 0) {
+                            tablaPesos.push(peso);
+                          }
+                        }
+                      });
+
+                      if (tablaPesos.length >= 2) {
+                        pesosSTD = tablaPesos;
+                      }
+                    }
+
+                    console.log('Pesos encontrados para STD:', pesosSTD); // Debug
+
+                    if (pesosSTD.length >= 2) {
+                      // Calcular media
+                      const media = pesosSTD.reduce((sum, peso) => sum + peso, 0) / pesosSTD.length;
+
+                      // Calcular varianza
+                      const varianza = pesosSTD.reduce((sum, peso) => sum + Math.pow(peso - media, 2), 0) / pesosSTD.length;
+
+                      // Calcular desviación estándar
+                      std = Math.sqrt(varianza);
+
+                      console.log('STD calculado:', std); // Debug
+
+                      // Agregar STD al contenido mostrado con formato mejorado
+                      contenidoEl.innerHTML += `<br><strong>STD ${std.toFixed(2)} kg</strong>`;
+                    } else {
+                      console.log('No se encontraron suficientes valores de peso para calcular STD:', pesosSTD.length); // Debug
+                    }
+
+                    // Aplicar colores según el cambio detectado
+                    if (encontroCambio) {
+                      if (Math.abs(cambio) < 0.1) {
+                        // No hay cambio significativo
+                        cardEl.style.backgroundColor = '#a5a5a5ff'; // celeste
+                      } else if (cambio > 0) {
+                        // Aumento de peso = fondo rojo
+                        cardEl.style.backgroundColor = '#eb0d0dff'; // rojo claro
+                      } else {
+                        // Pérdida de peso = fondo verde
+                        cardEl.style.backgroundColor = '#29a744'; // verde claro
+                      }
+                    } else {
+                      // Si no se pudo determinar el cambio, usar celeste
+                      cardEl.style.backgroundColor = '#e0f2fe'; // celeste
+                    }
+
+                  } catch(e){
+                    console.warn('Error procesando resumen de peso:', e);
+                    contenidoEl.innerHTML = '<span style="color:#6b7280;">Error al procesar datos</span>';
+                  }
+                })
+                .catch(e => {
+                  console.warn('Error obteniendo resumen de peso:', e);
+                  contenidoEl.innerHTML = '<span style="color:#6b7280;">Sin datos</span>';
+                });
+
+            } catch(e){
+              console.warn('Error inicializando resumen de peso:', e);
+              document.getElementById('resumen-peso-contenido').innerHTML = '<span style="color:#6b7280;">Sin datos</span>';
+            }
+          })();
+        </script>
+
+        <div class="btns">
+          <a
+            class="btn"
+            href="{{ url_for('excel_usuario', run=(usuario.run | replace('.','') | replace('-',''))) }}"
+            >Descargar Excel</a
+          >
+          <button
+            type="button"
+            onclick="generarPDF()"
+            class="btn"
+            id="btn-generar-pdf"
+            style="background: #dc3545; color: #fff; border-color: #dc3545"
+          >
+            📄 Generar PDF
+          </button>
+          <a
+            class="btn primary"
+            href="{{ url_for('graficos', run=usuario.run) }}"
+            >Graficar</a
+          >
+          <a
+            class="btn"
+            href="{{ url_for('acuerdos_page', run=usuario.run) }}"
+            style="background: #28a745; color: #fff; border-color: #28a745"
+            >Plan de Cuidados</a
+          >
+          <a
+            class="btn"
+            href="{{ url_for('tarjeton') }}?run={{ usuario.run | urlencode }}&autoload=true"
+            style="background: #f97316; color: #fff; border-color: #f97316"
+            >Nuevo control</a
+          >
+          <!-- Botón directo a Tarjetón (nuevo) -->
+          <a
+            class="btn"
+            href="{{ url_for('tarjeton') }}?run={{ usuario.run | urlencode }}&autoload=true"
+            style="background: #4f46e5; color: #fff; border-color: #4f46e5"
+            title="Abrir Tarjetón simplificado con este RUN"
+            >🔖 Tarjetón</a
+          >
+          <button
+            type="button"
+            onclick="irATarjeton()"
+            class="btn"
+            id="btn-ir-tarjeton"
+            style="background: #6366f1; color: #fff; border-color: #6366f1"
+          >
+            📋 Ir a Tarjetón
+          </button>
+          <a class="btn" href="{{ url_for('index') }}">Volver</a>
+          <a class="btn" href="{{ url_for('logout') }}">Cerrar sesión</a>
+        </div>
+      </div>
+
+      {# CONTROLES #}
+      <div class="card mt-20">
+        <!-- Tabla de exámenes guardados -->
+        <h5 style="margin-top: 10px; color: #0d6efd">Exámenes guardados</h5>
+        <div style="overflow-x: auto">
+          <table
+            id="tabla-examenes"
+            class="table table-bordered"
+            style="width: 100%; font-size: 13px; border: 2px solid black"
+          >
+            <thead style="background-color: #f8f9fa">
+              <tr>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 8px 6px;
+                    text-align: center;
+                    white-space: nowrap;
+                  "
+                >
+                  Fecha
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 8px 6px;
+                    text-align: center;
+                  "
+                >
+                  SO2 %
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 8px 6px;
+                    text-align: center;
+                  "
+                >
+                  Flujometría
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  Tos
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  Baciloscopia
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  Creatininemia
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  Col
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  HDL
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  LDL
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  TAG
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  Microalb.
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  Microalb. valor
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  VFG
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  RAC
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  RPR
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  TSH
+                </th>
+                <th
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  HbA1c
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for ex in examenes %}
+              <tr>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    white-space: nowrap;
+                  "
+                >
+                  {{ ex.examen_fecha | date_dmy('') }}
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  {{ ex.so2_percent or '' }}
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  {{ ex.flujometria or '' }}
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  {% if ex.tos == true %}Sí{% elif ex.tos == false %}No{% else
+                  %}{% endif %}
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  {% if ex.baciloscopia == true %}Sí{% elif ex.baciloscopia ==
+                  false %}No{% else %}{% endif %}
+                </td>
+                <td
+                  style="border: 1px solid black; padding: 6px; text-align: center;{% if ex.creatinemia and ex.creatinemia|float >= 1.2 %} background-color: #f8d7da; color: #dc3545; font-weight: bold;{% endif %}"
+                >
+                  {{ ex.creatinemia or '' }}
+                </td>
+                <td
+                  style="border: 1px solid black; padding: 6px; text-align: center;{% if ex.col and ex.col|float >= 200 %} background-color: #f8d7da; color: #dc3545; font-weight: bold;{% endif %}"
+                >
+                  {{ ex.col or '' }}
+                </td>
+                <td
+                  style="border: 1px solid black; padding: 6px; text-align: center;{% if ex.hdl and usuario.sexo %}{% set sexo_norm = usuario.sexo|lower|trim %}{% if (sexo_norm in ['femenino','f','mujer'] and ex.hdl|float <= 50) or (sexo_norm in ['masculino','m','hombre','varón','varon'] and ex.hdl|float <= 40) %} background-color: #f8d7da; color: #dc3545; font-weight: bold;{% endif %}{% endif %}"
+                >
+                  {{ ex.hdl or '' }}
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  {{ ex.ldl or '' }}
+                </td>
+                <td
+                  style="border: 1px solid black; padding: 6px; text-align: center;{% if ex.tag and ex.tag|float >= 150 %} background-color: #f8d7da; color: #dc3545; font-weight: bold;{% endif %}"
+                >
+                  {{ ex.tag or '' }}
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  {% if ex.microalbuminuria == true %}Sí{% elif
+                  ex.microalbuminuria == false %}No{% else %}{% endif %}
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  {{ ex.microalbuminuria_val or '' }}
+                </td>
+                <td
+                  style="border: 1px solid black; padding: 6px; text-align: center;{% if ex.vfg and ex.vfg|float < 60 %} background-color: #f8d7da; color: #dc3545; font-weight: bold;{% endif %}"
+                >
+                  {{ ex.vfg or '' }}
+                </td>
+                <td
+                  style="border: 1px solid black; padding: 6px; text-align: center;{% if ex.rac and ex.rac|float >= 300 %} background-color: #f8d7da; color: #dc3545; font-weight: bold;{% endif %}"
+                >
+                  {{ ex.rac or '' }}
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  {% if ex.rpr == true %}Sí{% elif ex.rpr == false %}No{% else
+                  %}{% endif %}
+                </td>
+                <td
+                  style="
+                    border: 1px solid black;
+                    padding: 6px;
+                    text-align: center;
+                  "
+                >
+                  {{ ex.tsh or '' }}
+                </td>
+                <td
+                  style="border: 1px solid black; padding: 6px; text-align: center;{% if ex.hba1c and ex.hba1c|float >= 7.0 %} background-color: #f8d7da; color: #dc3545; font-weight: bold;{% endif %}"
+                >
+                  {{ ex.hba1c or '' }}
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td
+                  colspan="17"
+                  style="
+                    text-align: center;
+                    color: #888;
+                    border: 1px solid black;
+                    padding: 10px;
+                  "
+                >
+                  No hay exámenes registrados para este usuario.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Profesional</th>
+                <th>Peso</th>
+                <th>Talla</th>
+                <th>IMC</th>
+                <th>PA</th>
+                <th>HGT</th>
+                <th>CC</th>
+                <th>HbA1c</th>
+                <th>Etapa HTA</th>
+                <th>Grupo control</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in controles %}
+              <tr data-grupo-etareo="{{ c.grupo_etareo_control|default('') }}">
+                <td>{{ c.fecha or '' }}</td>
+                <td>
+                  {% set prof_norm = (c.profesional or '')|trim|lower %}
+                  <span
+                    class="prof-pill {% if 'enfermero' in prof_norm %}prof-enfermero {% elif 'medico' in prof_norm or 'médico' in prof_norm %}prof-medico {% elif 'nutricionista' in prof_norm %}prof-nutricionista {% elif 'matrona' in prof_norm %}prof-matrona {% elif 'dupla' in prof_norm %}prof-dupla {% elif 'asistente social' in prof_norm %}prof-asistente {% elif prof_norm == 'vdi' %}prof-vdi {% elif 'uapo' in prof_norm %}prof-uapo{% endif %}"
+                  >
+                    {{ c.profesional or '' }}
+                  </span>
+                </td>
+                <td>{{ c.peso or '' }}</td>
+                <td>{{ c.talla or '' }}</td>
+                <td>
+                  {% set ge_norm = (grupo_etareo_calc or '')|trim|lower %} {% if
+                  c.imc is not none %} {% set imc_val = c.imc|float %}
+                  <span
+                    class="{% if ge_norm == 'adulto' %} {% if imc_val < 18.5 %}imc-morado {% elif imc_val < 25 %}imc-verde {% elif imc_val < 30 %}imc-amarillo {% else %}imc-rojo{% endif %} {% elif ge_norm == 'adulto mayor' %} {% if imc_val < 23 %}imc-morado {% elif imc_val < 28 %}imc-verde {% elif imc_val < 32 %}imc-amarillo {% else %}imc-rojo{% endif %} {% endif %}"
+                    >{{ c.imc }}</span
+                  >
+                  {% else %} {{ c.imc or '' }} {% endif %}
+                </td>
+                <td>
+                  {% if c.presion_sistolica is not none and c.presion_diastolica
+                  is not none %} {{ c.presion_sistolica }}/{{
+                  c.presion_diastolica }} {% else %}/{% endif %}
+                </td>
+                <td>
+                  {% if c.hgt is not none %} {% set hgtv = c.hgt|float %} {% if
+                  hgtv < 70 %}
+                  <span class="val-neon">! {{ c.hgt }}</span>
+                  {% elif hgtv >= 130 %}
+                  <span class="valor-critico">{{ c.hgt }}</span>
+                  {% else %}
+                  <span class="val-ok">{{ c.hgt }}</span>
+                  {% endif %} {% else %} {{ c.hgt or '' }} {% endif %}
+                </td>
+                <td>
+                  {% set cc_val = c.cc|float if c.cc is not none else None %} {%
+                  if cc_val is not none and sexo_norm %} {% if (sexo_norm in
+                  ['femenino','f','mujer'] and cc_val > 88) or (sexo_norm in
+                  ['masculino','m','hombre','varon','varón'] and cc_val > 102)
+                  %}
+                  <span style="color: #e53935; font-weight: bold"
+                    >{{ c.cc }}</span
+                  >
+                  {% elif (sexo_norm in ['femenino','f','mujer'] and cc_val <=
+                  88) or (sexo_norm in
+                  ['masculino','m','hombre','varon','varón'] and cc_val <= 102)
+                  %}
+                  <span style="color: #198754; font-weight: bold"
+                    >{{ c.cc }}</span
+                  >
+                  {% else %} {{ c.cc or '' }} {% endif %} {% else %} {{ c.cc or
+                  '' }} {% endif %}
+                </td>
+                <td>
+                  {% if c.hba1c is not none %} {% set a1c = c.hba1c|float %} {%
+                  if a1c >= 7 %}
+                  <span class="valor-critico">{{ c.hba1c }}</span>
+                  {% else %}
+                  <span class="val-ok">{{ c.hba1c }}</span>
+                  {% endif %} {% else %} {{ c.hba1c or '' }} {% endif %}
+                </td>
+                <td>
+                  {% set etapa = c.etapa_hta or '' %}
+                  <span
+                    class="badge {% if etapa == 'Normotensión' %}etapa-normo {% elif etapa == 'HTA Etapa 1' %}etapa-hta1 {% elif etapa == 'HTA Etapa 2' %}etapa-hta2 {% elif etapa == 'HTA Etapa 3' %}etapa-hta3{% endif %}"
+                  >
+                    {{ etapa }}
+                  </span>
+                </td>
+                <td>{{ c.grupo_etareo_control or '' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <script>
+          // Mapeo de grupo_etareo_control a rangos personalizados
+          function grupoEtareoToRango(grupo) {
+            if (!grupo) return '';
+            grupo = grupo.toLowerCase();
+            // Extraer edad si es posible
+            let match = grupo.match(/(\d+)[^\d]+(\d+)/); // ej: "15 a 19 años"
+            if (match) {
+              let desde = parseInt(match[1],10);
+              let hasta = parseInt(match[2],10);
+              if (desde >= 15 && hasta <= 19) return '15-19';
+              if (desde >= 20 && hasta <= 24) return '20-24';
+              if (desde >= 25 && hasta <= 29) return '25-29';
+              if (desde >= 30 && hasta <= 34) return '30-34';
+              if (desde >= 35 && hasta <= 39) return '35-39';
+              if (desde >= 40 && hasta <= 44) return '40-44';
+              if (desde >= 45 && hasta <= 49) return '45-49';
+              if (desde >= 50 && hasta <= 54) return '50-54';
+              if (desde >= 55 && hasta <= 59) return '55-59';
+              if (desde >= 60 && hasta <= 64) return '60-64';
+              if (desde >= 65 && hasta <= 69) return '65-69';
+              if (desde >= 70 && hasta <= 74) return '70-74';
+              if (desde >= 75 && hasta <= 79) return '75-79';
+              if (desde >= 80) return '80+';
+            }
+            // Si el grupo_etareo_control ya es del tipo "15-19" etc
+            if (/^15 ?- ?19/.test(grupo)) return '15-19';
+            if (/^20 ?- ?24/.test(grupo)) return '20-24';
+            if (/^25 ?- ?29/.test(grupo)) return '25-29';
+            if (/^30 ?- ?34/.test(grupo)) return '30-34';
+            if (/^35 ?- ?39/.test(grupo)) return '35-39';
+            if (/^40 ?- ?44/.test(grupo)) return '40-44';
+            if (/^45 ?- ?49/.test(grupo)) return '45-49';
+            if (/^50 ?- ?54/.test(grupo)) return '50-54';
+            if (/^55 ?- ?59/.test(grupo)) return '55-59';
+            if (/^60 ?- ?64/.test(grupo)) return '60-64';
+            if (/^65 ?- ?69/.test(grupo)) return '65-69';
+            if (/^70 ?- ?74/.test(grupo)) return '70-74';
+            if (/^75 ?- ?79/.test(grupo)) return '75-79';
+            if (/^80/.test(grupo)) return '80+';
+            return '';
+          }
+          document.getElementById('grupo-etareo-btns').addEventListener('click', function(e) {
+            if (e.target && e.target.matches('button.btn-ge')) {
+              var val = e.target.getAttribute('data-value');
+              // Activar sólo el botón seleccionado
+              document.querySelectorAll('#grupo-etareo-btns .btn-ge').forEach(function(btn){
+                btn.classList.toggle('active', btn === e.target);
+              });
+              var filas = document.querySelectorAll('tr[data-grupo-etareo]');
+              filas.forEach(function(tr) {
+                var grupo = tr.getAttribute('data-grupo-etareo') || '';
+                var rango = grupoEtareoToRango(grupo);
+                if (!val || val === rango) {
+                  tr.style.display = '';
+                } else {
+                  tr.style.display = 'none';
+                }
+              });
+            }
+          });
+
+          // Función para generar PDF con todos los datos del usuario incluyendo acuerdos históricos
+          async function generarPDF() {
+            const btnPdf = document.getElementById('btn-generar-pdf');
+            const textoOriginal = btnPdf.textContent;
+
+            try {
+              // Cambiar el botón para mostrar progreso
+              btnPdf.textContent = '⏳ Generando PDF...';
+              btnPdf.disabled = true;
+
+              console.log('📄 Generando PDF con datos completos del usuario...');
+
+              if (!window.jspdf || !window.jspdf.jsPDF) {
+                throw new Error('jsPDF no está cargado.');
+              }
+
+              const { jsPDF } = window.jspdf;
+              const doc = new jsPDF('p', 'mm', 'letter');
+
+              let y = 20; // Posición vertical inicial
+              const leftMargin = 15;
+              const rightMargin = 200;
+              const pageHeight = 270;
+
+              // Función para agregar nueva página si es necesario
+              function checkPageBreak(neededSpace = 20) {
+                if (y + neededSpace > pageHeight) {
+                  doc.addPage();
+                  y = 20;
+                  return true;
+                }
+                return false;
+              }
+
+              // Función para agregar texto con wrap
+              function addWrappedText(text, x, startY, maxWidth, lineHeight = 5) {
+                const lines = doc.splitTextToSize(text, maxWidth);
+                for (let i = 0; i < lines.length; i++) {
+                  checkPageBreak();
+                  doc.text(lines[i], x, startY + (i * lineHeight));
+                }
+                return startY + (lines.length * lineHeight);
+              }
+
+              // Función para obtener datos del promedio PA
+              async function obtenerPromedioPA() {
+                try {
+                  const response = await fetch({{ url_for('promedio_hta', run=usuario.run) | tojson }}, {credentials:'same-origin'});
+                  const html = await response.text();
+                  const tmp = document.createElement('div');
+                  tmp.innerHTML = html;
+                  const text = tmp.innerText || tmp.textContent || '';
+                  const lines = text.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+
+                  let clasificacion = '';
+                  let valor = '';
+
+                  for (const line of lines) {
+                    if (line.includes('HTA') || line.includes('Normo') || line.includes('Etapa')) {
+                      clasificacion = line;
+                    } else if (line.includes('/') && line.includes('mmHg')) {
+                      valor = line;
+                    }
+                  }
+
+                  return { clasificacion, valor };
+                } catch (e) {
+                  console.warn('Error obteniendo promedio PA:', e);
+                  return { clasificacion: '', valor: '' };
+                }
+              }
+
+              // Función para obtener datos del resumen de peso
+              async function obtenerResumenPeso() {
+                try {
+                  const response = await fetch({{ url_for('resumen_peso', run=usuario.run) | tojson }}, {credentials:'same-origin'});
+                  const html = await response.text();
+                  const tmp = document.createElement('div');
+                  tmp.innerHTML = html;
+                  const text = tmp.innerText || tmp.textContent || '';
+                  return text.trim();
+                } catch (e) {
+                  console.warn('Error obteniendo resumen de peso:', e);
+                  return '';
+                }
+              }
+
+              // Obtener datos asíncronos
+              console.log('🔄 Obteniendo datos de promedio PA y resumen de peso...');
+              const [promedioPA, resumenPeso] = await Promise.all([
+                obtenerPromedioPA(),
+                obtenerResumenPeso()
+              ]);
+
+              // ENCABEZADO
+              doc.setFontSize(16);
+              doc.setFont(undefined, 'bold');
+              doc.text('FICHA MÉDICA COMPLETA', leftMargin, y);
+              y += 10;
+
+              // DATOS DEL USUARIO
+              doc.setFontSize(12);
+              doc.setFont(undefined, 'bold');
+              doc.text('DATOS PERSONALES', leftMargin, y);
+              y += 8;
+
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(10);
+              {% if usuario %}
+              doc.text('RUN: {{ usuario.run }}', leftMargin, y);
+              doc.text('Nombre: {{ usuario.nombre or "Sin especificar" }}', leftMargin, y + 5);
+              doc.text('Sexo: {{ usuario.sexo or "Sin especificar" }}', leftMargin, y + 10);
+              {% if usuario.fecha_nacimiento %}
+              doc.text('Fecha Nacimiento: {{ usuario.fecha_nacimiento.strftime("%d/%m/%Y") }}', leftMargin, y + 15);
+              {% endif %}
+              {% if edad %}
+              doc.text('Edad: {{ edad }} años', leftMargin, y + 20);
+              {% endif %}
+              doc.text('Sector: {{ usuario.sector_nombre or "Sin especificar" }}', leftMargin, y + 25);
+              doc.text('Categoría: {{ usuario.categoria_nombre or "Sin especificar" }}', leftMargin, y + 30);
+              {% endif %}
+              y += 40;
+
+              // PATOLOGÍAS
+              checkPageBreak(30);
+              doc.setFont(undefined, 'bold');
+              doc.setFontSize(12);
+              doc.text('PATOLOGÍAS', leftMargin, y);
+              y += 8;
+
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(10);
+              {% if patologias and patologias|length > 0 %}
+              {% for pat in patologias %}
+              checkPageBreak();
+              doc.text('• {{ pat.nombre }} ({{ pat.cie10 }})', leftMargin + 5, y);
+              y += 5;
+              {% endfor %}
+              {% else %}
+              doc.text('No hay patologías registradas', leftMargin + 5, y);
+              y += 5;
+              {% endif %}
+              y += 5;
+
+              // CONTROLES RECIENTES (últimos 5)
+              checkPageBreak(30);
+              doc.setFont(undefined, 'bold');
+              doc.setFontSize(12);
+              doc.text('CONTROLES RECIENTES', leftMargin, y);
+              y += 8;
+
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(9);
+              {% if controles and controles|length > 0 %}
+              {% for control in controles[:5] %}
+              checkPageBreak(25);
+              doc.text('Fecha: {{ control.fecha.strftime("%d/%m/%Y") if control.fecha else "Sin fecha" }}', leftMargin + 5, y);
+              doc.text('Profesional: {{ control.profesional or "Sin especificar" }}', leftMargin + 5, y + 4);
+              {% if control.peso %}
+              doc.text('Peso: {{ control.peso }} kg', leftMargin + 5, y + 8);
+              {% endif %}
+              {% if control.talla %}
+              doc.text('Talla: {{ control.talla }} m', leftMargin + 5, y + 12);
+              {% endif %}
+              {% if control.imc %}
+              doc.text('IMC: {{ "%.1f"|format(control.imc) }}', leftMargin + 5, y + 16);
+              {% endif %}
+              {% if control.presion_sistolica and control.presion_diastolica %}
+              doc.text('Presión: {{ control.presion_sistolica }}/{{ control.presion_diastolica }} mmHg', leftMargin + 5, y + 20);
+              {% endif %}
+              y += 25;
+              {% endfor %}
+              {% else %}
+              doc.text('No hay controles registrados', leftMargin + 5, y);
+              y += 5;
+              {% endif %}
+              y += 5;
+
+              // PROMEDIO PA
+              checkPageBreak(30);
+              doc.setFont(undefined, 'bold');
+              doc.setFontSize(12);
+              doc.text('PROMEDIO PA (PROMEDIO)', leftMargin, y);
+              y += 8;
+
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(10);
+
+              if (promedioPA.clasificacion) {
+                doc.text('Clasificación: ' + promedioPA.clasificacion, leftMargin + 5, y);
+                y += 5;
+              }
+
+              if (promedioPA.valor) {
+                doc.text('Valor: ' + promedioPA.valor, leftMargin + 5, y);
+                y += 5;
+              }
+
+              if (!promedioPA.clasificacion && !promedioPA.valor) {
+                doc.text('No hay datos de promedio PA disponibles', leftMargin + 5, y);
+                y += 5;
+              }
+              y += 5;
+
+              // RESUMEN DE PESO
+              checkPageBreak(30);
+              doc.setFont(undefined, 'bold');
+              doc.setFontSize(12);
+              doc.text('RESUMEN DE PESO', leftMargin, y);
+              y += 8;
+
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(10);
+
+              if (resumenPeso && resumenPeso !== 'Sin datos') {
+                y = addWrappedText(resumenPeso, leftMargin + 5, y, rightMargin - leftMargin - 10);
+              } else {
+                doc.text('No hay datos de resumen de peso disponibles', leftMargin + 5, y);
+                y += 5;
+              }
+              y += 10;
+
+              // ACUERDOS HISTÓRICOS
+              checkPageBreak(30);
+              doc.setFont(undefined, 'bold');
+              doc.setFontSize(12);
+              doc.text('ACUERDOS Y PLANES DE CUIDADO', leftMargin, y);
+              y += 8;
+
+              doc.setFont(undefined, 'normal');
+              doc.setFontSize(9);
+              {% if acuerdos and acuerdos|length > 0 %}
+              {% for acuerdo in acuerdos %}
+              checkPageBreak(20);
+              doc.text('Fecha: {{ acuerdo.fecha_creacion.strftime("%d/%m/%Y %H:%M") if acuerdo.fecha_creacion else "Sin fecha" }}', leftMargin + 5, y);
+              y += 5;
+
+              {% if acuerdo.acuerdos_consensuados %}
+              doc.setFont(undefined, 'bold');
+              doc.text('Acuerdos:', leftMargin + 5, y);
+              y += 4;
+              doc.setFont(undefined, 'normal');
+              y = addWrappedText({{ acuerdo.acuerdos_consensuados|tojson }}, leftMargin + 10, y, rightMargin - leftMargin - 10);
+              y += 3;
+              {% endif %}
+
+              {% if acuerdo.cumplimiento %}
+              doc.setFont(undefined, 'bold');
+              doc.text('Cumplimiento: ', leftMargin + 5, y);
+              doc.setFont(undefined, 'normal');
+              doc.text('{{ acuerdo.cumplimiento }}', leftMargin + 35, y);
+              y += 5;
+              {% endif %}
+
+              {% if acuerdo.observaciones %}
+              doc.setFont(undefined, 'bold');
+              doc.text('Observaciones:', leftMargin + 5, y);
+              y += 4;
+              doc.setFont(undefined, 'normal');
+              y = addWrappedText({{ acuerdo.observaciones|tojson }}, leftMargin + 10, y, rightMargin - leftMargin - 10);
+              y += 3;
+              {% endif %}
+
+              // Línea separadora entre acuerdos
+              doc.setDrawColor(200, 200, 200);
+              doc.line(leftMargin, y, rightMargin, y);
+              y += 8;
+              {% endfor %}
+              {% else %}
+              doc.text('No hay acuerdos registrados', leftMargin + 5, y);
+              y += 5;
+              {% endif %}
+
+              // PIE DE PÁGINA
+              const pageCount = doc.internal.getNumberOfPages();
+              for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Generado el ${new Date().toLocaleDateString('es-CL')} - Página ${i} de ${pageCount}`, leftMargin, pageHeight + 5);
+                doc.text('Sistema ECICEP - Ficha Médica Completa', rightMargin - 80, pageHeight + 5);
+              }
+
+              // Guardar el PDF
+              const fecha = new Date().toISOString().split('T')[0];
+              const nombreArchivo = `Ficha_Completa_{{ usuario.run|replace('.','_')|replace('-','_') }}_${fecha}.pdf`;
+              doc.save(nombreArchivo);
+
+              console.log('✅ PDF generado exitosamente');
+
+            } catch (error) {
+              console.error('❌ Error al generar PDF:', error);
+              alert('Error al generar PDF: ' + (error.message || error));
+            } finally {
+              // Restaurar el botón
+              btnPdf.textContent = textoOriginal;
+              btnPdf.disabled = false;
+            }
+          }
+
+          // ============ FUNCIÓN PARA IR A TARJETÓN CON RUN PRECARGADO ============
+          function irATarjeton() {
+            const run = '{{ usuario.run }}';
+
+            if (!run) {
+              alert('Error: No se pudo obtener el RUN del usuario');
+              return;
+            }
+
+            console.log('🏥 Redirigiendo a tarjetón con RUN:', run);
+
+            // Crear URL del tarjetón con parámetro de RUN
+            const tarjetonUrl = new URL('/tarjeton', window.location.origin);
+            tarjetonUrl.searchParams.set('run', run);
+            tarjetonUrl.searchParams.set('autoload', 'true');
+
+            // Abrir en nueva pestaña
+            const nuevaVentana = window.open(tarjetonUrl.toString(), '_blank');
+
+            if (nuevaVentana) {
+              // Opcionalmente, agregar datos adicionales al localStorage para la nueva ventana
+              try {
+                const datosUsuario = {
+                  run: run,
+                  nombre: '{{ usuario.nombre|e }}',
+                  fecha_carga: new Date().toISOString(),
+                  origen: 'detalle'
+                };
+
+                // Usar sessionStorage para datos temporales
+                sessionStorage.setItem('usuario_precarga_' + run.replace(/[.-]/g, ''), JSON.stringify(datosUsuario));
+
+                console.log('✅ Datos del usuario guardados en sessionStorage para precarga');
+              } catch (error) {
+                console.warn('⚠️ No se pudieron guardar datos en sessionStorage:', error);
+              }
+
+              // Feedback visual
+              const btnTarjeton = document.getElementById('btn-ir-tarjeton');
+              if (btnTarjeton) {
+                const textoOriginal = btnTarjeton.textContent;
+                btnTarjeton.textContent = '✅ Abriendo tarjetón...';
+                btnTarjeton.disabled = true;
+
+                setTimeout(() => {
+                  btnTarjeton.textContent = textoOriginal;
+                  btnTarjeton.disabled = false;
+                }, 2000);
+              }
+            } else {
+              alert('No se pudo abrir el tarjetón. Verifique que no esté bloqueando ventanas emergentes.');
+            }
+          }
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

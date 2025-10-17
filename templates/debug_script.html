@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Debug Script Inyectable</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+  </head>
+  <body>
+    <script>
+      // Script para inyectar en consola del navegador
+      console.log("=== DIAGNÓSTICO FORMULARIO ECICEP ===");
+
+      // 1. Verificar si las funciones están definidas
+      console.log("1. Verificando funciones:");
+      console.log("   - normalizarRun:", typeof normalizarRun);
+      console.log("   - dvValido:", typeof dvValido);
+      console.log("   - manejarBusquedaRun:", typeof manejarBusquedaRun);
+      console.log("   - buscarUsuario:", typeof buscarUsuario);
+
+      // 2. Verificar si el input del RUN existe
+      const runInput = document.getElementById("run");
+      console.log("2. Input RUN:", runInput ? "ENCONTRADO" : "NO ENCONTRADO");
+      if (runInput) {
+        console.log("   - Valor actual:", runInput.value);
+        console.log("   - Atributos:", runInput.attributes);
+      }
+
+      // 3. Verificar eventos
+      console.log("3. Eventos del input RUN:");
+      if (runInput) {
+        console.log(
+          "   - Input listeners:",
+          getEventListeners(runInput).input?.length || 0,
+        );
+        console.log(
+          "   - Blur listeners:",
+          getEventListeners(runInput).blur?.length || 0,
+        );
+      }
+
+      // 4. Test manual de funciones
+      console.log("4. Test manual:");
+      try {
+        if (typeof normalizarRun === "function") {
+          const testRun = normalizarRun("100001411");
+          console.log('   - normalizarRun("100001411"):', testRun);
+        }
+
+        if (typeof dvValido === "function") {
+          const testDV = dvValido("10000141-1");
+          console.log('   - dvValido("10000141-1"):', testDV);
+        }
+      } catch (e) {
+        console.error("   - Error en test:", e);
+      }
+
+      // 5. Simular evento input
+      console.log("5. Simulando evento input:");
+      if (runInput && typeof manejarBusquedaRun === "function") {
+        runInput.value = "100001411";
+        manejarBusquedaRun({ target: runInput });
+        console.log("   - Evento simulado ejecutado");
+      }
+
+      console.log("=== FIN DIAGNÓSTICO ===");
+    </script>
+  </body>
+</html>

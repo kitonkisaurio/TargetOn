@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ECICEP — Ingresar nuevo usuario y control</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          "Helvetica Neue",
+          Arial,
+          "Noto Sans",
+          sans-serif;
+        line-height: 1.35;
+        margin: 0;
+        background: #f6f8fb;
+        color: #111827;
+      }
+      .container {
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 8px 0 18px;
+      }
+      fieldset {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        margin-bottom: 16px;
+      }
+      legend {
+        padding: 0 8px;
+        font-weight: 700;
+        color: #111827;
+      }
+      label {
+        display: block;
+        margin: 6px 0;
+        color: #374151;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 14px;
+        background: #fff;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #0d6efd;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+      }
+      .btn-secondary {
+        background: #6b7280;
+      }
+      .btn-danger {
+        background: #dc2626;
+      }
+      .badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 10px;
+        background: #e5e7eb;
+        color: #111827;
+        font-size: 12px;
+      }
+      .categoria-seccion {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        margin: 10px 0;
+      }
+      .categoria-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .categoria-toggle {
+        background: #0d6efd;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        width: 28px;
+        height: 28px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .categoria-content {
+        padding: 10px 12px;
+      }
+      .familia {
+        border: 1px dashed #e5e7eb;
+        border-radius: 8px;
+        margin: 10px 0;
+      }
+      .familia-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f9fafb;
+        padding: 8px 10px;
+        border-bottom: 1px dashed #e5e7eb;
+      }
+      .familia-toggle {
+        background: #6b7280;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        width: 26px;
+        height: 26px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .familia-content {
+        padding: 10px;
+      }
+      .patologia-item {
+        margin: 5px 0;
+      }
+      .subcategoria-header {
+        margin-top: 8px;
+        font-weight: 700;
+        color: #0d6efd;
+      }
+      .collapsed {
+        display: none;
+      }
+      .calculo-riesgo {
+        margin: 16px 0;
+        padding: 15px;
+        border: 2px solid #0d6efd;
+        border-radius: 8px;
+        background: #f0f8ff;
+        box-shadow: 0 2px 8px rgba(13, 110, 253, 0.1);
+      }
+      .nuevo-usuario {
+        display: none;
+        background: #e8f5e8;
+        border: 1px solid #28a745;
+        border-radius: 6px;
+        padding: 12px;
+        margin: 8px 0;
+        color: #155724;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #333;
+        padding: 8px;
+      }
+      thead {
+        background: #f8f9fa;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Ingresar nuevo usuario y control</h1>
+
+      <form id="form-ecicep">
+        <fieldset>
+          <legend>Datos del usuario</legend>
+          <div class="row">
+            <label
+              >RUN:
+              <input
+                id="run"
+                name="run"
+                autocomplete="off"
+                placeholder="12.345.678-9"
+              />
+            </label>
+            <span></span>
+            <label>Nombre:<input id="nombre" name="nombre" /></label>
+            <label
+              >Fecha de nacimiento:<input
+                id="fecha_nacimiento"
+                name="fecha_nacimiento"
+                type="date"
+            /></label>
+            <label>Dirección:<input id="direccion" name="direccion" /></label>
+            <label
+              >Teléfono:<input
+                id="telefono"
+                name="telefono"
+                placeholder="+56..."
+            /></label>
+            <label
+              >Sexo:
+              <select id="sexo" name="sexo">
+                <option value="">--</option>
+                <option>Femenino</option>
+                <option>Masculino</option>
+              </select>
+            </label>
+            <label
+              >Categoría:
+              <select id="categoria_id" name="categoria_id">
+                <option value="">--</option>
+                <option value="1">G1</option>
+                <option value="2">G2</option>
+                <option value="3">G3</option>
+              </select>
+            </label>
+          </div>
+
+          <div
+            id="usuario-encontrado"
+            class="badge"
+            style="display: none; margin-top: 8px"
+          >
+            Usuario cargado
+          </div>
+          <div id="usuario-nuevo" class="nuevo-usuario">
+            <strong>🆕 Usuario nuevo</strong>
+            <p style="margin: 4px 0 0 0; font-size: 13px">
+              El RUN no fue encontrado. Completa para crear un nuevo registro.
+            </p>
+          </div>
+        </fieldset>
+
+        <div class="categoria-seccion" id="cat-metabolicas">
+          <div
+            class="categoria-header"
+            onclick="toggleCategoria('content-metabolicas')"
+          >
+            <h4>
+              ⚙️ Metabólicas / Endocrinas
+              <span class="badge" id="badge-metabolicas">0</span>
+            </h4>
+            <button
+              type="button"
+              class="categoria-toggle"
+              id="toggle-metabolicas"
+            >
+              +
+            </button>
+          </div>
+          <div class="categoria-content collapsed" id="content-metabolicas">
+            <div class="familia" data-familia-id="fam-diabetes" data-points="1">
+              <div class="familia-header">
+                <button
+                  type="button"
+                  class="familia-toggle"
+                  onclick="toggleCollapse('fam-diabetes-block', this)"
+                >
+                  +
+                </button>
+                Diabetes / Prediabetes <span class="badge">(1)</span>
+              </div>
+              <div class="familia-content collapsed" id="fam-diabetes-block">
+                <div class="patologia-item">
+                  <input
+                    type="checkbox"
+                    class="patologia-checkbox"
+                    id="E110"
+                    name="patologia[]"
+                    value="E11.0"
+                    data-points="1"
+                  />
+                  <label for="E110"
+                    ><strong>E11.0</strong> — DM2 con complicaciones
+                    leves</label
+                  >
+                </div>
+                <div class="patologia-item">
+                  <input
+                    type="checkbox"
+                    class="patologia-checkbox"
+                    id="E111"
+                    name="patologia[]"
+                    value="E11.1"
+                    data-points="2"
+                  />
+                  <label for="E111"
+                    ><strong>E11.1</strong> — DM2 con complicaciones
+                    significativas</label
+                  >
+                </div>
+                <div class="patologia-item">
+                  <input
+                    type="checkbox"
+                    class="patologia-checkbox"
+                    id="R7303"
+                    name="patologia[]"
+                    value="R73.03"
+                    data-points="1"
+                  />
+                  <label for="R7303"
+                    ><strong>R73.03</strong> — Prediabetes</label
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="familia"
+              data-familia-id="fam-dislipidemia"
+              data-points="1"
+            >
+              <div class="familia-header">
+                <button
+                  type="button"
+                  class="familia-toggle"
+                  onclick="toggleCollapse('fam-dislipidemia-block', this)"
+                >
+                  +
+                </button>
+                Dislipidemia <span class="badge">(1)</span>
+              </div>
+              <div
+                class="familia-content collapsed"
+                id="fam-dislipidemia-block"
+              >
+                <div class="patologia-item">
+                  <input
+                    type="checkbox"
+                    class="patologia-checkbox"
+                    id="E78"
+                    name="patologia[]"
+                    value="E78"
+                    data-points="1"
+                  />
+                  <label for="E78"
+                    ><strong>E78</strong> — Trastornos del metabolismo de
+                    lipoproteínas</label
+                  >
+                </div>
+                <div class="patologia-item">
+                  <input
+                    type="checkbox"
+                    class="patologia-checkbox"
+                    id="E780"
+                    name="patologia[]"
+                    value="E78.0"
+                    data-points="1"
+                  />
+                  <label for="E780"
+                    ><strong>E78.0</strong> — Hipercolesterolemia</label
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="calculo-riesgo">
+          <h5 style="color: #0d6efd; margin: 0 0 10px 0">
+            📊 Cálculo de Riesgo ECICEP
+          </h5>
+          <div
+            style="
+              display: flex;
+              gap: 15px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <span style="font-weight: 600"
+              >Total de puntos:
+              <strong id="total-puntos" style="font-size: 18px">0</strong></span
+            >
+            <span style="font-weight: 600"
+              >Categoría:
+              <strong
+                id="categoria-resultado"
+                style="
+                  font-size: 18px;
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                  background: #e9ecef;
+                "
+                >G0</strong
+              ></span
+            >
+          </div>
+          <small style="color: #666; display: block; margin-top: 8px">
+            <span style="color: #198754">🟢 1 punto = G1 (Leve)</span> |
+            <span style="color: #ffc107">🟡 2–4 puntos = G2 (Moderado)</span> |
+            <span style="color: #dc3545">🔴 ≥5 puntos = G3 (Alto)</span>
+          </small>
+        </div>
+
+        <fieldset>
+          <legend>Control inicial</legend>
+          <div class="grid-3">
+            <label>Peso: <input name="peso" type="number" step="0.01" /></label>
+            <label
+              >Talla (m):
+              <input
+                name="talla"
+                type="number"
+                step="0.01"
+                min="0.50"
+                max="2.30"
+                placeholder="1.70"
+            /></label>
+            <label
+              >HbA1c: <input name="hba1c" type="number" step="0.01"
+            /></label>
+          </div>
+        </fieldset>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px">
+          <button type="submit" class="btn">Guardar Usuario y Control</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="limpiarFormulario()"
+          >
+            Limpiar Formulario
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      // === Toggler de categorías/familias ===
+      function toggleCategoria(contentId) {
+        const content = document.getElementById(contentId);
+        if (!content) return;
+        content.classList.toggle("collapsed");
+        const wrap = content.closest(".categoria-seccion");
+        const btn = wrap?.querySelector(".categoria-toggle");
+        if (btn)
+          btn.textContent = content.classList.contains("collapsed") ? "+" : "−";
+      }
+      function toggleCollapse(blockId, btn) {
+        const block = document.getElementById(blockId);
+        if (!block) return;
+        block.classList.toggle("collapsed");
+        if (btn)
+          btn.textContent = block.classList.contains("collapsed") ? "+" : "−";
+      }
+
+      // === Helpers ===
+      function $all(sel, scope) {
+        return Array.from((scope || document).querySelectorAll(sel));
+      }
+      function $(sel, scope) {
+        return (scope || document).querySelector(sel);
+      }
+
+      // ========= CÁLCULO DE RIESGO ECICEP =========
+      function calcularRiesgo() {
+        let total = 0;
+        document
+          .querySelectorAll(".patologia-checkbox:checked")
+          .forEach((cb) => {
+            const pts = parseInt(cb.getAttribute("data-points"), 10);
+            total += Number.isFinite(pts) ? pts : 0;
+          });
+
+        const totalSpan = document.getElementById("total-puntos");
+        if (totalSpan) totalSpan.textContent = String(total);
+
+        let categoria = "G0";
+        let bg = "#e9ecef",
+          fg = "#000";
+        if (total === 1) {
+          categoria = "G1";
+          bg = "#198754";
+          fg = "#fff";
+        } else if (total >= 2 && total <= 4) {
+          categoria = "G2";
+          bg = "#ffc107";
+          fg = "#000";
+        } else if (total >= 5) {
+          categoria = "G3";
+          bg = "#dc3545";
+          fg = "#fff";
+        }
+
+        const pill = document.getElementById("categoria-resultado");
+        if (pill) {
+          pill.textContent = categoria;
+          pill.style.backgroundColor = bg;
+          pill.style.color = fg;
+        }
+
+        try {
+          const sel = document.getElementById("categoria_id");
+          if (sel) {
+            if (categoria === "G1") sel.value = "1";
+            else if (categoria === "G2") sel.value = "2";
+            else if (categoria === "G3") sel.value = "3";
+            else sel.value = "";
+            colorearSelectCategoria();
+          }
+        } catch (e) {
+          console.error("Error actualizando select de categoría:", e);
+        }
+      }
+
+      function colorearSelectCategoria() {
+        try {
+          const sel = document.getElementById("categoria_id");
+          if (!sel) return;
+          const v = sel.value;
+          if (v === "1") {
+            sel.style.background = "#198754";
+            sel.style.color = "#fff";
+          } else if (v === "2") {
+            sel.style.background = "#ffc107";
+            sel.style.color = "#000";
+          } else if (v === "3") {
+            sel.style.background = "#dc3545";
+            sel.style.color = "#fff";
+          } else {
+            sel.style.background = "";
+            sel.style.color = "";
+          }
+        } catch (e) {}
+      }
+
+      // ===== Guardado automático de categoria =====
+      let _guardarCategoriaTimeout = null;
+      function scheduleGuardarCategoria() {
+        clearTimeout(_guardarCategoriaTimeout);
+        _guardarCategoriaTimeout = setTimeout(guardarCategoriaActual, 800);
+      }
+      function guardarCategoriaActual() {
+        try {
+          const run = (
+            document.getElementById("run") || { value: "" }
+          ).value.trim();
+          const sel = document.getElementById("categoria_id");
+          if (!run || !sel) return;
+          const payload = { categoria_id: sel.value || null };
+          fetch(`/api/usuario/${encodeURIComponent(run)}/categoria`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (data && data.success) {
+                colorearSelectCategoria();
+              } else {
+                console.error("Error guardando categoria:", data && data.error);
+              }
+            })
+            .catch((err) =>
+              console.error("Error guardando categoria (fetch):", err),
+            );
+        } catch (e) {
+          console.error("Error en guardarCategoriaActual:", e);
+        }
+      }
+
+      // ===== Limpieza formulario (preserva RUN) =====
+      function limpiarFormulario() {
+        const runInput = document.getElementById("run");
+        const runValue = runInput ? runInput.value : "";
+        document
+          .querySelectorAll(
+            'input[type="text"], input[type="number"], input[type="date"]',
+          )
+          .forEach((inp) => {
+            if (inp.id !== "run") inp.value = "";
+          });
+        document
+          .querySelectorAll("select")
+          .forEach((s) => (s.selectedIndex = 0));
+        document
+          .querySelectorAll(".patologia-checkbox")
+          .forEach((cb) => (cb.checked = false));
+        calcularRiesgo();
+        colorearSelectCategoria();
+        if (runInput) runInput.value = runValue;
+      }
+
+      // ===== Bindings =====
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".patologia-checkbox").forEach((cb) => {
+          cb.addEventListener("change", () => {
+            calcularRiesgo();
+            if (typeof scheduleGuardarCategoria === "function")
+              scheduleGuardarCategoria();
+          });
+        });
+        calcularRiesgo();
+        colorearSelectCategoria();
+      });
+    </script>
+
+    <!-- Scripts adicionales -->
+    <script src="{{ url_for('static', filename='js/common.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/run-formatter.js') }}"></script>
+  </body>
+</html>

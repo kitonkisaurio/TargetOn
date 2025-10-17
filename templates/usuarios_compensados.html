@@ -1,0 +1,757 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Compensación Vigente - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            --card-bg: #ffffff;
+            --primary-color: #059669;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #047857 100%);
+            border: none;
+            color: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .filter-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .results-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #047857 100%);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table td {
+            padding: 10px 12px;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        .badge-compensado {
+            background: var(--success-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-patologia {
+            background: var(--secondary-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin: 1px;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #047857 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+        }
+
+        .form-select {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            padding: 20px;
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .stats-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .compensation-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .alert-success {
+            border-left: 4px solid var(--success-color);
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card header-card">
+                    <div class="card-body text-center py-4">
+                        <h1 class="card-title mb-2">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            Compensación Vigente
+                        </h1>
+                        <p class="mb-0">Pacientes que cumplen metas terapéuticas según criterios clínicos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card filter-card">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-funnel me-2"></i>
+                            Filtros de Búsqueda
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" id="filtrosForm">
+                            <div class="row g-3">
+                                <!-- Fechas -->
+                                <div class="col-md-3">
+                                    <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                                           value="{{ request.args.get('fecha_inicio', '') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                                           value="{{ request.args.get('fecha_fin', '') }}">
+                                </div>
+                                
+                                <!-- Categorías -->
+                                <div class="col-md-3">
+                                    <label for="categorias" class="form-label">Categorías</label>
+                                    <select class="form-select" id="categorias" name="categorias" multiple size="6">
+                                        <option value="PSCV" {{ 'selected' if 'PSCV' in request.args.getlist('categorias') }}>PSCV</option>
+                                        <option value="DM" {{ 'selected' if 'DM' in request.args.getlist('categorias') }}>Diabetes Mellitus (DM)</option>
+                                        <option value="HTA" {{ 'selected' if 'HTA' in request.args.getlist('categorias') }}>Hipertensión Arterial (HTA)</option>
+                                        <option value="DISLIPIDEMIA" {{ 'selected' if 'DISLIPIDEMIA' in request.args.getlist('categorias') }}>Dislipidemia</option>
+                                        <option value="OBESIDAD" {{ 'selected' if 'OBESIDAD' in request.args.getlist('categorias') }}>Obesidad</option>
+                                        <option value="TABAQUISMO" {{ 'selected' if 'TABAQUISMO' in request.args.getlist('categorias') }}>Tabaquismo</option>
+                                        <option value="OTRAS" {{ 'selected' if 'OTRAS' in request.args.getlist('categorias') }}>Otras</option>
+                                    </select>
+                                    <small class="form-text text-muted">Mantén Ctrl/Cmd para seleccionar múltiples</small>
+                                </div>
+                                
+                                <!-- Sexo -->
+                                <div class="col-md-3">
+                                    <label for="sexo" class="form-label">Sexo</label>
+                                    <select class="form-select" id="sexo" name="sexo">
+                                        <option value="">Ambos sexos</option>
+                                        <option value="masculino" {{ 'selected' if request.args.get('sexo') == 'masculino' }}>Masculino</option>
+                                        <option value="femenino" {{ 'selected' if request.args.get('sexo') == 'femenino' }}>Femenino</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Grupo Etario -->
+                                <div class="col-md-4">
+                                    <label for="grupo_etario" class="form-label">Grupo Etario</label>
+                                    <select class="form-select" id="grupo_etario" name="grupo_etario">
+                                        <option value="">Todos los grupos</option>
+                                        <option value="15-19" {{ 'selected' if request.args.get('grupo_etario') == '15-19' }}>15 a 19 años</option>
+                                        <option value="20-24" {{ 'selected' if request.args.get('grupo_etario') == '20-24' }}>20 a 24 años</option>
+                                        <option value="25-29" {{ 'selected' if request.args.get('grupo_etario') == '25-29' }}>25 a 29 años</option>
+                                        <option value="30-34" {{ 'selected' if request.args.get('grupo_etario') == '30-34' }}>30 a 34 años</option>
+                                        <option value="35-39" {{ 'selected' if request.args.get('grupo_etario') == '35-39' }}>35 a 39 años</option>
+                                        <option value="40-44" {{ 'selected' if request.args.get('grupo_etario') == '40-44' }}>40 a 44 años</option>
+                                        <option value="45-49" {{ 'selected' if request.args.get('grupo_etario') == '45-49' }}>45 a 49 años</option>
+                                        <option value="50-54" {{ 'selected' if request.args.get('grupo_etario') == '50-54' }}>50 a 54 años</option>
+                                        <option value="55-59" {{ 'selected' if request.args.get('grupo_etario') == '55-59' }}>55 a 59 años</option>
+                                        <option value="60-64" {{ 'selected' if request.args.get('grupo_etario') == '60-64' }}>60 a 64 años</option>
+                                        <option value="65-69" {{ 'selected' if request.args.get('grupo_etario') == '65-69' }}>65 a 69 años</option>
+                                        <option value="70-74" {{ 'selected' if request.args.get('grupo_etario') == '70-74' }}>70 a 74 años</option>
+                                        <option value="75-79" {{ 'selected' if request.args.get('grupo_etario') == '75-79' }}>75 a 79 años</option>
+                                        <option value="80+" {{ 'selected' if request.args.get('grupo_etario') == '80+' }}>80 y más años</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Sector -->
+                                <div class="col-md-4">
+                                    <label for="sector" class="form-label">Sector</label>
+                                    <select class="form-select" id="sector" name="sector">
+                                        <option value="">Todos los sectores</option>
+                                        {% for sector in sectores %}
+                                        <option value="{{ sector.id }}" {{ 'selected' if request.args.get('sector') == sector.id|string }}>{{ sector.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <!-- Condiciones Específicas -->
+                                <div class="col-12">
+                                    <div class="card mt-3">
+                                        <div class="card-header bg-light">
+                                            <h6 class="card-title mb-0">
+                                                <i class="bi bi-check2-square me-2"></i>
+                                                Condiciones Específicas (Combinar múltiples)
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <!-- Sobrepeso/Obesidad -->
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="sobrepeso_menor_65" 
+                                                               id="sobrepeso_menor_65" {{ 'checked' if 'sobrepeso_menor_65' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="sobrepeso_menor_65">
+                                                            <strong>Sobrepeso <65 años:</strong> IMC 25-29.9 kg/m²
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="sobrepeso_mayor_65" 
+                                                               id="sobrepeso_mayor_65" {{ 'checked' if 'sobrepeso_mayor_65' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="sobrepeso_mayor_65">
+                                                            <strong>Sobrepeso ≥65 años:</strong> IMC 28-31.9 kg/m²
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="obesidad_menor_65" 
+                                                               id="obesidad_menor_65" {{ 'checked' if 'obesidad_menor_65' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="obesidad_menor_65">
+                                                            <strong>Obesidad <65 años:</strong> IMC ≥30 kg/m²
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="obesidad_mayor_65" 
+                                                               id="obesidad_mayor_65" {{ 'checked' if 'obesidad_mayor_65' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="obesidad_mayor_65">
+                                                            <strong>Obesidad ≥65 años:</strong> IMC ≥32 kg/m²
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Tabaquismo -->
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="fumador_mayor_55" 
+                                                               id="fumador_mayor_55" {{ 'checked' if 'fumador_mayor_55' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="fumador_mayor_55">
+                                                            <strong>Tabaquismo:</strong> Fumador actual ≥55 años
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- ERC -->
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="con_erc" 
+                                                               id="con_erc" {{ 'checked' if 'con_erc' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="con_erc">
+                                                            <strong>Con ERC:</strong> Etapas G1-G5 según VFG
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Antecedentes Cardiovasculares -->
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="antec_iam" 
+                                                               id="antec_iam" {{ 'checked' if 'antec_iam' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="antec_iam">
+                                                            <strong>Antec. IAM:</strong> Infarto Agudo al Miocardio
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="antec_acv" 
+                                                               id="antec_acv" {{ 'checked' if 'antec_acv' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="antec_acv">
+                                                            <strong>Antec. ACV:</strong> Accidente Cerebrovascular
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Actividad Física -->
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="en_actividad_fisica" 
+                                                               id="en_actividad_fisica" {{ 'checked' if 'en_actividad_fisica' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="en_actividad_fisica">
+                                                            <strong>En actividad física:</strong> Programa cardiovascular
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Evaluación Pie Diabético -->
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="condiciones" value="pie_dm_vigente" 
+                                                               id="pie_dm_vigente" {{ 'checked' if 'pie_dm_vigente' in request.args.getlist('condiciones') }}>
+                                                        <label class="form-check-label" for="pie_dm_vigente">
+                                                            <strong>Evaluación Pie DM:</strong> Vigente
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Botones -->
+                                <div class="col-12 d-flex align-items-end gap-2 mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search me-1"></i>
+                                        Filtrar
+                                    </button>
+                                    <a href="{{ url_for('usuarios_compensados') }}" class="btn btn-outline-primary">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        Limpiar
+                                    </a>
+                                    <a href="{{ url_for('estadisticas') }}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-1"></i>
+                                        Volver
+                                    </a>
+                                    <button type="button" class="btn btn-success" id="btnExportarExcel">
+                                        <i class="bi bi-file-excel me-1"></i>
+                                        Exportar Excel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas Resumidas -->
+        {% if usuarios %}
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <p class="stats-number">{{ usuarios|length }}</p>
+                    <p class="stats-label">Total Compensados</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <p class="stats-number">{{ usuarios|selectattr('hta_compensado')|list|length }}</p>
+                    <p class="stats-label">HTA Compensada</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <p class="stats-number">{{ usuarios|selectattr('dm_compensado')|list|length }}</p>
+                    <p class="stats-label">DM Compensada</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <p class="stats-number">{{ usuarios|selectattr('pie_diabetico_vigente')|list|length }}</p>
+                    <p class="stats-label">Pie Diabético Vigente</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Criterios de Compensación -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-success">
+                    <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Criterios de Compensación</h6>
+                    <ul class="mb-0">
+                        <li><strong>Hipertensión:</strong> PA <140/90 mmHg (<80 años) o PA <150/90 mmHg (≥80 años)</li>
+                        <li><strong>Diabetes:</strong> HbA1c <7% (<80 años) o HbA1c <8% (≥80 años)</li>
+                        <li><strong>Pie Diabético:</strong> Evaluación vigente según protocolo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card results-card">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-table me-2"></i>
+                            Compensación Vigente
+                            {% if usuarios %}
+                            <span class="badge bg-success ms-2">{{ usuarios|length }} encontrados</span>
+                            {% endif %}
+                        </h5>
+                        {% if usuarios %}
+                        <div>
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="exportarExcel()">
+                                <i class="bi bi-file-earmark-excel me-1"></i>
+                                Exportar Excel
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body p-0">
+                        {% if usuarios %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre Completo</th>
+                                        <th>Edad</th>
+                                        <th>Sexo</th>
+                                        <th>Sector</th>
+                                        <th>Patologías</th>
+                                        <th>Compensación</th>
+                                        <th>Fecha Vigencia</th>
+                                        <th>Detalles</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for usuario in usuarios %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>{{ usuario.nombre_completo }}</strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ usuario.edad }} años</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {{ 'bg-primary' if usuario.sexo == 'masculino' else 'bg-info' }}">
+                                                {{ 'Masculino' if usuario.sexo == 'masculino' else 'Femenino' }}
+                                            </span>
+                                        </td>
+                                        <td>{{ usuario.sector }}</td>
+                                        <td>
+                                            {% for patologia in usuario.patologias %}
+                                            <span class="badge-patologia">{{ patologia }}</span>
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            <div class="compensation-indicator">
+                                                {% if usuario.hta_compensado %}
+                                                <span class="badge-compensado">✅ HTA</span>
+                                                {% endif %}
+                                                {% if usuario.dm_compensado %}
+                                                <span class="badge-compensado">✅ DM</span>
+                                                {% endif %}
+                                                {% if usuario.pie_diabetico_vigente %}
+                                                <span class="badge-compensado">✅ PD</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ usuario.fecha_vigencia.strftime('%d/%m/%Y') if usuario.fecha_vigencia else 'N/A' }}</small>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#detalleModal{{ loop.index }}">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-search display-1 text-muted"></i>
+                            <h4 class="text-muted mt-3">No se encontraron usuarios con compensación vigente</h4>
+                            <p class="text-muted">Intenta ajustar los filtros de búsqueda</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales de Detalle (uno por usuario) -->
+    {% if usuarios %}
+    {% for usuario in usuarios %}
+    <div class="modal fade" id="detalleModal{{ loop.index }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-check me-2"></i>
+                        Detalle de Compensación - {{ usuario.nombre_completo }}
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-person me-2"></i>Información Personal</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>RUT:</strong></td><td>{{ usuario.rut }}</td></tr>
+                                <tr><td><strong>Nombre:</strong></td><td>{{ usuario.nombre_completo }}</td></tr>
+                                <tr><td><strong>Edad:</strong></td><td>{{ usuario.edad }} años</td></tr>
+                                <tr><td><strong>Sexo:</strong></td><td>{{ 'Masculino' if usuario.sexo == 'masculino' else 'Femenino' }}</td></tr>
+                                <tr><td><strong>Sector:</strong></td><td>{{ usuario.sector }}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-heart-pulse me-2"></i>Estado de Compensación</h6>
+                            <table class="table table-sm">
+                                {% if usuario.hta_compensado %}
+                                <tr>
+                                    <td><strong>Hipertensión:</strong></td>
+                                    <td><span class="badge bg-success">✅ Compensada</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>PA Actual:</strong></td>
+                                    <td>{{ usuario.pa_sistolica }}/{{ usuario.pa_diastolica }} mmHg</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Meta PA:</strong></td>
+                                    <td>{{ '<150/90' if usuario.edad >= 80 else '<140/90' }} mmHg</td>
+                                </tr>
+                                {% endif %}
+                                
+                                {% if usuario.dm_compensado %}
+                                <tr>
+                                    <td><strong>Diabetes:</strong></td>
+                                    <td><span class="badge bg-success">✅ Compensada</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>HbA1c Actual:</strong></td>
+                                    <td>{{ usuario.hba1c }}%</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Meta HbA1c:</strong></td>
+                                    <td>{{ '<8' if usuario.edad >= 80 else '<7' }}%</td>
+                                </tr>
+                                {% endif %}
+                                
+                                {% if usuario.pie_diabetico_vigente %}
+                                <tr>
+                                    <td><strong>Pie Diabético:</strong></td>
+                                    <td><span class="badge bg-success">✅ Vigente</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Última Evaluación:</strong></td>
+                                    <td>{{ usuario.fecha_eval_pie.strftime('%d/%m/%Y') if usuario.fecha_eval_pie else 'N/A' }}</td>
+                                </tr>
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6><i class="bi bi-calendar-check me-2"></i>Fechas de Evaluación que Tributan a Estadísticas</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ítem</th>
+                                    <th>Fecha Evaluación</th>
+                                    <th>Valor</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if usuario.hta_compensado %}
+                                <tr>
+                                    <td>Presión Arterial</td>
+                                    <td>{{ usuario.fecha_pa.strftime('%d/%m/%Y') if usuario.fecha_pa else 'N/A' }}</td>
+                                    <td>{{ usuario.pa_sistolica }}/{{ usuario.pa_diastolica }} mmHg</td>
+                                    <td><span class="badge bg-success">✅ Compensada</span></td>
+                                </tr>
+                                {% endif %}
+                                {% if usuario.dm_compensado %}
+                                <tr>
+                                    <td>Hemoglobina Glicosilada</td>
+                                    <td>{{ usuario.fecha_hba1c.strftime('%d/%m/%Y') if usuario.fecha_hba1c else 'N/A' }}</td>
+                                    <td>{{ usuario.hba1c }}%</td>
+                                    <td><span class="badge bg-success">✅ Compensada</span></td>
+                                </tr>
+                                {% endif %}
+                                {% if usuario.pie_diabetico_vigente %}
+                                <tr>
+                                    <td>Evaluación Pie Diabético</td>
+                                    <td>{{ usuario.fecha_eval_pie.strftime('%d/%m/%Y') if usuario.fecha_eval_pie else 'N/A' }}</td>
+                                    <td>{{ usuario.resultado_pie }}</td>
+                                    <td><span class="badge bg-success">✅ Vigente</span></td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function exportarExcel() {
+            // Crear parámetros de la URL actual para mantener filtros
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('export', 'excel');
+            
+            // Redirigir a la misma página con parámetro de exportación
+            window.location.href = '{{ url_for("usuarios_compensados") }}?' + urlParams.toString();
+        }
+        
+        // Auto-submit del formulario cuando cambian los filtros
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('filtrosForm');
+            const selects = form.querySelectorAll('select');
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            
+            // Event listeners para selects - activar auto-submit
+            selects.forEach(select => {
+                select.addEventListener('change', function() {
+                    console.log('Filtro cambiado:', this.name, '=', this.value);
+                    
+                    // Mostrar indicador de carga
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Filtrando...';
+                        submitBtn.disabled = true;
+                    }
+                    
+                    form.submit();
+                });
+            });
+            
+            // Event listeners para checkboxes de condiciones - activar auto-submit
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    console.log('Condición cambiada:', this.name, '=', this.checked);
+                    
+                    // Mostrar indicador de carga
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Filtrando...';
+                        submitBtn.disabled = true;
+                    }
+                    
+                    form.submit();
+                });
+            });
+            
+            // Configurar botón de exportar Excel
+            const btnExportarExcel = document.getElementById('btnExportarExcel');
+            if (btnExportarExcel) {
+                btnExportarExcel.addEventListener('click', exportarExcel);
+            }
+            
+            // Funcionalidad para mostrar/ocultar criterios
+            const btnMostrarCriterios = document.querySelector('.btn[data-bs-toggle="collapse"]');
+            if (btnMostrarCriterios) {
+                btnMostrarCriterios.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    setTimeout(() => {
+                        if (icon.classList.contains('bi-chevron-down')) {
+                            icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+                        } else {
+                            icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+                        }
+                    }, 150);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

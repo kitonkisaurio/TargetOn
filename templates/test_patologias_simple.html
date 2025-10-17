@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Patologías Simple</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f8f9fa;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      .test-section {
+        margin: 20px 0;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .patologias-container {
+        background: #ecfdf5;
+        border: 1px solid #059669;
+        border-radius: 4px;
+        padding: 10px;
+        min-height: 50px;
+      }
+      .pat-badge {
+        padding: 4px 8px;
+        margin: 2px;
+        border-radius: 4px;
+        display: inline-block;
+        color: white;
+        font-size: 11px;
+      }
+      .pat-red {
+        background: #dc3545;
+      }
+      .pat-green {
+        background: #28a745;
+      }
+      .pat-yellow {
+        background: #ffc107;
+        color: black;
+      }
+      .pat-default {
+        background: #6c757d;
+      }
+      button {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      .log {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧪 Test Patologías - Versión Simple</h1>
+
+      <div class="test-section">
+        <h3>🎯 Test RUN: 8.371.186-8</h3>
+        <button onclick="testPatologias()">🚀 Probar Cargar Patologías</button>
+        <button onclick="testEndpoint()">🔗 Probar Endpoint Directo</button>
+        <button onclick="clearLog()">🧹 Limpiar Log</button>
+      </div>
+
+      <div class="test-section">
+        <h3>📋 Resultado:</h3>
+        <div id="patologias-guardadas" class="patologias-container">
+          <span style="color: #6b7280">Presiona un botón para probar...</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h3>📝 Log:</h3>
+        <div id="log" class="log"></div>
+      </div>
+    </div>
+
+    <script>
+      function log(mensaje) {
+        const logDiv = document.getElementById("log");
+        const tiempo = new Date().toLocaleTimeString();
+        logDiv.innerHTML += `[${tiempo}] ${mensaje}<br>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+        console.log(mensaje);
+      }
+
+      function clearLog() {
+        document.getElementById("log").innerHTML = "";
+      }
+
+      // Función simplificada para cargar patologías
+      function cargarPatologiasGuardadas(run) {
+        log(`🔍 [SIMPLE] Cargando patologías para RUN: ${run}`);
+
+        const container = document.getElementById("patologias-guardadas");
+        if (!container) {
+          log("❌ [SIMPLE] Container no encontrado");
+          return;
+        }
+
+        // Mostrar loading
+        container.innerHTML =
+          '<span style="color:#6b7280;">🔄 Cargando...</span>';
+
+        // Limpiar RUN
+        const runLimpio = run.replace(/[\.\-\s]/g, "");
+        log(`🧹 [SIMPLE] RUN limpio: ${runLimpio}`);
+
+        const url = `/api/patologias/${runLimpio}`;
+        log(`📡 [SIMPLE] URL: ${url}`);
+
+        fetch(url)
+          .then((response) => {
+            log(`📡 [SIMPLE] Status: ${response.status}`);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            log(`📦 [SIMPLE] Data: ${JSON.stringify(data, null, 2)}`);
+
+            if (data.patologias && data.patologias.length > 0) {
+              mostrarPatologias(data.patologias);
+            } else {
+              container.innerHTML =
+                '<span style="color:#6b7280;">Sin patologías</span>';
+              log("⚪ [SIMPLE] Sin patologías encontradas");
+            }
+          })
+          .catch((error) => {
+            log(`❌ [SIMPLE] Error: ${error.message}`);
+            container.innerHTML = `<span style="color:#dc3545;">Error: ${error.message}</span>`;
+          });
+      }
+
+      function mostrarPatologias(patologias) {
+        log(`🎨 [SIMPLE] Mostrando ${patologias.length} patologías`);
+
+        const container = document.getElementById("patologias-guardadas");
+
+        const badges = patologias
+          .map((pat) => {
+            log(
+              `🏷️ [SIMPLE] ${pat.nombre} (${pat.cie10}) - color: ${pat.color}`,
+            );
+
+            return `<span class="pat-badge pat-${pat.color}" title="${pat.nombre} - ${pat.cie10}">
+                    ${pat.nombre} (${pat.cie10})
+                </span>`;
+          })
+          .join("");
+
+        container.innerHTML = `
+                <div style="margin-bottom: 8px; color: #059669; font-weight: 600;">
+                    ✅ ${patologias.length} patología(s) encontrada(s):
+                </div>
+                ${badges}
+            `;
+
+        log("✅ [SIMPLE] Patologías mostradas correctamente");
+      }
+
+      function testPatologias() {
+        log("🧪 [TEST] Iniciando test de patologías...");
+        cargarPatologiasGuardadas("8.371.186-8");
+      }
+
+      async function testEndpoint() {
+        log("🔗 [TEST] Probando endpoint directo...");
+
+        try {
+          const response = await fetch("/api/patologias/83711868");
+          const text = await response.text();
+          log(`📡 [TEST] Response: ${text}`);
+
+          const data = JSON.parse(text);
+          log(`📦 [TEST] Parsed: ${JSON.stringify(data, null, 2)}`);
+        } catch (error) {
+          log(`❌ [TEST] Error: ${error.message}`);
+        }
+      }
+
+      // Test automático al cargar
+      document.addEventListener("DOMContentLoaded", function () {
+        log("✅ Página cargada - funciones disponibles");
+
+        // Test automático después de 2 segundos
+        setTimeout(() => {
+          log("🚀 Ejecutando test automático...");
+          testPatologias();
+        }, 2000);
+      });
+    </script>
+  </body>
+</html>

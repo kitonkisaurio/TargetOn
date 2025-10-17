@@ -1,0 +1,2508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan de cuidados ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root{
+            --bg:#f8fafc; --ink:#222; --muted:#6c757d; --line:#e5e7eb;
+            --brand:#0d6efd; --brand-600:#0b5ed7; --success:#198754; --card:#fff;
+        }
+        *{box-sizing:border-box}
+        body { 
+            margin:0;padding:0;background:var(--bg);color:var(--ink);
+            font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial;
+            font-size: 14px;
+        }
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            background: var(--card); 
+            padding: 16px; 
+            border-radius: 6px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); 
+        }
+        h1, h2 { margin: 16px 0; }
+        .header { display:flex; align-items:center; gap:20px; margin-bottom:20px; }
+        .btn { padding:10px 18px; font-size:16px; background:#0d6efd; color:#fff; border:none; border-radius:6px; cursor:pointer; }
+        p { line-height: 1.6; }
+        hr { margin: 20px 0; border: none; border-top: 1px solid var(--line); }
+        @media print {
+            .no-print { display: none; }
+            body { background: white; }
+            .container { box-shadow: none; }
+
+            /* Optimizaciones para PDF */
+            .container { max-width: none; margin: 0; padding: 10mm; }
+
+            /* Tabla de controles más pequeña */
+            table { font-size: 10px; }
+            th, td { padding: 4px 6px; }
+            th { font-size: 9px; }
+
+            /* Gráficos sin corte */
+            .grid { grid-template-columns: 1fr; gap: 15px; }
+            canvas { max-width: 100%; height: 300px; }
+
+            /* Espaciado optimizado */
+            h1 { font-size: 24px; margin: 10px 0; }
+            h2 { font-size: 18px; margin: 15px 0 8px 0; }
+            h3 { font-size: 14px; margin: 10px 0 8px 0; }
+
+            /* Badges más pequeños */
+            .pat, .sector-pill { font-size: 10px; padding: 2px 6px; }
+
+            /* Márgenes reducidos */
+            .pat-badges { gap: 4px; margin-top: 4px; }
+        }
+
+        /* Mantener la sección 'Controles' junta en impresión/PDF y, si es necesario,
+            empezarla en la siguiente página para que el título quede siempre sobre la tabla */
+        .controls-section { page-break-inside: avoid; break-inside: avoid; }
+
+        /* No introducir margen extra en la vista normal */
+        .controls-section { margin-top: 0; }
+
+
+        /* CSS específico para PDF */
+        @media print, (max-width: 0) {
+            /* Forzar gráficos a mantener proporciones */
+            .grid > div { page-break-inside: avoid; }
+            canvas { image-rendering: -webkit-optimize-contrast; }
+
+            /* Tabla responsive para PDF: dejar que el ancho se ajuste al contenido */
+            table { width: auto; max-width: 100%; table-layout: auto; }
+            th, td { word-wrap: break-word; }
+
+            /* Evitar cortes de página en secciones importantes */
+            .container > div { page-break-inside: avoid; }
+
+            /* Iframes para PDF */
+            iframe { display: block !important; visibility: visible !important; }
+            .summary-iframe { height: 60px !important; }
+            .summary-iframe.weight { height: 90px !important; }
+        }
+
+
+                /* Estilos específicos para exportación PDF */
+                .pdf-export { 
+                    font-size: 10px !important;
+                    line-height: 1.35 !important;
+                }
+                .pdf-export table,
+                .pdf-export thead,
+                .pdf-export tbody,
+                .pdf-export tr,
+                .pdf-export th,
+                .pdf-export td {
+                    font-size: 8px !important;
+                }
+                .pdf-export th, .pdf-export td {
+                    padding: 3px 4px !important;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                .pdf-export h1 { font-size: 18px !important; }
+                .pdf-export h2 { font-size: 14px !important; }
+                .pdf-export h3 { font-size: 12px !important; }
+            .pdf-export canvas { height: 260px !important; }
+
+        /* Evitar que las filas o celdas de tablas se corten en el PDF */
+        table, thead, tbody, tr, th, td {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            -webkit-column-break-inside: avoid !important;
+            -webkit-page-break-inside: avoid !important;
+        }
+
+        /* Si la tabla es muy ancha/alta, permitir que la tabla se divida entre filas pero nunca dentro de una celda */
+        .pdf-export table { page-break-inside: auto !important; }
+
+        /* Iframes visibles en PDF */
+        iframe {
+            display: block !important;
+            visibility: visible !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 8px !important;
+            background: white !important;
+        }
+
+        .summary-iframe {
+            width: 100% !important;
+            height: 60px !important;
+            background: white !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 8px !important;
+        }
+
+        .summary-iframe.weight {
+            height: 90px !important;
+        }
+
+        .summary-card {
+            page-break-inside: avoid;
+            margin-bottom: 16px !important;
+            background: white !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 8px !important;
+            padding: 16px !important;
+        }
+
+        .summary-title {
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            margin: 0 0 8px 0 !important;
+            color: #1f2937 !important;
+        }
+
+        /* Evitar que título y tabla de controles se separen en el PDF.
+            No forzar nueva página; simplemente evitar cortes dentro de la sección
+            y procurar que haya al menos 2 líneas (orphans/widows) si se divide. */
+        .controls-section {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            page-break-before: avoid !important;
+            break-before: auto !important;
+            orphans: 3;
+            widows: 3;
+        }
+
+        /* Evitar que el título quede separado de la tabla */
+        .controls-section h2 { page-break-after: avoid !important; break-after: avoid !important; }
+        .controls-section table, .controls-section thead, .controls-section tbody, .controls-section tr, .controls-section th, .controls-section td {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+        /* Durante la exportación forzar que la sección de controles comience en página nueva */
+        .controls-section { page-break-before: always !important; break-before: page !important; }
+
+        /* Estilos adicionales para patologías, edad y grupo etario */
+        .pat-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+        .pat{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:600;border:1px solid transparent}
+        .pat-diabetes{background:#dcfce7;color:#065f46;border-color:#86efac}
+        .pat-hta{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+        .pat-dislipidemia{background:#fef3c7;color:#92400e;border-color:#fde68a}
+
+        /* Grupo etario colores en el texto */
+        .ge-adulto{color:#1d4ed8;font-weight:700}
+        .ge-adulto-mayor{color:#dc2626;font-weight:700}
+
+        /* Estilos para sector */
+        .sector-pill{display:inline-block;padding:4px 8px;border-radius:6px;font-weight:600;line-height:1}
+        .sector-amarillo{background:#fde047;color:#1f2937}
+        .sector-trespinos{background:#1d4ed8;color:#fff}
+        .sector-antihuala{background:#38bdf8;color:#1f2937}
+        .sector-verde{background:#16a34a;color:#fff}
+        .sector-pangue{background:#86efac;color:#1f2937}
+        .sector-rojo{background:#dc2626;color:#fff}
+        .sector-ranquilco{background:#22c55e;color:#fff}
+        .sector-default{background:#e5e7eb;color:#111827}
+
+        /* Estilos para las tarjetas de resumen */
+        .summary-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .summary-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            color: var(--ink);
+        }
+        .summary-iframe {
+            width: 100%;
+            height: 50px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+        .summary-iframe.weight {
+            height: 80px;
+        }
+
+        /* Contenedor fijo para charts: evita que canvas se estire o reduzca de forma indeseada */
+        .chart-wrap { position: relative; width: 100%; height: 320px; min-height: 240px; }
+        .chart-wrap canvas { display: block; position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+
+        /* ============================================
+           OVERRIDES FINALES PARA PDF (petición actual)
+           - Texto general 10px en PDF
+           - Tablas (th/td) 8px en PDF
+           ============================================ */
+        /* Se activan porque el script añade .pdf-export antes de exportar */
+        .pdf-export { font-size: 10px !important; }
+
+        @media print {
+          .pdf-export { font-size: 10px !important; }
+
+          .pdf-export table,
+          .pdf-export thead,
+          .pdf-export tbody,
+          .pdf-export tr,
+          .pdf-export th,
+          .pdf-export td {
+            font-size: 8px !important;
+          }
+
+          .pdf-export th, .pdf-export td {
+            padding: 3px 4px !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .pdf-export h1 { font-size: 18px !important; }
+          .pdf-export h2 { font-size: 14px !important; }
+          .pdf-export h3 { font-size: 12px !important; }
+
+          .pdf-export canvas { height: 180px !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="{{ url_for('static', filename='logo_ecicep.jpg') }}" alt="Logo ECICEP" style="height:120px;">
+            <h1 style="margin:0;">Plan de cuidados ECICEP</h1>
+            <button onclick="descargarPDF()" class="btn no-print" style="margin-left:auto;">Generar PDF</button>
+        </div>
+        <hr>
+        
+        {% if usuario %}
+        <div style="margin-bottom:24px;">
+            <h2>Identificación y Detalles</h2>
+            <p><b>RUN:</b> {{ usuario.run }}<br>
+               <b>Nombre:</b> {{ usuario.nombre }}<br>
+               <b>Fecha de nacimiento:</b> {{ usuario.fecha_nacimiento }}<br>
+               <b>Sexo:</b> {{ usuario.sexo }}<br>
+               <b>Dirección:</b> {{ usuario.direccion }}<br>
+               <b>Teléfono:</b> {{ usuario.telefono }}<br>
+            </p>
+
+            {# SECTOR Y CATEGORÍA #}
+            <div style="margin-top:20px;">
+                <div style="display:grid; grid-template-columns:180px 1fr; gap:8px 18px;">
+                    <div style="color:#6c757d; font-weight:600;">Sector</div>
+                    <div>
+                        {% set sector_norm = (usuario.sector_nombre or usuario.sector_id or '')|trim|upper %}
+                        <span class="sector-pill
+                          {% if sector_norm == 'AMARILLO' %}sector-amarillo
+                          {% elif sector_norm == 'TRES PINOS' %}sector-trespinos
+                          {% elif sector_norm == 'ANTIHUALA' %}sector-antihuala
+                          {% elif sector_norm == 'VERDE' %}sector-verde
+                          {% elif sector_norm == 'PANGUE' %}sector-pangue
+                          {% elif sector_norm == 'ROJO' %}sector-rojo
+                          {% elif sector_norm == 'RANQUILCO' %}sector-ranquilco
+                          {% else %}sector-default{% endif %}">
+                          {{ usuario.sector_nombre or usuario.sector_id }}
+                        </span>
+                    </div>
+
+                    <div style="color:#6c757d; font-weight:600;">Categorización del Riesgo</div>
+                    <div>
+                        {% set categoria_display = usuario.categoria_nombre or ('G' + usuario.categoria_id|string if usuario.categoria_id else '—') %}
+                        {% set categoria_norm = (usuario.categoria_id|string if usuario.categoria_id else '')|trim|lower %}
+                        <span class="sector-pill
+                            {% if categoria_norm == '1' %}sector-verde
+                            {% elif categoria_norm == '2' %}sector-amarillo
+                            {% elif categoria_norm == '3' %}sector-rojo
+                            {% else %}sector-default{% endif %}">
+                            {{ categoria_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {# PATOLOGÍAS #}
+            <div style="margin-top:20px;">
+                <div style="color:#6c757d; font-weight:600;">Patologías</div>
+                <div class="pat-badges">
+                    {% if patologias and patologias|length %}
+                        {% for p in patologias %}
+                            {% set pnorm = (p.nombre or '')|lower %}
+                            <span class="pat
+                                {% if 'diabet' in pnorm %}pat-diabetes
+                                {% elif 'hipert' in pnorm %}pat-hta
+                                {% elif 'dislip' in pnorm %}pat-dislipidemia
+                                {% else %}{% endif %}">
+                                {{ p.nombre }}
+                            </span>
+                        {% endfor %}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+
+            {# EDAD Y GRUPO ETARIO #}
+            <div style="margin-top:20px;">
+                <div style="display:grid; grid-template-columns:180px 1fr; gap:8px 18px;">
+                    <div style="color:#6c757d; font-weight:600;">Edad años</div>
+                    <div>{% if edad is not none %}{{ "%.1f"|format(edad) }}{% else %}—{% endif %}</div>
+
+                    <div style="color:#6c757d; font-weight:600;">Grupo etario</div>
+                    <div>
+                        {% set ge_norm = (grupo_etareo_calc or '')|trim|lower %}
+                        <span class="{% if ge_norm == 'adulto' %}ge-adulto{% elif ge_norm == 'adulto mayor' %}ge-adulto-mayor{% endif %}">
+                            {{ grupo_etareo_calc or '—' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# PROMEDIO PA Y RESUMEN DE PESO #}
+        {% if usuario %}
+        <div class="summary-card">
+            <h3 class="summary-title">Promedio PA (promedio)</h3>
+            {% if promedio_fragment %}
+                <div class="summary-iframe" style="padding:0; border:none; background:transparent; color:#000 !important;">
+                    {{ promedio_fragment|safe }}
+                </div>
+            {% else %}
+                <iframe src="{{ url_for('promedio_hta', run=usuario.run) }}"
+                        class="summary-iframe"
+                        loading="lazy"></iframe>
+            {% endif %}
+        </div>
+
+        <div class="summary-card">
+            <h3 class="summary-title">Resumen de peso</h3>
+            {% if resumen_peso_fragment %}
+                <div class="summary-iframe weight" style="padding:0; border:none; background:transparent; color:#000 !important;">
+                    {{ resumen_peso_fragment|safe }}
+                </div>
+            {% else %}
+                <iframe src="{{ url_for('resumen_peso', run=usuario.run) }}"
+                        class="summary-iframe weight"
+                        loading="lazy"></iframe>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if controles %}
+        <div class="controls-section" style="margin-bottom:24px;">
+            <h2>Controles</h2>
+            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+                <table style="width:100%; border-collapse:collapse; margin-top:12px; border:1px solid #e5e7eb; font-size:12px; table-layout:fixed;">
+                    <thead>
+                        <tr style="background:#f3f4f6;">
+                            <th style="padding:8px 6px; border:1px solid #e5e7eb; text-align:left; width:15%;">Fecha</th>
+                            <th style="padding:8px 6px; border:1px solid #e5e7eb; text-align:left; width:25%;">Profesional</th>
+                            <th style="padding:8px 6px; border:1px solid #e5e7eb; text-align:left; width:12%;">Peso</th>
+                            <th style="padding:8px 6px; border:1px solid #e5e7eb; text-align:left; width:15%;">PA</th>
+                            <th style="padding:8px 6px; border:1px solid #e5e7eb; text-align:left; width:12%;">HGT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for control in controles %}
+                        <tr>
+                            <td style="padding:6px 4px; border:1px solid #e5e7eb; font-size:11px;">{{ control.fecha }}</td>
+                            <td style="padding:6px 4px; border:1px solid #e5e7eb; font-size:11px;">{{ control.profesional }}</td>
+                            <td style="padding:6px 4px; border:1px solid #e5e7eb; font-size:11px; text-align:center;">{{ control.peso or '-' }}</td>
+                            <td style="padding:6px 4px; border:1px solid #e5e7eb; font-size:11px; text-align:center; white-space:nowrap;">{{ control.presion_sistolica }}/{{ control.presion_diastolica }}</td>
+                            <td style="padding:6px 4px; border:1px solid #e5e7eb; font-size:11px; text-align:center;">{{ control.hgt or '-' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if acuerdos %}
+        <div style="margin-bottom:24px;">
+            <h2>Acuerdos Existentes</h2>
+            <ul>
+                {% for acuerdo in acuerdos %}
+                <li style="margin:8px 0; padding:8px; background:#f8f9fa; border-radius:6px;">
+                    <strong>Fecha:</strong> {{ acuerdo.fecha_creacion.strftime('%Y-%m-%d %H:%M') if acuerdo.fecha_creacion else '' }}<br>
+                    <strong>Acuerdo:</strong> {{ acuerdo.acuerdos }}<br>
+                    <strong>Cumplimiento:</strong> <span style="color:
+                        {% if acuerdo.cumplimiento == 'cumple' %}#198754
+                        {% elif acuerdo.cumplimiento == 'cumple parcialmente' %}#f59e0b
+                        {% else %}#dc2626{% endif %};">{{ acuerdo.cumplimiento }}</span>
+                    {% if acuerdo.observaciones %}<br><strong>Observaciones:</strong> {{ acuerdo.observaciones }}{% endif %}
+                </li>
+                {% else %}
+                <li>No hay acuerdos registrados.</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Formulario para agregar nuevos acuerdos -->
+        <div style="margin-bottom:24px; background:#f8f9fa; padding:20px; border-radius:8px; border:1px solid #e5e7eb;" class="no-print">
+            <h2 style="margin-top:0;">Agregar Nuevo Acuerdo</h2>
+            <form id="formAcuerdo" style="display:grid; gap:16px;">
+                <div>
+                    <label for="fechaAcuerdo" style="display:block; margin-bottom:4px; font-weight:600; color:#374151;">Fecha del Acuerdo:</label>
+                    <input type="date" id="fechaAcuerdo" name="fecha_acuerdo" 
+                           style="width:200px; padding:8px; border:1px solid #d1d5db; border-radius:4px; font-size:14px;">
+                    <script>
+                        // Establecer fecha actual por defecto
+                        document.getElementById('fechaAcuerdo').value = new Date().toISOString().split('T')[0];
+                    </script>
+                </div>
+                
+                <div>
+                    <label for="acuerdosText" style="display:block; margin-bottom:4px; font-weight:600; color:#374151;">Acuerdos Consensuados:</label>
+                    <textarea id="acuerdosText" name="acuerdos_consensuados" 
+                              style="width:100%; min-height:80px; padding:8px; border:1px solid #d1d5db; border-radius:4px; font-size:14px; resize:vertical;"
+                              placeholder="Escriba los acuerdos consensuados con el paciente..."></textarea>
+                </div>
+                
+                <div>
+                    <label for="cumplimientoSelect" style="display:block; margin-bottom:4px; font-weight:600; color:#374151;">Cumplimiento:</label>
+                    <select id="cumplimientoSelect" name="cumplimiento" 
+                            style="width:250px; padding:8px; border:1px solid #d1d5db; border-radius:4px; font-size:14px;">
+                        <option value="">Seleccionar cumplimiento</option>
+                        <option value="cumple">Cumple</option>
+                        <option value="cumple parcialmente">Cumple parcialmente</option>
+                        <option value="no cumple">No cumple</option>
+                        <option value="inicio de acuerdos consensuados">Inicio de acuerdos consensuados</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="observacionesText" style="display:block; margin-bottom:4px; font-weight:600; color:#374151;">Observaciones (opcional):</label>
+                    <textarea id="observacionesText" name="observaciones" 
+                              style="width:100%; min-height:60px; padding:8px; border:1px solid #d1d5db; border-radius:4px; font-size:14px; resize:vertical;"
+                              placeholder="Observaciones adicionales sobre el cumplimiento o seguimiento..."></textarea>
+                </div>
+                
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <button type="button" onclick="guardarAcuerdo()" 
+                            style="padding:10px 20px; background:#198754; color:white; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer;">
+                        💾 Guardar Acuerdo
+                    </button>
+                    <button type="button" onclick="limpiarFormulario()" 
+                            style="padding:10px 20px; background:#6c757d; color:white; border:none; border-radius:6px; font-size:14px; cursor:pointer;">
+                        🗑️ Limpiar
+                    </button>
+                    <span id="mensajeGuardado" style="color:#198754; font-weight:600; display:none;">✅ Acuerdo guardado exitosamente</span>
+                </div>
+            </form>
+        </div>
+        
+        <div style="margin-bottom:24px;">
+            <h2>Gráficos</h2>
+            {% if usuario %}
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:16px;" class="grid">
+                <!-- Gráfico de Peso/IMC -->
+                <div style="background:white; border-radius:8px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.1); page-break-inside:avoid;">
+                    <h3 style="text-align:center; margin:0 0 16px 0; color:#1f2937;">Peso e IMC</h3>
+                    <div class="chart-wrap"><canvas id="pesoImcChart"></canvas></div>
+                </div>
+
+                <!-- Gráfico de Presión Arterial -->
+                <div style="background:white; border-radius:8px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.1); page-break-inside:avoid;">
+                    <h3 style="text-align:center; margin:0 0 16px 0; color:#1f2937;">Presión Arterial</h3>
+                    <div class="chart-wrap"><canvas id="presionChart"></canvas></div>
+                </div>
+
+                <!-- Gráfico de HGT/CC -->
+                <div style="background:white; border-radius:8px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.1); page-break-inside:avoid;">
+                    <h3 style="text-align:center; margin:0 0 16px 0; color:#1f2937;">HGT / CC</h3>
+                    <div class="chart-wrap"><canvas id="hgtCcChart"></canvas></div>
+                </div>
+
+                {% if tiene_diabetes %}
+                <!-- Gráfico de HbA1c -->
+                <div style="background:white; border-radius:8px; padding:20px; box-shadow:0 1px 3px rgba(0,0,0,0.1); page-break-inside:avoid;">
+                    <h3 style="text-align:center; margin:0 0 16px 0; color:#1f2937;">HbA1c</h3>
+                    <div class="chart-wrap"><canvas id="hba1cChart"></canvas></div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <p style="color:#6c757d;">No se puede mostrar gráficos sin información del usuario.</p>
+            {% endif %}
+        </div>
+        
+        <script>
+        // Función simplificada para generar PDF
+        async function descargarPDF() {
+            console.log('🚀 Iniciando generación de PDF...');
+            const element = document.querySelector('.container');
+            
+            try {
+                // Reemplazar iframes con contenido real
+                console.log('� Cargando contenido de iframes...');
+                await reemplazarIframesConContenido();
+                
+                // Configuración PDF
+                const opt = {
+                    margin: [10, 10, 10, 10],
+                    filename: 'plan_cuidados_{{ run }}.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff',
+                        logging: false
+                    },
+                    jsPDF: {
+                        unit: 'mm',
+                        format: 'a4',
+                        orientation: 'portrait'
+                    }
+                };
+
+                // Aplicar estilos para PDF
+                element.classList.add('pdf-export');
+                const noprint = document.querySelectorAll('.no-print');
+                noprint.forEach(el => el.style.display = 'none');
+
+                console.log('🖼️ Generando PDF...');
+                await html2pdf().set(opt).from(element).save();
+                console.log('✅ PDF generado exitosamente');
+                
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('Error al generar PDF: ' + error.message);
+            } finally {
+                // Restaurar estilos
+                const noprint = document.querySelectorAll('.no-print');
+                noprint.forEach(el => el.style.display = '');
+                element.classList.remove('pdf-export');
+                
+                // Restaurar iframes originales
+                await restaurarIframes();
+                console.log('✅ Restaurado');
+            }
+        }
+        
+        // Función para reemplazar iframes con contenido real
+        async function reemplazarIframesConContenido() {
+            console.log('🔄 Reemplazando iframes con contenido...');
+            const iframes = document.querySelectorAll('iframe');
+            window.iframeBackups = []; // Guardar para restaurar
+            
+            for (let i = 0; i < iframes.length; i++) {
+                const iframe = iframes[i];
+                const src = iframe.src;
+                console.log(`📥 Cargando contenido de: ${src}`);
+                
+                try {
+                    // Hacer fetch del contenido
+                    const response = await fetch(src);
+                    if (!response.ok) {
+                        console.warn(`⚠️ Error al cargar ${src}: ${response.status}`);
+                        continue;
+                    }
+                    
+                    const html = await response.text();
+                    console.log(`✅ Contenido cargado (${html.length} caracteres)`);
+                    
+                    // Crear div de reemplazo
+                    const div = document.createElement('div');
+                    div.innerHTML = html;
+                    div.style.width = iframe.style.width || '100%';
+                    div.style.minHeight = iframe.style.height || 'auto';
+                    div.className = 'iframe-replacement';
+                    
+                    // Guardar referencia para restaurar
+                    window.iframeBackups.push({
+                        iframe: iframe,
+                        parent: iframe.parentNode,
+                        nextSibling: iframe.nextSibling,
+                        replacement: div
+                    });
+                    
+                    // Reemplazar iframe con div
+                    iframe.parentNode.insertBefore(div, iframe);
+                    iframe.style.display = 'none';
+                    
+                    console.log(`✅ Iframe ${i + 1} reemplazado`);
+                    
+                } catch (error) {
+                    console.error(`❌ Error procesando iframe ${i + 1}:`, error);
+                }
+            }
+            
+            console.log('✅ Todos los iframes procesados');
+        }
+        
+        // Función para restaurar iframes originales
+        async function restaurarIframes() {
+            console.log('🔄 Restaurando iframes originales...');
+            
+            if (window.iframeBackups) {
+                window.iframeBackups.forEach(backup => {
+                    try {
+                        // Remover el div de reemplazo
+                        if (backup.replacement && backup.replacement.parentNode) {
+                            backup.replacement.parentNode.removeChild(backup.replacement);
+                        }
+                        
+                        // Mostrar iframe original
+                        backup.iframe.style.display = '';
+                    } catch (error) {
+                        console.warn('Error restaurando iframe:', error);
+                    }
+                });
+                
+                window.iframeBackups = [];
+            }
+            
+            console.log('✅ Iframes restaurados');
+        }
+        </script>
+        
+        <script>
+        // Sistema completo de gráficos basado en graficos.html
+                    return new Promise((resolve) => {
+                        console.log(`⏳ Procesando iframe ${index + 1}: ${iframe.src}`);
+                        
+                        // Función para verificar contenido
+                        const checkContent = () => {
+                            try {
+                                const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                                if (doc && doc.readyState === 'complete') {
+                                    const body = doc.body;
+                                    if (body && (body.innerText.trim() || body.innerHTML.includes('<table'))) {
+                                        console.log(`✅ Iframe ${index + 1} tiene contenido válido`);
+                                        return true;
+                                    }
+                                }
+                            } catch (e) {
+                                console.log(`⚠️ Error accediendo al contenido del iframe ${index + 1}:`, e.message);
+                            }
+                            return false;
+                        };
+                        
+                        // Si ya está listo, resolver inmediatamente
+                        if (checkContent()) {
+                            console.log(`✅ Iframe ${index + 1} ya está listo`);
+                            resolve();
+                            return;
+                        }
+                        
+                        // Configurar eventos
+                        const onLoad = () => {
+                            console.log(`🔄 Evento load en iframe ${index + 1}`);
+                            setTimeout(() => {
+                                if (checkContent()) {
+                                    console.log(`✅ Iframe ${index + 1} cargado con contenido`);
+                                } else {
+                                    console.log(`⚠️ Iframe ${index + 1} cargado pero sin contenido visible`);
+                                }
+                                resolve();
+                            }, 1000); // Esperar un poco más para contenido dinámico
+                        };
+                        
+                        iframe.addEventListener('load', onLoad, { once: true });
+                        
+                        // Timeout de seguridad aumentado
+                        setTimeout(() => {
+                            console.log(`⏰ Timeout para iframe ${index + 1} - continuando`);
+                            resolve();
+                        }, 8000);
+                    });
+                });
+                
+                await Promise.all(promises);
+                console.log('✅ Todos los iframes procesados');
+                
+                // Espera adicional para asegurar renderizado completo
+                console.log('⏳ Esperando renderizado final...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                console.log('✅ Renderizado final completado');
+            }
+            
+            console.log('� Iniciando generación de PDF...');
+            await waitForIframesToLoad();
+            console.log('✅ Iframes cargados, generando PDF...');
+            
+            const opt = {
+                margin: [10, 10, 10, 10],
+                filename: 'plan_cuidados_{{ run }}.pdf',
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4',
+                    orientation: 'portrait'
+                }
+            };
+
+            element.classList.add('pdf-export');
+            // Limpiar estilos inline de tablas y celdas para que el CSS se aplique
+            const tablas = element.querySelectorAll('table, th, td');
+            tablas.forEach(el => {
+                el.removeAttribute('style');
+            });
+            
+            const noprint = document.querySelectorAll('.no-print');
+            noprint.forEach(el => el.style.display = 'none');
+
+            // Antes de generar el PDF, convertir canvases e iframes same-origin a imágenes
+            // para evitar problemas con renderizado y con html2canvas en algunos navegadores.
+            const canvases = Array.from(element.querySelectorAll('canvas'));
+            const iframes = Array.from(element.querySelectorAll('iframe'));
+            const replacements = [];
+
+            // Convertir canvases a imágenes (existente)
+            for (const c of canvases) {
+                try {
+                    if (c.width === 0 || c.height === 0) continue;
+                    const dataUrl = c.toDataURL && c.toDataURL('image/png');
+                    if (!dataUrl) continue;
+                    const img = document.createElement('img');
+                    img.src = dataUrl;
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    img.className = 'pdf-canvas-image';
+                    c.style.display = 'none';
+                    c.parentElement.appendChild(img);
+                    replacements.push({canvas: c, img: img});
+                } catch (e) {
+                    console.warn('No se pudo convertir canvas a imagen:', e);
+                }
+            }
+
+            // Intentar capturar iframes same-origin: ajustar altura al contenido y renderizar documentElement.
+            console.log(`🔄 Procesando ${iframes.length} iframes para captura...`);
+            for (let i = 0; i < iframes.length; i++) {
+                const f = iframes[i];
+                console.log(`🔍 Procesando iframe ${i + 1}/${iframes.length}:`, f.src);
+                try {
+                    const win = f.contentWindow;
+                    const doc = f.contentDocument || (win && win.document);
+                    if (!doc || !win) {
+                        console.warn(`❌ Iframe ${i + 1} no accesible (cross-origin):`, f.src);
+                        continue; // no es accesible (cross-origin)
+                    }
+
+                    const elToCapture = doc.documentElement || doc.body;
+                    if (!elToCapture) {
+                        console.warn(`❌ No se encontró elemento a capturar en iframe ${i + 1}:`, f.src);
+                        continue;
+                    }
+                    
+                    // Verificar si hay contenido real
+                    const textContent = elToCapture.innerText.trim();
+                    const hasHTML = elToCapture.innerHTML.includes('<');
+                    console.log(`📄 Iframe ${i + 1} - Texto: "${textContent.substring(0, 100)}..." (${textContent.length} caracteres)`);
+                    console.log(`📄 Iframe ${i + 1} - Tiene HTML:`, hasHTML);
+                    
+                    if (!textContent && !hasHTML) {
+                        console.warn(`⚠️ Iframe ${i + 1} parece estar vacío`);
+                    }
+
+                    // Guardar estilos previos del iframe y del element a capturar
+                    const prevIframeStyle = {height: f.style.height || '', overflow: f.style.overflow || '', position: f.style.position || ''};
+                    const prevElStyle = {height: elToCapture.style.height || '', overflow: elToCapture.style.overflow || '', position: elToCapture.style.position || ''};
+
+                    // Determinar altura completa del contenido
+                    const contentHeight = Math.max(
+                        doc.documentElement.scrollHeight || 0,
+                        doc.body ? (doc.body.scrollHeight || 0) : 0,
+                        elToCapture.scrollHeight || 0
+                    ) || 300; // altura mínima por defecto
+                    
+                    console.log(`📏 Iframe ${i + 1} - Altura del contenido:`, contentHeight);
+
+                    // Forzar que el iframe muestre todo su contenido antes de renderizar
+                    try {
+                        f.style.height = contentHeight + 'px';
+                        f.style.overflow = 'visible';
+                        elToCapture.style.overflow = 'visible';
+                        
+                        // Dar tiempo para que se apliquen los cambios de altura
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        }
+                        f.style.overflow = 'visible';
+                        f.style.position = 'static';
+                        elToCapture.style.height = 'auto';
+                        elToCapture.style.overflow = 'visible';
+                        elToCapture.style.position = 'static';
+                    } catch (e) {
+                        console.warn('⚠️ No se pudo ajustar estilos del iframe:', e);
+                        // Ignorar si no es posible
+                    }
+
+                    // Esperar un poco para que el iframe reflow y las fuentes se carguen
+                    await new Promise(r => setTimeout(r, 120));
+
+                    // Asegurar opciones html2canvas: aumentar scale para texto nítido
+                    const html2opts = Object.assign({}, opt.html2canvas || {}, {scale: (opt.html2canvas && opt.html2canvas.scale) || 2, useCORS: true});
+
+                    // Renderizar el documentElement completo del iframe
+                    console.log('🖼️ Capturando iframe con html2canvas...');
+                    const canvasIframe = await html2canvas(elToCapture, html2opts);
+                    const dataUrl = canvasIframe.toDataURL('image/png');
+                    if (!dataUrl) {
+                        console.warn('❌ No se pudo generar imagen del iframe');
+                        // Restaurar estilos si falló
+                        try { f.style.height = prevIframeStyle.height; f.style.overflow = prevIframeStyle.overflow; f.style.position = prevIframeStyle.position; } catch(e){}
+                        try { elToCapture.style.height = prevElStyle.height; elToCapture.style.overflow = prevElStyle.overflow; elToCapture.style.position = prevElStyle.position; } catch(e){}
+                        continue;
+                    }
+
+                    console.log('✅ Iframe capturado exitosamente, creando imagen de reemplazo');
+                    const img = document.createElement('img');
+                    img.src = dataUrl;
+                    img.style.width = f.style.width && f.style.width !== '' ? f.style.width : '100%';
+                    img.style.height = 'auto';
+                    img.className = 'pdf-iframe-image';
+                    f.style.display = 'none';
+                    f.parentElement.appendChild(img);
+                    replacements.push({iframe: f, img: img, prevIframeStyle, prevElStyle});
+                } catch (e) {
+                    console.warn('❌ No se pudo capturar iframe:', f.src, e);
+                }
+            }
+
+            // Preparar posible ajuste temporal para forzar controls en página siguiente
+            const controlsSection = element.querySelector('.controls-section');
+            let __prev_controls_style = null;
+            try {
+                // Pequeña espera para que el DOM se estabilice
+                await new Promise(r => setTimeout(r, 50));
+
+                if (controlsSection) {
+                    __prev_controls_style = controlsSection.getAttribute('style') || '';
+                    try {
+                        // Calcular altura imprimible por página en px (aprox. conversion mm -> px usando 96dpi)
+                        const mmToPx = 96 / 25.4;
+                        let pageHeightMm = 297; // A4 por defecto
+                        const jsPDFcfg = (opt && opt.jsPDF) || {};
+                        const format = jsPDFcfg.format || 'a4';
+                        const orientation = jsPDFcfg.orientation || 'portrait';
+                        if (format === 'a4') pageHeightMm = (orientation === 'landscape' ? 210 : 297);
+                        const marginTop = Array.isArray(opt.margin) ? (opt.margin[0] || 0) : (opt.margin || 10);
+                        const marginBottom = Array.isArray(opt.margin) ? (opt.margin[2] || 0) : (opt.margin || 10);
+                        const printableHeightPx = (pageHeightMm - marginTop - marginBottom) * mmToPx;
+
+                        const containerRect = element.getBoundingClientRect();
+                        const controlsRect = controlsSection.getBoundingClientRect();
+                        const offsetFromContainerTop = Math.max(0, controlsRect.top - containerRect.top);
+
+                        // Altura mínima necesaria para mantener título + primera fila en la misma página
+                        const h2 = controlsSection.querySelector('h2');
+                        const h2Height = h2 ? h2.getBoundingClientRect().height : 36;
+                        const firstRow = controlsSection.querySelector('tbody tr');
+                        const rowHeight = firstRow ? firstRow.getBoundingClientRect().height : 24;
+                        const minNeeded = h2Height + rowHeight + 8;
+
+                        const pageIndex = Math.floor(offsetFromContainerTop / printableHeightPx);
+                        const positionWithinPage = offsetFromContainerTop - (pageIndex * printableHeightPx);
+
+                        const needsBreak = (positionWithinPage + minNeeded) > printableHeightPx;
+                        if (needsBreak) {
+                            // Forzar salto antes de controls sólo si es necesario
+                            controlsSection.style.setProperty('page-break-before', 'always', 'important');
+                            controlsSection.style.setProperty('break-before', 'page', 'important');
+                            controlsSection.style.setProperty('-webkit-column-break-before', 'always', 'important');
+                            controlsSection.style.setProperty('-webkit-page-break-before', 'always', 'important');
+                        } else {
+                            // Asegurar que no forcemos salto si no es requerido
+                            try {
+                                controlsSection.style.removeProperty('page-break-before');
+                                controlsSection.style.removeProperty('break-before');
+                                controlsSection.style.removeProperty('-webkit-column-break-before');
+                                controlsSection.style.removeProperty('-webkit-page-break-before');
+                            } catch (e) {}
+                        }
+                    } catch (e) {
+                        // En caso de error conservamos el comportamiento previo (forzar)
+                        try {
+                            controlsSection.style.setProperty('page-break-before', 'always', 'important');
+                        } catch (err) {}
+                    }
+                }
+
+                await html2pdf().set(opt).from(element).save();
+            } finally {
+                // Restaurar estado previo: eliminar imágenes insertadas y mostrar los elementos
+                for (const rpl of replacements) {
+                    try { if (rpl.img) rpl.img.remove(); } catch(e) {}
+                    try { if (rpl.canvas) rpl.canvas.style.display = ''; } catch(e) {}
+                    if (rpl.iframe) {
+                        try { rpl.iframe.style.display = ''; } catch(e) {}
+                        // Restaurar estilos previos si los guardamos
+                        try { if (rpl.prevIframeStyle) { rpl.iframe.style.height = rpl.prevIframeStyle.height; rpl.iframe.style.overflow = rpl.prevIframeStyle.overflow; rpl.iframe.style.position = rpl.prevIframeStyle.position; } } catch(e) {}
+                        try { const doc = rpl.iframe.contentDocument; if (doc && rpl.prevBodyStyle) { doc.body.style.height = rpl.prevBodyStyle.height; doc.body.style.overflow = rpl.prevBodyStyle.overflow; doc.body.style.position = rpl.prevBodyStyle.position; } } catch(e) {}
+                    }
+                }
+                // Restaurar estilo inline de controls-section
+                if (controlsSection) {
+                    try { controlsSection.setAttribute('style', __prev_controls_style || ''); } catch(e) {}
+                }
+                noprint.forEach(el => el.style.display = '');
+                element.classList.remove('pdf-export');
+            }
+        }
+        </script>
+        
+        <script>
+        // Sistema completo de gráficos basado en graficos.html
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Iniciando sistema de gráficos...');
+            
+            // Verificar Chart.js y registrar plugins
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js no está disponible');
+                return;
+            }
+
+            // Registrar plugins
+            try {
+                if (typeof ChartjsPluginAnnotation !== 'undefined') {
+                    Chart.register(ChartjsPluginAnnotation);
+                    console.log('Plugin de anotación registrado');
+                }
+            } catch (e) {
+                console.warn('Error registrando plugin de anotación:', e);
+            }
+
+            // Datos del backend (igual que en graficos.html) - usar chart_data enviado por app.py
+            // Usar valores por defecto si chart_data o chart_data.fechas no están definidos
+            const labels = {{ (chart_data.fechas if (chart_data is defined and chart_data.fechas is defined) else []) | tojson }};
+            const s = {{ (chart_data if chart_data is defined else {'peso':[], 'imc':[], 'psis':[], 'pdia':[], 'hgt':[], 'cc':[], 'hba1c':[]}) | tojson }};
+
+            console.log('Datos cargados:');
+            console.log('- Labels:', labels);
+            console.log('- Series:', s);
+
+            // Filtra pares (x,y) válidos (sin null/undefined/NaN) - IGUAL QUE GRAFICOS.HTML
+            function buildXY(xs, ysRaw){
+                const xsOut=[], ysOut=[];
+                for (let i=0;i<xs.length;i++){
+                    const y = Array.isArray(ysRaw) ? ysRaw[i] : null;
+                    if (y !== null && y !== undefined && !Number.isNaN(y)){
+                        xsOut.push(xs[i]); ysOut.push(y);
+                    }
+                }
+                return {xs: xsOut, ys: ysOut};
+            }
+
+            // ¿Hay algún dato? - IGUAL QUE GRAFICOS.HTML
+            const hasAnyData =
+                (s.peso  || []).some(v => v!=null) ||
+                (s.imc   || []).some(v => v!=null) ||
+                (s.psis  || []).some(v => v!=null) ||
+                (s.pdia  || []).some(v => v!=null) ||
+                (s.hgt   || []).some(v => v!=null) ||
+                (s.cc    || []).some(v => v!=null) ||
+                (s.hba1c || []).some(v => v!=null);
+
+            console.log('¿Hay datos?', hasAnyData);
+
+            if (!labels.length || !hasAnyData){
+                console.log('No hay datos disponibles, mostrando mensaje');
+                document.querySelectorAll('canvas').forEach(canvas => {
+                    canvas.parentElement.innerHTML = '<p style="text-align:center; color:#6c757d; padding:40px;">No hay gráficos disponibles.</p>';
+                });
+                return;
+            }
+
+            // Opciones comunes: sin animación, sin re-escalar infinito - IGUAL QUE GRAFICOS.HTML
+            const commonOpts = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                spanGaps: true,
+                interaction: { mode: 'nearest', intersect: false },
+                scales: {
+                    x: { ticks: { autoSkip: true, maxRotation: 0 } },
+                    y: { beginAtZero: false }
+                }
+            };
+
+            // PESO + IMC - EXACTAMENTE IGUAL QUE GRAFICOS.HTML
+            (() => {
+                const canvas = document.getElementById('pesoImcChart');
+                if (!canvas) {
+                    console.log('Canvas pesoImcChart no encontrado');
+                    return;
+                }
+
+                console.log('Creando gráfico Peso + IMC...');
+                
+                const p = buildXY(labels, s.peso || []);
+                const m = buildXY(labels, s.imc  || []);
+                const lab = (p.xs.length >= m.xs.length ? p.xs : m.xs);
+                
+                console.log('Datos peso:', p);
+                console.log('Datos IMC:', m);
+                console.log('Labels finales:', lab);
+                
+                // Determinar edad del usuario para IMC
+                const fechaNacimiento = "{{ fecha_nacimiento }}";
+                let edad = 0;
+                if (fechaNacimiento) {
+                    const hoy = new Date();
+                    const nacimiento = new Date(fechaNacimiento);
+                    edad = hoy.getFullYear() - nacimiento.getFullYear();
+                    const mes = hoy.getMonth() - nacimiento.getMonth();
+                    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+                        edad--;
+                    }
+                }
+                
+                console.log('Edad calculada:', edad);
+                
+                // Valores de IMC según edad
+                const esAdultoMayor = edad >= 65;
+                const imc1 = esAdultoMayor ? 28 : 25;
+                const imc2 = esAdultoMayor ? 32 : 30;
+                const label1 = esAdultoMayor ? 'IMC 28 SP (AM)' : 'IMC 25 SP';
+                const label2 = esAdultoMayor ? 'IMC 32 OB (AM)' : 'IMC 30 OB';
+                
+                try {
+                    new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels: lab,
+                            datasets: [
+                                { 
+                                    label: 'Peso (kg)', 
+                                    data: p.ys, 
+                                    borderColor: '#3b82f6',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    borderWidth: 2, 
+                                    tension: 0.2 
+                                },
+                                { 
+                                    label: 'IMC', 
+                                    data: m.ys, 
+                                    borderColor: '#ef4444',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    borderWidth: 2, 
+                                    tension: 0.2 
+                                }
+                            ]
+                        },
+                        options: {
+                            ...commonOpts,
+                            plugins: {
+                                annotation: {
+                                    annotations: {
+                                        line1: {
+                                            type: 'line',
+                                            yMin: imc1,
+                                            yMax: imc1,
+                                            borderColor: '#333333',
+                                            borderWidth: 2,
+                                            borderDash: [5, 5],
+                                            label: {
+                                                content: label1,
+                                                enabled: true,
+                                                position: 'end'
+                                            }
+                                        },
+                                        line2: {
+                                            type: 'line',
+                                            yMin: imc2,
+                                            yMax: imc2,
+                                            borderColor: '#333333',
+                                            borderWidth: 2,
+                                            borderDash: [5, 5],
+                                            label: {
+                                                content: label2,
+                                                enabled: true,
+                                                position: 'end'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    console.log('✅ Gráfico Peso + IMC creado exitosamente');
+                } catch (error) {
+                    console.error('❌ Error creando gráfico Peso + IMC:', error);
+                }
+            })();
+
+            // PRESIÓN ARTERIAL - CON LÍNEAS DE REFERENCIA SEGÚN EDAD
+            (() => {
+                const canvas = document.getElementById('presionChart');
+                if (!canvas) {
+                    console.log('Canvas presionChart no encontrado');
+                    return;
+                }
+
+                console.log('Creando gráfico Presión Arterial...');
+                
+                const a = buildXY(labels, s.psis || []);
+                const b = buildXY(labels, s.pdia || []);
+                const lab = (a.xs.length >= b.xs.length ? a.xs : b.xs);
+                
+                // Determinar edad del usuario para líneas de referencia
+                const edad = {{ edad|default(0) }};
+                
+                // Preparar anotaciones según la edad
+                const sistolicaRef = edad >= 80 ? 150 : 140;
+                const sistolicaLabel = edad >= 80 ? 'PA 150 SIS (≥80 años)' : 'PA 140 SIS';
+                
+                console.log('Datos sistólica:', a);
+                console.log('Datos diastólica:', b);
+                console.log('Edad usuario:', edad, 'Referencia sistólica:', sistolicaRef);
+                
+                try {
+                    new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels: lab,
+                            datasets: [
+                                { label: 'Sistólica',  data: a.ys, borderWidth: 2, tension: .2 },
+                                { label: 'Diastólica', data: b.ys, borderWidth: 2, tension: .2 }
+                            ]
+                        },
+                        options: {
+                            ...commonOpts,
+                            plugins: {
+                                annotation: {
+                                    annotations: {
+                                        line1: {
+                                            type: 'line',
+                                            yMin: sistolicaRef,
+                                            yMax: sistolicaRef,
+                                            borderColor: '#333333',
+                                            borderWidth: 2,
+                                            borderDash: [5, 5],
+                                            label: {
+                                                content: sistolicaLabel,
+                                                enabled: true,
+                                                position: 'end'
+                                            }
+                                        },
+                                        line2: {
+                                            type: 'line',
+                                            yMin: 90,
+                                            yMax: 90,
+                                            borderColor: '#333333',
+                                            borderWidth: 2,
+                                            borderDash: [5, 5],
+                                            label: {
+                                                content: 'PA 90 DIAS',
+                                                enabled: true,
+                                                position: 'end'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    console.log('✅ Gráfico Presión Arterial creado exitosamente');
+                } catch (error) {
+                    console.error('❌ Error creando gráfico Presión Arterial:', error);
+                }
+            })();
+
+            // HGT + CC - EXACTAMENTE IGUAL QUE GRAFICOS.HTML
+            (() => {
+                const canvas = document.getElementById('hgtCcChart');
+                if (!canvas) {
+                    console.log('Canvas hgtCcChart no encontrado');
+                    return;
+                }
+
+                console.log('Creando gráfico HGT + CC...');
+                
+                const a = buildXY(labels, s.hgt || []);
+                const b = buildXY(labels, s.cc  || []);
+                const lab = (a.xs.length >= b.xs.length ? a.xs : b.xs);
+                
+                console.log('Datos HGT:', a);
+                console.log('Datos CC:', b);
+                
+                // Líneas de HGT según si tiene diabetes o no
+                const tieneDiabetes = {{ tiene_diabetes|tojson }};
+                let hgtAnnotations = {};
+                
+                if (tieneDiabetes) {
+                    // Si tiene diabetes: líneas en 130 y 180
+                    hgtAnnotations = {
+                        line1: {
+                            type: 'line',
+                            yMin: 130,
+                            yMax: 130,
+                            borderColor: '#333333',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                                content: 'HGT 130',
+                                enabled: true,
+                                position: 'end'
+                            }
+                        },
+                        line2: {
+                            type: 'line',
+                            yMin: 180,
+                            yMax: 180,
+                            borderColor: '#333333',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                                content: 'HGT 180',
+                                enabled: true,
+                                position: 'end'
+                            }
+                        }
+                    };
+                } else {
+                    // Si NO tiene diabetes: línea en 100
+                    hgtAnnotations = {
+                        line1: {
+                            type: 'line',
+                            yMin: 100,
+                            yMax: 100,
+                            borderColor: '#333333',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                                content: 'HGT 100',
+                                enabled: true,
+                                position: 'end'
+                            }
+                        }
+                    };
+                }
+                
+                try {
+                    new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels: lab,
+                            datasets: [
+                                { label: 'HGT', data: a.ys, borderWidth: 2, tension: .2 },
+                                { label: 'CC',  data: b.ys, borderWidth: 2, tension: .2 }
+                            ]
+                        },
+                        options: {
+                            ...commonOpts,
+                            plugins: {
+                                annotation: {
+                                    annotations: hgtAnnotations
+                                }
+                            }
+                        }
+                    });
+                    console.log('✅ Gráfico HGT + CC creado exitosamente');
+                } catch (error) {
+                    console.error('❌ Error creando gráfico HGT + CC:', error);
+                }
+            })();
+
+            // HbA1c - CON LÍNEAS DE REFERENCIA SEGÚN EDAD Y DIABETES
+            {% if tiene_diabetes %}
+            (() => {
+                const canvas = document.getElementById('hba1cChart');
+                if (!canvas) {
+                    console.log('Canvas hba1cChart no encontrado');
+                    return;
+                }
+
+                console.log('Creando gráfico HbA1c...');
+                
+                const a = buildXY(labels, s.hba1c || []);
+                
+                // Determinar edad del usuario para líneas de referencia
+                const edad = {{ edad|default(0) }};
+                const tieneDiabetes = {{ tiene_diabetes|lower }};
+                
+                // Línea de referencia HbA1c según edad y diabetes
+                const hba1cRef = (edad >= 80 && tieneDiabetes) ? 8 : 7;
+                const hba1cLabel = (edad >= 80 && tieneDiabetes) ? 'HbA1c 8% (≥80 años)' : 'HbA1c 7%';
+                
+                console.log('Datos HbA1c:', a);
+                console.log('Edad usuario:', edad, 'Tiene diabetes:', tieneDiabetes, 'Referencia HbA1c:', hba1cRef);
+                
+                try {
+                    new Chart(canvas, {
+                        type: 'line',
+                        data: {
+                            labels: a.xs,
+                            datasets: [
+                                { label: 'HbA1c', data: a.ys, borderWidth: 2, tension: .2 }
+                            ]
+                        },
+                        options: {
+                            ...commonOpts,
+                            plugins: {
+                                annotation: {
+                                    annotations: {
+                                        line1: {
+                                            type: 'line',
+                                            yMin: hba1cRef,
+                                            yMax: hba1cRef,
+                                            borderColor: '#333333',
+                                            borderWidth: 2,
+                                            borderDash: [5, 5],
+                                            label: {
+                                                content: hba1cLabel,
+                                                enabled: true,
+                                                position: 'end'
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    console.log('✅ Gráfico HbA1c creado exitosamente');
+                } catch (error) {
+                    console.error('❌ Error creando gráfico HbA1c:', error);
+                }
+            })();
+            {% endif %}
+            
+            console.log('🎨 Sistema de gráficos inicializado completamente');
+            
+            // Función para calcular y mostrar la STD del peso
+            function calcularSTDPeso() {
+                console.log('📊 Iniciando cálculo de STD del peso en acuerdos...');
+                
+                let pesos = [];
+                
+                // Función para extraer pesos de texto
+                function extraerPesos(texto) {
+                    const pesosList = [];
+                    if (texto) {
+                        // Patrón 1: números con "kg"
+                        const regexPesoKg = /(\d+\.?\d*)\s*kg/gi;
+                        let match;
+                        while ((match = regexPesoKg.exec(texto)) !== null) {
+                            const peso = parseFloat(match[1]);
+                            if (!isNaN(peso) && peso > 20 && peso < 300) {
+                                pesosList.push(peso);
+                            }
+                        }
+                        
+                        // Patrón 2: números decimales solos que podrían ser pesos
+                        if (pesosList.length === 0) {
+                            const regexNumero = /^(\d{2,3}\.\d{1,2})$/;
+                            const matchNumero = texto.trim().match(regexNumero);
+                            if (matchNumero) {
+                                const peso = parseFloat(matchNumero[1]);
+                                if (!isNaN(peso) && peso > 20 && peso < 300) {
+                                    pesosList.push(peso);
+                                }
+                            }
+                        }
+                    }
+                    return pesosList;
+                }
+                
+                // Método 1: Buscar en el iframe del resumen de peso
+                const iframe = document.querySelector('iframe.summary-iframe.weight');
+                if (iframe) {
+                    console.log('🖼️ Encontrado iframe de resumen de peso');
+                    try {
+                        // Intentar acceder al contenido del iframe
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        if (iframeDoc && iframeDoc.body) {
+                            const textoIframe = iframeDoc.body.innerText || iframeDoc.body.textContent || '';
+                            console.log('📄 Texto del iframe:', textoIframe);
+                            pesos = extraerPesos(textoIframe);
+                            console.log('⚖️ Pesos del iframe:', pesos);
+                        }
+                    } catch (e) {
+                        console.log('❌ No se puede acceder al contenido del iframe:', e.message);
+                    }
+                }
+                
+                // Método 2: Buscar en el div del resumen de peso (si existe)
+                const divResumen = document.querySelector('div.summary-iframe.weight');
+                if (divResumen && pesos.length < 2) {
+                    console.log('📄 Encontrado div de resumen de peso');
+                    const textoDiv = divResumen.innerText || divResumen.textContent || '';
+                    console.log('📄 Texto del div:', textoDiv);
+                    const pesosDiv = extraerPesos(textoDiv);
+                    pesos = pesos.concat(pesosDiv);
+                    console.log('⚖️ Pesos del div:', pesosDiv);
+                }
+                
+                // Método 3: Buscar en la tabla de controles
+                if (pesos.length < 2) {
+                    console.log('🔍 Buscando pesos en tabla de controles...');
+                    const tablaControles = document.querySelector('.controls-section table');
+                    if (tablaControles) {
+                        // Buscar específicamente en la columna de Peso
+                        const filas = tablaControles.querySelectorAll('tr');
+                        filas.forEach((fila, index) => {
+                            const celdas = fila.querySelectorAll('td');
+                            if (celdas.length >= 3) { // Asegurar que hay suficientes columnas
+                                // La columna de peso suele ser la tercera (índice 2)
+                                const celdaPeso = celdas[2];
+                                if (celdaPeso) {
+                                    const textoPeso = (celdaPeso.innerText || celdaPeso.textContent || '').trim();
+                                    console.log(`🔍 Revisando fila ${index}, celda peso: "${textoPeso}"`);
+                                    
+                                    // Buscar números que representen peso
+                                    const match = textoPeso.match(/^(\d+\.?\d*)$/);
+                                    if (match) {
+                                        const peso = parseFloat(match[1]);
+                                        if (!isNaN(peso) && peso > 20 && peso < 300) { // Rango realista para peso humano
+                                            pesos.push(peso);
+                                            console.log(`✅ Peso encontrado: ${peso} kg`);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                        
+                        // También buscar patrones "XX.XX kg" en toda la tabla como fallback
+                        const todasLasCeldas = tablaControles.querySelectorAll('td');
+                        todasLasCeldas.forEach(celda => {
+                            const textoCelda = celda.innerText || celda.textContent || '';
+                            const pesosTabla = extraerPesos(textoCelda);
+                            pesos = pesos.concat(pesosTabla);
+                        });
+                        
+                        console.log('📋 Pesos encontrados en tabla:', pesos);
+                    }
+                }
+                
+                // Remover duplicados y validar
+                pesos = [...new Set(pesos)];
+                console.log('� Pesos únicos para STD:', pesos);
+                
+                if (pesos.length < 2) {
+                    console.log('⚠️ No hay suficientes datos de peso para calcular STD (mínimo 2)');
+                    return;
+                }
+                
+                // Calcular STD
+                const media = pesos.reduce((sum, peso) => sum + peso, 0) / pesos.length;
+                const varianza = pesos.reduce((sum, peso) => sum + Math.pow(peso - media, 2), 0) / pesos.length;
+                const std = Math.sqrt(varianza);
+                
+                console.log('📊 STD calculado:', std.toFixed(2));
+                
+                // Mostrar STD
+                const stdTexto = `STD ${std.toFixed(2)} kg`;
+                
+                // Verificar si ya existe STD específicamente marcado
+                const stdExistente = document.querySelector('[data-std-peso]');
+                
+                if (stdExistente) {
+                    console.log('ℹ️ STD ya existe en la página (marcado), saltando inserción');
+                    return;
+                }
+                
+                // Buscar donde agregar el STD - múltiples estrategias
+                let stdAgregado = false;
+                
+                // Estrategia 1: Buscar la summary-card del peso
+                const summaryCards = document.querySelectorAll('.summary-card');
+                summaryCards.forEach(card => {
+                    const titulo = card.querySelector('h3.summary-title');
+                    if (titulo && titulo.textContent.toLowerCase().includes('peso') && !stdAgregado) {
+                        // Verificar si ya existe STD en esta card específica
+                        if (!card.querySelector('[data-std-peso]')) {
+                            const stdDiv = document.createElement('div');
+                            stdDiv.setAttribute('data-std-peso', 'true'); // Marcador único
+                            stdDiv.style.cssText = 'margin-top: 10px; padding: 8px; background: #e3f2fd; border-left: 4px solid #0066cc; font-weight: bold; color: #0066cc; border-radius: 4px;';
+                            stdDiv.textContent = stdTexto;
+                            card.appendChild(stdDiv);
+                            console.log('✅ STD agregado en summary-card');
+                            stdAgregado = true;
+                        }
+                    }
+                });
+                
+                // Estrategia 2: Si no funciona la primera, agregar después del iframe/div de peso
+                if (!stdAgregado) {
+                    const resumenPesoElement = document.querySelector('.summary-iframe.weight');
+                    if (resumenPesoElement && !document.querySelector('[data-std-peso]')) {
+                        const stdDiv = document.createElement('div');
+                        stdDiv.setAttribute('data-std-peso', 'true'); // Marcador único
+                        stdDiv.style.cssText = 'margin-top: 10px; padding: 8px; background: #e3f2fd; border-left: 4px solid #0066cc; font-weight: bold; color: #0066cc; border-radius: 4px; width: 100%;';
+                        stdDiv.textContent = stdTexto;
+                        
+                        // Agregar después del elemento
+                        if (resumenPesoElement.parentNode) {
+                            resumenPesoElement.parentNode.insertBefore(stdDiv, resumenPesoElement.nextSibling);
+                            console.log('✅ STD agregado después del iframe/div');
+                            stdAgregado = true;
+                        }
+                    }
+                }
+                
+                // Estrategia 3: Como último recurso, agregar al final de la página
+                if (!stdAgregado) {
+                    const container = document.querySelector('.container') || document.body;
+                    if (!document.querySelector('[data-std-peso]')) {
+                        const stdDiv = document.createElement('div');
+                        stdDiv.setAttribute('data-std-peso', 'true'); // Marcador único
+                        stdDiv.style.cssText = 'margin: 20px auto; padding: 15px; background: #e3f2fd; border: 2px solid #0066cc; font-weight: bold; color: #0066cc; border-radius: 8px; max-width: 400px; text-align: center;';
+                        stdDiv.innerHTML = `<h4 style="margin: 0 0 10px 0;">Desviación Estándar del Peso</h4><p style="margin: 0; font-size: 18px;">${stdTexto}</p>`;
+                        container.appendChild(stdDiv);
+                        console.log('✅ STD agregado al final como último recurso');
+                        stdAgregado = true;
+                    }
+                }
+                
+                if (!stdAgregado) {
+                    console.log('❌ No se pudo agregar el STD');
+                } else {
+                    console.log('🎉 STD mostrado exitosamente');
+                }
+            }
+            
+            // Ejecutar cálculo de STD - solo una vez con verificación
+            console.log('🎯 Programando ejecución única de STD...');
+            
+            let stdEjecutado = false;
+            
+            function ejecutarSTDUnaVez() {
+                if (!stdEjecutado) {
+                    stdEjecutado = true;
+                    calcularSTDPeso();
+                } else {
+                    console.log('ℹ️ STD ya fue ejecutado previamente');
+                }
+            }
+            
+            // Ejecutar una sola vez después de un tiempo razonable
+            setTimeout(ejecutarSTDUnaVez, 3000);
+        });
+
+        // ===== FUNCIONES PARA MANEJAR ACUERDOS =====
+        
+        function guardarAcuerdo() {
+            const form = document.getElementById('formAcuerdo');
+            const formData = new FormData();
+            
+            // Obtener datos del formulario
+            const fechaAcuerdo = document.getElementById('fechaAcuerdo').value;
+            const acuerdosText = document.getElementById('acuerdosText').value.trim();
+            const cumplimiento = document.getElementById('cumplimientoSelect').value;
+            const observaciones = document.getElementById('observacionesText').value.trim();
+            
+            // Validaciones
+            if (!fechaAcuerdo) {
+                alert('⚠️ Por favor seleccione una fecha para el acuerdo');
+                return;
+            }
+            
+            if (!acuerdosText) {
+                alert('⚠️ Por favor escriba los acuerdos consensuados');
+                return;
+            }
+            
+            if (!cumplimiento) {
+                alert('⚠️ Por favor seleccione el cumplimiento');
+                return;
+            }
+            
+            // Preparar datos para envío
+            formData.append('run', '{{ usuario.run if usuario else "" }}');
+            formData.append('fecha_acuerdo', fechaAcuerdo);
+            formData.append('nuevo_acuerdo', acuerdosText);
+            formData.append('cumplimiento', cumplimiento);
+            formData.append('observaciones', observaciones);
+            formData.append('guardar_solo_acuerdos', '1');
+            
+            console.log('📤 Enviando acuerdo al servidor...');
+            
+            // Mostrar estado de carga
+            const btnGuardar = event.target;
+            const textoOriginal = btnGuardar.textContent;
+            btnGuardar.textContent = '⏳ Guardando...';
+            btnGuardar.disabled = true;
+            
+            // Enviar al servidor
+            fetch('/usuario/nuevo', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error del servidor: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                console.log('✅ Acuerdo guardado exitosamente');
+                
+                // Mostrar mensaje de éxito
+                const mensaje = document.getElementById('mensajeGuardado');
+                mensaje.style.display = 'inline';
+                setTimeout(() => {
+                    mensaje.style.display = 'none';
+                }, 3000);
+                
+                // Limpiar formulario
+                limpiarFormulario();
+                
+                // Recargar página para mostrar el nuevo acuerdo
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('❌ Error al guardar acuerdo:', error);
+                alert(`❌ Error al guardar el acuerdo: ${error.message}`);
+            })
+            .finally(() => {
+                // Restaurar botón
+                btnGuardar.textContent = textoOriginal;
+                btnGuardar.disabled = false;
+            });
+        }
+        
+        function limpiarFormulario() {
+            document.getElementById('acuerdosText').value = '';
+            document.getElementById('cumplimientoSelect').value = '';
+            document.getElementById('observacionesText').value = '';
+            // Mantener la fecha actual
+            document.getElementById('fechaAcuerdo').value = new Date().toISOString().split('T')[0];
+            
+            console.log('🧹 Formulario limpiado');
+        }
+        </script>
+        
+        <!-- Pie de página para PDF -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); text-align: center;">
+            <p style="font-size: 11px; color: var(--muted); margin: 0;">
+                Powered by EU Hernando Gayoso Navarrete
+            </p>
+        </div>
+
+        <div class="no-print" style="text-align:center; margin-top:24px;">
+            <a href="{{ url_for('usuario_detalle', run=run) }}" style="padding:10px 20px; background:#6c757d; color:white; text-decoration:none; border-radius:6px; margin-right:10px;">Volver</a>
+            <a href="{{ url_for('index') }}" style="padding:10px 20px; background:#0d6efd; color:white; text-decoration:none; border-radius:6px;">Inicio</a>
+        </div>
+    </div>
+
+    <!-- ESTILOS ESPECÍFICOS PARA PDF PROFESIONAL -->
+    <style id="pdf-styles">
+        @media print, screen {
+            .pdf-export .summary-card,
+            .pdf-export .iframe-replacement,
+            .pdf-export .chart-container,
+            .pdf-export .graph-container,
+            .pdf-export .data-table,
+            .pdf-export .metric-card {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                margin-bottom: 16px !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 8px !important;
+                padding: 16px !important;
+                background: #ffffff !important;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+            }
+            
+            .pdf-export h1, .pdf-export h2, .pdf-export h3 {
+                page-break-after: avoid !important;
+                margin-top: 24px !important;
+                margin-bottom: 12px !important;
+                color: #1e293b !important;
+                font-weight: 600 !important;
+            }
+            
+            .pdf-export .chart, .pdf-export canvas, .pdf-export svg {
+                max-width: 100% !important;
+                height: auto !important;
+                page-break-inside: avoid !important;
+            }
+            
+            .pdf-export table {
+                page-break-inside: avoid !important;
+                width: 100% !important;
+                border-collapse: collapse !important;
+                font-size: 12px !important;
+            }
+            
+            .pdf-export table th, .pdf-export table td {
+                padding: 8px 12px !important;
+                border: 1px solid #e2e8f0 !important;
+                text-align: left !important;
+            }
+            
+            .pdf-export table th {
+                background: #f8fafc !important;
+                font-weight: 600 !important;
+                color: #374151 !important;
+            }
+            
+            .pdf-export .metric-value {
+                font-size: 18px !important;
+                font-weight: 700 !important;
+                color: #059669 !important;
+                margin: 8px 0 !important;
+            }
+            
+            .pdf-export .section-divider {
+                margin: 32px 0 24px 0 !important;
+                border-bottom: 2px solid #e2e8f0 !important;
+                page-break-after: avoid !important;
+            }
+        }
+    </style>
+
+    <!-- PDF FUNCTION LIMPIA Y FUNCIONAL -->
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            console.log('🔧 Cargando función PDF limpia...');
+            
+            // Función PDF completamente reescrita y limpia
+            window.descargarPDF = async function() {
+                console.log('🚀 Generando PDF [VERSIÓN LIMPIA]...');
+                
+                try {
+                    // 1. OBTENER DATOS DE ENDPOINTS
+                    const obtenerDatos = async () => {
+                        try {
+                            const basePath = window.location.pathname.replace('/acuerdos/', '/usuario/');
+                            const [respPA, respPeso] = await Promise.all([
+                                fetch(basePath + '/promedio-hta', {credentials:'same-origin'}),
+                                fetch(basePath + '/resumen-peso', {credentials:'same-origin'})
+                            ]);
+                            
+                            return {
+                                promedioPA: await respPA.text(),
+                                resumenPeso: await respPeso.text()
+                            };
+                        } catch (e) {
+                            console.warn('Error obteniendo datos:', e);
+                            return {
+                                promedioPA: '<div>Error cargando PA</div>',
+                                resumenPeso: '<div>Error cargando peso</div>'
+                            };
+                        }
+                    };
+                    
+                    const { promedioPA, resumenPeso } = await obtenerDatos();
+                    console.log('✅ Datos obtenidos exitosamente');
+                    
+                    // 2. REEMPLAZAR IFRAMES
+                    const iframes = document.querySelectorAll('iframe');
+                    const backups = [];
+                    
+                    iframes.forEach((iframe, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'iframe-replacement';
+                        div.style.cssText = 'padding:15px; border:1px solid #ddd; margin:10px 0; background:#fff; font-size:14px;';
+                        
+                        if (iframe.src.includes('promedio-hta')) {
+                            div.innerHTML = promedioPA;
+                        } else if (iframe.src.includes('resumen-peso')) {
+                            div.innerHTML = resumenPeso;
+                        } else {
+                            div.innerHTML = '<p>Contenido no disponible</p>';
+                        }
+                        
+                        backups.push({ iframe, div });
+                        iframe.parentNode.insertBefore(div, iframe);
+                        iframe.style.display = 'none';
+                    });
+                    
+                    console.log(`✅ ${iframes.length} iframes reemplazados`);
+                    
+                    // 3. PREPARAR CONTENEDOR
+                    const container = document.querySelector('.container');
+                    if (!container) throw new Error('Contenedor no encontrado');
+                    
+                    // Ocultar elementos no deseados
+                    document.querySelectorAll('.no-print, script, .debug').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    
+                    // Optimizar gráficos
+                    document.querySelectorAll('canvas').forEach(canvas => {
+                        canvas.style.pageBreakInside = 'avoid';
+                        canvas.style.display = 'block';
+                        canvas.style.maxWidth = '100%';
+                    });
+                    
+                    // Optimizar tablas
+                    document.querySelectorAll('table').forEach(table => {
+                        table.style.pageBreakInside = 'avoid';
+                        table.style.fontSize = '12px';
+                    });
+                    
+                    console.log('✅ Elementos optimizados');
+                    
+                    // 4. ESPERAR GRÁFICOS (SIMPLE)
+                    console.log('⏳ Esperando gráficos...');
+                    await new Promise(resolve => setTimeout(resolve, 3000)); // 3 segundos
+                    console.log('✅ Espera completada');
+                    
+                    // 5. GENERAR PDF
+                    const opciones = {
+                        margin: [10, 10, 10, 10],
+                        filename: 'plan_cuidados_' + new Date().getTime() + '.pdf',
+                        image: { type: 'jpeg', quality: 0.8 },
+                        html2canvas: { 
+                            scale: 1.5,
+                            useCORS: true,
+                            allowTaint: true,
+                            backgroundColor: '#ffffff',
+                            logging: false,
+                            removeContainer: true
+                        },
+                        jsPDF: { 
+                            unit: 'mm', 
+                            format: 'a4', 
+                            orientation: 'portrait' 
+                        }
+                    };
+                    
+                    console.log('🖼️ Generando PDF...');
+                    await html2pdf().set(opciones).from(container).save();
+                    console.log('✅ PDF generado exitosamente');
+                    
+                    // 6. RESTAURAR
+                    backups.forEach(backup => {
+                        if (backup.div && backup.div.parentNode) {
+                            backup.div.parentNode.removeChild(backup.div);
+                        }
+                        if (backup.iframe) {
+                            backup.iframe.style.display = '';
+                        }
+                    });
+                    
+                    document.querySelectorAll('.no-print').forEach(el => {
+                        el.style.display = '';
+                    });
+                    
+                    console.log('✅ Estado restaurado');
+                    
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                    alert('Error al generar PDF: ' + error.message);
+                }
+            };
+            
+            console.log('✅ Función PDF limpia cargada exitosamente');
+        });
+    </script>
+                
+                try {
+                    // Función para obtener promedio PA
+                    async function obtenerPromedioPA() {
+                        try {
+                            console.log('📊 Obteniendo promedio PA...');
+                            const response = await fetch(window.location.pathname.replace('/acuerdos/', '/usuario/') + '/promedio-hta', {credentials:'same-origin'});
+                            const html = await response.text();
+                            console.log('✅ Promedio PA obtenido');
+                            return html;
+                        } catch (e) {
+                            console.warn('❌ Error:', e);
+                            return '<div class="summary-card"><h3>Error cargando promedio PA</h3><p>No se pudo cargar la información</p></div>';
+                        }
+                    }
+                    
+                    // Función para obtener resumen peso
+                    async function obtenerResumenPeso() {
+                        try {
+                            console.log('⚖️ Obteniendo resumen peso...');
+                            const response = await fetch(window.location.pathname.replace('/acuerdos/', '/usuario/') + '/resumen-peso', {credentials:'same-origin'});
+                            const html = await response.text();
+                            console.log('✅ Resumen peso obtenido');
+                            return html;
+                        } catch (e) {
+                            console.warn('❌ Error:', e);
+                            return '<div class="summary-card"><h3>Error cargando resumen peso</h3><p>No se pudo cargar la información</p></div>';
+                        }
+                    }
+                    
+                    // Obtener datos
+                    console.log('🔄 Obteniendo datos...');
+                    const [promedioPA, resumenPeso] = await Promise.all([
+                        obtenerPromedioPA(),
+                        obtenerResumenPeso()
+                    ]);
+                    
+                    // Reemplazar iframes con diseño profesional
+                    const iframes = document.querySelectorAll('iframe');
+                    const backups = [];
+                    
+                    console.log(`🔄 Procesando ${iframes.length} iframes...`);
+                    iframes.forEach((iframe, index) => {
+                        const replacement = document.createElement('div');
+                        replacement.className = 'iframe-replacement summary-card';
+                        replacement.style.cssText = `
+                            width: 100%; 
+                            min-height: 120px; 
+                            border: 1px solid #e2e8f0; 
+                            border-radius: 8px; 
+                            padding: 20px; 
+                            background: #ffffff; 
+                            font-size: 14px; 
+                            line-height: 1.6;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                            margin-bottom: 20px;
+                            page-break-inside: avoid;
+                        `;
+                        
+                        if (iframe.src.includes('promedio-hta')) {
+                            console.log('📊 Insertando promedio PA con estilo profesional');
+                            replacement.innerHTML = `<div class="section-divider"></div>${promedioPA}`;
+                        } else if (iframe.src.includes('resumen-peso')) {
+                            console.log('⚖️ Insertando resumen peso con estilo profesional');
+                            replacement.innerHTML = `<div class="section-divider"></div>${resumenPeso}`;
+                        } else {
+                            replacement.innerHTML = '<div class="summary-card"><h3>Contenido no disponible</h3></div>';
+                        }
+                        
+                        backups.push({ iframe, replacement });
+                        iframe.parentNode.insertBefore(replacement, iframe);
+                        iframe.style.display = 'none';
+                        
+                        console.log(`✅ Iframe ${index + 1} reemplazado con estilo profesional`);
+                    });
+                    
+                    // Aplicar estilos adicionales para PDF
+                    const element = document.querySelector('.container');
+                    if (!element) {
+                        throw new Error('No se encontró el contenedor principal');
+                    }
+                    
+                    element.classList.add('pdf-export');
+                    
+                    // ESPERA MEJORADA DE GRÁFICOS
+                    console.log('📊 Esperando gráficos (versión mejorada)...');
+                    
+                    // Función para esperar gráficos con mejor estrategia
+                    async function esperarGraficos() {
+                        const chartIds = ['pesoImcChart', 'presionChart', 'hgtCcChart', 'hba1cChart'];
+                        console.log('🔍 Verificando gráficos disponibles...');
+                        
+                        // Primero verificar qué canvas existen
+                        const availableCharts = [];
+                        for (const chartId of chartIds) {
+                            const canvas = document.getElementById(chartId);
+                            if (canvas) {
+                                availableCharts.push(chartId);
+                                console.log(`✅ Canvas encontrado: ${chartId} (${canvas.width}x${canvas.height})`);
+                            } else {
+                                console.log(`⚠️ Canvas no encontrado: ${chartId}`);
+                            }
+                        }
+                        
+                        if (availableCharts.length === 0) {
+                            console.log('⚠️ No se encontraron canvas, continuando sin espera de gráficos');
+                            return;
+                        }
+                        
+                        // Esperar que al menos algunos canvas tengan contenido
+                        let attempts = 0;
+                        const maxAttempts = 10; // 5 segundos máximo
+                        
+                        while (attempts < maxAttempts) {
+                            let readyCount = 0;
+                            
+                            for (const chartId of availableCharts) {
+                                try {
+                                    const canvas = document.getElementById(chartId);
+                                    if (canvas && canvas.width > 0 && canvas.height > 0) {
+                                        const context = canvas.getContext('2d');
+                                        // Verificación simple pero efectiva
+                                        const imageData = context.getImageData(0, 0, Math.min(50, canvas.width), Math.min(50, canvas.height));
+                                        const hasContent = imageData.data.some(pixel => pixel > 20);
+                                        
+                                        if (hasContent) {
+                                            readyCount++;
+                                        }
+                                    }
+                                } catch (e) {
+                                    // Ignorar errores de verificación
+                                }
+                            }
+                            
+                            console.log(`📊 Gráficos con contenido: ${readyCount}/${availableCharts.length}`);
+                            
+                            if (readyCount >= Math.min(2, availableCharts.length)) {
+                                console.log('🎉 Suficientes gráficos están listos');
+                                break;
+                            }
+                            
+                            attempts++;
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        }
+                        
+                        // Tiempo adicional breve para estabilización
+                        await new Promise(resolve => setTimeout(resolve, 800));
+                        console.log('✅ Espera de gráficos completada');
+                    }
+                    
+                    // Esperar gráficos
+                    await esperarGraficos();
+                    
+                    // Optimizar elementos para PDF
+                    console.log('🎯 Optimizando elementos para PDF...');
+                    
+                    // LIMPIAR CONTENIDO EXTRA Y OPTIMIZAR LAYOUT
+                    console.log('🧹 Limpiando contenido extra...');
+                    
+                    // Ocultar scripts y elementos que pueden generar texto extra
+                    document.querySelectorAll('script, .no-print, .debug, .dev-tools').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    
+                    // Optimizar gráficos para evitar cortes
+                    document.querySelectorAll('.chart-wrap').forEach((chartWrap, index) => {
+                        chartWrap.style.pageBreakInside = 'avoid';
+                        chartWrap.style.breakInside = 'avoid';
+                        chartWrap.style.marginBottom = '20px';
+                        chartWrap.style.minHeight = '300px';
+                        chartWrap.style.maxHeight = '400px';
+                        console.log(`📊 Chart-wrap ${index + 1} optimizado para evitar cortes`);
+                    });
+                    
+                    // Asegurar que canvas sean visibles y del tamaño correcto
+                    document.querySelectorAll('canvas').forEach((canvas, index) => {
+                        if (canvas.id) {
+                            // Estilos para evitar cortes
+                            canvas.style.display = 'block';
+                            canvas.style.visibility = 'visible';
+                            canvas.style.opacity = '1';
+                            canvas.style.pageBreakInside = 'avoid';
+                            canvas.style.breakInside = 'avoid';
+                            canvas.style.maxWidth = '100%';
+                            canvas.style.height = 'auto';
+                            
+                            // Asegurar dimensiones apropiadas para PDF
+                            const parent = canvas.parentElement;
+                            if (parent && parent.classList.contains('chart-wrap')) {
+                                parent.style.height = '350px';
+                                parent.style.overflow = 'hidden';
+                            }
+                            
+                            console.log(`🎨 Canvas optimizado: ${canvas.id} (${canvas.width}x${canvas.height})`);
+                        }
+                    });
+                    
+                    // Optimizar tablas para evitar cortes
+                    document.querySelectorAll('table').forEach((table, index) => {
+                        table.style.pageBreakInside = 'avoid';
+                        table.style.breakInside = 'avoid';
+                        table.style.borderCollapse = 'collapse';
+                        table.style.fontSize = '12px';
+                        table.style.lineHeight = '1.3';
+                        console.log(`📋 Tabla ${index + 1} optimizada`);
+                    });
+                    
+                    // Optimizar secciones de contenido
+                    document.querySelectorAll('.summary-card, .iframe-replacement').forEach((card, index) => {
+                        card.style.pageBreakInside = 'avoid';
+                        card.style.breakInside = 'avoid';
+                        card.style.marginBottom = '15px';
+                        card.style.overflow = 'hidden';
+                        console.log(`📄 Tarjeta ${index + 1} optimizada`);
+                    });
+                    
+                    // Limpiar elementos que pueden causar texto extra
+                    const extraElements = document.querySelectorAll('.tooltip, .modal, .popup, .overlay, .debug-info');
+                    extraElements.forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    
+                    // Asegurar que el contenedor principal tenga el tamaño correcto
+                    element.style.overflow = 'visible';
+                    element.style.minHeight = 'auto';
+                    
+                    console.log('✅ Optimización de layout completada');
+                    
+                    // Configuración MEJORADA para PDF sin cortes
+                    console.log('🖼️ Generando PDF con configuración anti-cortes...');
+                    const opt = {
+                        margin: [12, 12, 12, 12], // Márgenes equilibrados
+                        filename: 'plan_cuidados_' + window.location.pathname.split('/').pop() + '.pdf',
+                        image: { 
+                            type: 'jpeg', 
+                            quality: 0.85 // Calidad optimizada
+                        },
+                        html2canvas: { 
+                            scale: 1.5, // Escala reducida para evitar problemas de memoria
+                            useCORS: true, 
+                            allowTaint: true, 
+                            backgroundColor: '#ffffff',
+                            logging: false,
+                            width: 794,
+                            height: 1123,
+                            scrollX: 0,
+                            scrollY: 0,
+                            imageTimeout: 8000,
+                            removeContainer: true,
+                            // Configuraciones específicas para evitar cortes
+                            windowWidth: 1200,
+                            windowHeight: 800,
+                            x: 0,
+                            y: 0,
+                            // Evitar elementos problemáticos
+                            ignoreElements: function(element) {
+                                // Ignorar elementos que pueden causar texto extra
+                                if (element.tagName === 'SCRIPT' || 
+                                    element.classList.contains('no-print') ||
+                                    element.classList.contains('debug') ||
+                                    element.classList.contains('dev-tools') ||
+                                    element.classList.contains('tooltip') ||
+                                    element.classList.contains('modal')) {
+                                    return true;
+                                }
+                                return false;
+                            }
+                        },
+                        jsPDF: { 
+                            unit: 'mm', 
+                            format: 'a4', 
+                            orientation: 'portrait',
+                            compress: true,
+                            putOnlyUsedFonts: true
+                        },
+                        pagebreak: {
+                            mode: ['css', 'legacy'],
+                            before: '.page-break-before',
+                            after: '.page-break-after', 
+                            avoid: ['.summary-card', '.iframe-replacement', '.chart-wrap', '.chart-container', 'canvas', 'table', '.no-break']
+                        }
+                    };
+                    
+                    // Ocultar elementos no imprimibles y hacer limpieza final
+                    console.log('🧹 Realizando limpieza final antes de generar PDF...');
+                    
+                    // Ocultar elementos no imprimibles
+                    document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+                    
+                    // Ocultar elementos que pueden generar contenido extra
+                    const elementsToHide = [
+                        'script[src*="chart"]',
+                        'script[src*="html2pdf"]', 
+                        '.debug',
+                        '.dev-tools',
+                        '.tooltip',
+                        '.modal',
+                        '.popup',
+                        '.overlay',
+                        '.loading',
+                        '#console',
+                        '.error-message'
+                    ];
+                    
+                    elementsToHide.forEach(selector => {
+                        document.querySelectorAll(selector).forEach(el => {
+                            el.style.display = 'none';
+                            el.style.visibility = 'hidden';
+                        });
+                    });
+                    
+                    // Limpiar nodos de texto sueltos que pueden aparecer después de scripts
+                    const walker = document.createTreeWalker(
+                        element,
+                        NodeFilter.SHOW_TEXT,
+                        null,
+                        false
+                    );
+                    
+                    const textNodesToRemove = [];
+                    let node;
+                    while (node = walker.nextNode()) {
+                        // Remover nodos de texto que solo contienen espacios o caracteres extraños
+                        if (node.nodeValue.trim() === '' || 
+                            /^[\s\n\r\t]*$/.test(node.nodeValue) ||
+                            node.nodeValue.includes('Chart.register') ||
+                            node.nodeValue.includes('console.log') ||
+                            node.nodeValue.includes('function') ||
+                            node.nodeValue.includes('script')) {
+                            textNodesToRemove.push(node);
+                        }
+                    }
+                    
+                    textNodesToRemove.forEach(node => {
+                        if (node.parentNode) {
+                            node.parentNode.removeChild(node);
+                        }
+                    });
+                    
+                    console.log(`🗑️ Limpiados ${textNodesToRemove.length} nodos de texto extra`);
+                    
+                    // Forzar layout final
+                    element.style.overflow = 'hidden';
+                    element.style.position = 'relative';
+                    
+                    console.log('✅ Limpieza final completada');
+                    
+                    // Generar PDF
+                    await html2pdf().set(opt).from(element).save();
+                    console.log('✅ PDF anti-cortes generado exitosamente');
+                    
+                    // Restaurar estado original
+                    console.log('🔄 Restaurando estado original...');
+                    backups.forEach(backup => {
+                        if (backup.replacement && backup.replacement.parentNode) {
+                            backup.replacement.parentNode.removeChild(backup.replacement);
+                        }
+                        if (backup.iframe) {
+                            backup.iframe.style.display = '';
+                        }
+                    });
+                    
+                    document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
+                    element.classList.remove('pdf-export');
+                    console.log('✅ Estado restaurado completamente');
+                    
+                } catch (error) {
+                    console.error('❌ Error generando PDF equilibrado:', error);
+                    alert('Error al generar PDF: ' + error.message);
+                }
+            };
+                
+                try {
+                    // Función para obtener promedio PA
+                    async function obtenerPromedioPA() {
+                        try {
+                            console.log('📊 Obteniendo promedio PA...');
+                            const response = await fetch(window.location.pathname.replace('/acuerdos/', '/usuario/') + '/promedio-hta', {credentials:'same-origin'});
+                            const html = await response.text();
+                            console.log('✅ Promedio PA obtenido');
+                            return html;
+                        } catch (e) {
+                            console.warn('❌ Error:', e);
+                            return '<div class="summary-card"><h3>Error cargando promedio PA</h3><p>No se pudo cargar la información</p></div>';
+                        }
+                    }
+                    
+                    // Función para obtener resumen peso
+                    async function obtenerResumenPeso() {
+                        try {
+                            console.log('⚖️ Obteniendo resumen peso...');
+                            const response = await fetch(window.location.pathname.replace('/acuerdos/', '/usuario/') + '/resumen-peso', {credentials:'same-origin'});
+                            const html = await response.text();
+                            console.log('✅ Resumen peso obtenido');
+                            return html;
+                        } catch (e) {
+                            console.warn('❌ Error:', e);
+                            return '<div class="summary-card"><h3>Error cargando resumen peso</h3><p>No se pudo cargar la información</p></div>';
+                        }
+                    }
+                    
+                    // Obtener datos
+                    console.log('🔄 Obteniendo datos...');
+                    const [promedioPA, resumenPeso] = await Promise.all([
+                        obtenerPromedioPA(),
+                        obtenerResumenPeso()
+                    ]);
+                    
+                    // Reemplazar iframes con diseño profesional
+                    const iframes = document.querySelectorAll('iframe');
+                    const backups = [];
+                    
+                    console.log(`🔄 Procesando ${iframes.length} iframes...`);
+                    iframes.forEach((iframe, index) => {
+                        const replacement = document.createElement('div');
+                        replacement.className = 'iframe-replacement summary-card';
+                        replacement.style.cssText = `
+                            width: 100%; 
+                            min-height: 120px; 
+                            border: 1px solid #e2e8f0; 
+                            border-radius: 8px; 
+                            padding: 20px; 
+                            background: #ffffff; 
+                            font-size: 14px; 
+                            line-height: 1.6;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                            margin-bottom: 20px;
+                            page-break-inside: avoid;
+                        `;
+                        
+                        if (iframe.src.includes('promedio-hta')) {
+                            console.log('📊 Insertando promedio PA con estilo profesional');
+                            replacement.innerHTML = `<div class="section-divider"></div>${promedioPA}`;
+                        } else if (iframe.src.includes('resumen-peso')) {
+                            console.log('⚖️ Insertando resumen peso con estilo profesional');
+                            replacement.innerHTML = `<div class="section-divider"></div>${resumenPeso}`;
+                        } else {
+                            replacement.innerHTML = '<div class="summary-card"><h3>Contenido no disponible</h3></div>';
+                        }
+                        
+                        backups.push({ iframe, replacement });
+                        iframe.parentNode.insertBefore(replacement, iframe);
+                        iframe.style.display = 'none';
+                        
+                        console.log(`✅ Iframe ${index + 1} reemplazado con estilo profesional`);
+                    });
+                    
+                    // Aplicar estilos adicionales para PDF
+                    const element = document.querySelector('.container');
+                    element.classList.add('pdf-export');
+                    
+                    // Mejorar tablas y gráficos existentes
+                    document.querySelectorAll('.pdf-export table').forEach(table => {
+                        table.style.pageBreakInside = 'avoid';
+                        table.style.borderCollapse = 'collapse';
+                    });
+                    
+                    document.querySelectorAll('.pdf-export canvas, .pdf-export svg, .pdf-export .chart').forEach(chart => {
+                        chart.style.pageBreakInside = 'avoid';
+                        chart.style.maxWidth = '100%';
+                        chart.style.height = 'auto';
+                    });
+                    
+                    // ESPERA SIMPLIFICADA DE GRÁFICOS
+                    console.log('📊 Esperando gráficos (versión simplificada)...');
+                    
+                    // Función simple para esperar que los canvas estén listos
+                    async function esperarCanvasSimple() {
+                        const chartIds = ['pesoImcChart', 'presionChart', 'hgtCcChart', 'hba1cChart'];
+                        const maxWait = 8000; // 8 segundos máximo
+                        const startTime = Date.now();
+                        
+                        console.log('🔍 Verificando canvas existentes...');
+                        
+                        while (Date.now() - startTime < maxWait) {
+                            let readyCount = 0;
+                            
+                            for (const chartId of chartIds) {
+                                try {
+                                    const canvas = document.getElementById(chartId);
+                                    if (canvas && canvas.width > 0 && canvas.height > 0) {
+                                        // Verificación simple: intentar obtener datos del canvas
+                                        const context = canvas.getContext('2d');
+                                        const imageData = context.getImageData(0, 0, Math.min(canvas.width, 50), Math.min(canvas.height, 50));
+                                        const hasContent = imageData.data.some(pixel => pixel > 10);
+                                        
+                                        if (hasContent) {
+                                            readyCount++;
+                                            console.log(`✅ Canvas listo: ${chartId}`);
+                                        } else {
+                                            console.log(`⏳ Canvas sin contenido: ${chartId}`);
+                                        }
+                                    } else {
+                                        console.log(`⏳ Canvas no encontrado o sin dimensiones: ${chartId}`);
+                                    }
+                                } catch (e) {
+                                    console.warn(`⚠️ Error verificando ${chartId}:`, e.message);
+                                }
+                            }
+                            
+                            console.log(`📊 Canvas listos: ${readyCount}/${chartIds.length}`);
+                            
+                            if (readyCount >= 2) { // Al menos 2 canvas listos
+                                console.log('🎉 Suficientes canvas están listos');
+                                break;
+                            }
+                            
+                            // Esperar 1 segundo antes de verificar de nuevo
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+                        }
+                        
+                        // Tiempo adicional de estabilización
+                        console.log('⏱️ Esperando estabilización (1 segundo)...');
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                    
+                    // Esperar a que los canvas estén listos
+                    await esperarCanvasSimple();
+                    
+                    // Optimización simple de canvas
+                    console.log('� Aplicando optimizaciones simples...');
+                    document.querySelectorAll('canvas').forEach((canvas, index) => {
+                        try {
+                            if (canvas.id) {
+                                console.log(`🎨 Optimizando: ${canvas.id}`);
+                                canvas.style.display = 'block';
+                                canvas.style.visibility = 'visible';
+                                canvas.style.opacity = '1';
+                            }
+                        } catch (e) {
+                            console.warn(`⚠️ Error optimizando canvas ${index}:`, e.message);
+                        }
+                    });
+                    
+                    console.log('📊 Optimización de canvas completada');
+                    
+                    // Configuración optimizada para PDF profesional
+                    console.log('🖼️ Generando PDF profesional con gráficos...');
+                    const opt = {
+                        margin: [15, 15, 15, 15], // Márgenes más generosos
+                        filename: 'plan_cuidados_' + window.location.pathname.split('/').pop() + '.pdf',
+                        image: { 
+                            type: 'jpeg', 
+                            quality: 1.0 // Máxima calidad
+                        },
+                        html2canvas: { 
+                            scale: 2, // Escala reducida para evitar problemas
+                            useCORS: true, 
+                            allowTaint: true, 
+                            backgroundColor: '#ffffff',
+                            logging: false, // Desactivar logging para producción
+                            letterRendering: true,
+                            width: 794, // Ancho A4 en píxeles
+                            height: 1123, // Alto A4 en píxeles
+                            scrollX: 0,
+                            scrollY: 0,
+                            // Configuración simplificada
+                            imageTimeout: 10000, // 10 segundos
+                            removeContainer: true,
+                            foreignObjectRendering: false,
+                            ignoreElements: function(element) {
+                                // No ignorar nada importante
+                                return false;
+                            }
+                        },
+                        jsPDF: { 
+                            unit: 'mm', 
+                            format: 'a4', 
+                            orientation: 'portrait',
+                            compress: true
+                        },
+                        pagebreak: {
+                            mode: ['avoid-all', 'css', 'legacy'],
+                            before: '.page-break-before',
+                            after: '.page-break-after',
+                            avoid: ['.summary-card', '.iframe-replacement', '.chart-container', '.no-break']
+                        }
+                    };
+                    
+                    // Ocultar elementos no imprimibles
+                    document.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
+                    
+                    // Generar PDF con configuración optimizada
+                    await html2pdf().set(opt).from(element).save();
+                    console.log('✅ PDF profesional generado exitosamente');
+                    
+                    // Restaurar estado original
+                    console.log('🔄 Restaurando estado original...');
+                    backups.forEach(backup => {
+                        if (backup.replacement.parentNode) {
+                            backup.replacement.parentNode.removeChild(backup.replacement);
+                        }
+                        backup.iframe.style.display = '';
+                    });
+                    
+                    document.querySelectorAll('.no-print').forEach(el => el.style.display = '');
+                    element.classList.remove('pdf-export');
+                    console.log('✅ Estado restaurado completamente');
+                    
+                } catch (error) {
+                    console.error('❌ Error generando PDF profesional:', error);
+                    alert('Error al generar PDF: ' + error.message);
+                }
+            };
+            
+            console.log('🔧 Función descargarPDF profesional cargada exitosamente!');
+        });
+    </script>
+</body>
+</html>

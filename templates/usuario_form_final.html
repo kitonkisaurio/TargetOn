@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nuevo Usuario - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f8f9fa;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .pat-badges {
+        margin: 10px 0;
+      }
+      .pat-badge {
+        padding: 4px 8px;
+        margin: 2px;
+        border-radius: 4px;
+        display: inline-block;
+      }
+      .pat-green {
+        background: #28a745;
+        color: white;
+      }
+      .pat-red {
+        background: #dc3545;
+        color: white;
+      }
+      .pat-yellow {
+        background: #ffc107;
+        color: black;
+      }
+      .pat-default {
+        background: #6c757d;
+        color: white;
+      }
+      .pat-empty {
+        color: #6c757d;
+        font-style: italic;
+      }
+      .btn {
+        padding: 10px 20px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .btn-sm {
+        padding: 4px 8px;
+        font-size: 12px;
+        margin: 0 2px;
+      }
+      .patologias-resumen {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+      .patologias-titulo {
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 6px;
+        font-size: 13px;
+      }
+      th {
+        background: #f1f3f5;
+      }
+      .estado-tag {
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+      }
+      .estado-pendiente {
+        background: #fff3cd;
+        color: #856404;
+      }
+      .estado-solicitado {
+        background: #cce5ff;
+        color: #004085;
+      }
+      .estado-realizado {
+        background: #d4edda;
+        color: #155724;
+      }
+      .estado-descartado {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .acciones-col {
+        white-space: nowrap;
+      }
+      .flex {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .small {
+        font-size: 12px;
+        color: #555;
+      }
+      #examenes-section {
+        margin-top: 30px;
+      }
+      #examenes-section h2 {
+        margin: 0 0 10px 0;
+        font-size: 20px;
+      }
+      .badge-prioridad {
+        font-size: 10px;
+        padding: 2px 4px;
+        border-radius: 4px;
+        background: #343a40;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Nuevo Usuario</h1>
+
+      <form method="POST">
+        <div class="form-group">
+          <label for="run">RUN:</label>
+          <input
+            type="text"
+            id="run"
+            name="run"
+            required
+            maxlength="12"
+            placeholder="Ej: 12.345.678-9"
+          />
+        </div>
+
+        <div class="patologias-resumen">
+          <div class="patologias-titulo">Patologías Guardadas en BD:</div>
+          <div id="patologias-badges" class="pat-badges">
+            <span class="pat-empty"
+              >Sin patologías guardadas en base de datos</span
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre">Nombre:</label>
+          <input type="text" id="nombre" name="nombre" required />
+        </div>
+
+        <div class="form-group">
+          <label for="fecha_nacimiento">Fecha de nacimiento:</label>
+          <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" />
+        </div>
+
+        <div class="form-group">
+          <label for="direccion">Dirección:</label>
+          <input type="text" id="direccion" name="direccion" />
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">Teléfono:</label>
+          <input type="tel" id="telefono" name="telefono" />
+        </div>
+
+        <div class="form-group">
+          <label for="fecha_ingreso">Fecha de ingreso:</label>
+          <input type="date" id="fecha_ingreso" name="fecha_ingreso" />
+        </div>
+
+        <div class="form-group">
+          <label for="sexo">Sexo:</label>
+          <select id="sexo" name="sexo">
+            <option value="">-- Seleccionar --</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn">Guardar Usuario</button>
+      </form>
+
+      <section id="examenes-section">
+        <h2>Exámenes Recomendados</h2>
+        <div class="small">
+          Se generan a partir de las patologías asociadas al RUN. Estados:
+          pendiente → solicitado → (realizado / descartado).
+        </div>
+        <div class="flex">
+          <button id="btn-generar-examenes" type="button" class="btn">
+            Generar Recomendaciones
+          </button>
+          <select id="filtro-estado">
+            <option value="">Todos</option>
+            <option value="pendiente">Pendientes</option>
+            <option value="solicitado">Solicitados</option>
+            <option value="realizado">Realizados</option>
+            <option value="descartado">Descartados</option>
+          </select>
+          <button id="btn-refrescar" type="button" class="btn">
+            Refrescar
+          </button>
+        </div>
+        <table id="tabla-examenes">
+          <thead>
+            <tr>
+              <th>Prioridad</th>
+              <th>Código</th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Origen Patologías</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="7" style="text-align: center; font-style: italic">
+                Sin datos
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <script>
+      console.log("🚀 Script iniciando...");
+      function limpiarRun(raw) {
+        return (raw || "").toUpperCase().replace(/[^0-9K]/g, "");
+      }
+      function formatearRun(raw) {
+        const limpio = limpiarRun(raw);
+        if (limpio.length < 2) return raw;
+        const cuerpo = limpio.slice(0, -1);
+        const dv = limpio.slice(-1);
+        if (cuerpo.length <= 3) return cuerpo + "-" + dv;
+        if (cuerpo.length <= 6)
+          return cuerpo.slice(0, -3) + "." + cuerpo.slice(-3) + "-" + dv;
+        // cuerpo 7 u 8
+        const pre =
+          cuerpo.length === 7 ? cuerpo.slice(0, 1) : cuerpo.slice(0, 2);
+        const mid =
+          cuerpo.length === 7 ? cuerpo.slice(1, 4) : cuerpo.slice(2, 5);
+        const end = cuerpo.length === 7 ? cuerpo.slice(4) : cuerpo.slice(5);
+        return `${pre}.${mid}.${end}-${dv}`;
+      }
+      document.addEventListener("DOMContentLoaded", function () {
+        const runInput = document.getElementById("run");
+        const container = document.getElementById("patologias-badges");
+        function cargarPatologias(run) {
+          const limpio = limpiarRun(run);
+          if (limpio.length < 8) {
+            mostrarPatologias([]);
+            return;
+          }
+
+          // Cargar patologías
+          fetch(`/api/patologias/${limpio}`)
+            .then((r) => r.json())
+            .then((data) => {
+              mostrarPatologias(data.patologias || []);
+              // Auto refrescar exámenes cuando haya patologías
+              if ((data.patologias || []).length) {
+                cargarExamenes();
+              }
+            })
+            .catch(() => mostrarPatologias([]));
+
+          // Autocompletar datos del usuario
+          cargarDatosUsuario(run);
+        }
+
+        function cargarDatosUsuario(run) {
+          const runFormateado = formatearRun(run);
+          fetch(`/buscar_usuario?run=${encodeURIComponent(runFormateado)}`)
+            .then((r) => r.json())
+            .then((data) => {
+              if (data.success && data.usuario) {
+                const usuario = data.usuario;
+
+                // Autocompletar campos
+                if (usuario.nombre) {
+                  document.getElementById("nombre").value = usuario.nombre;
+                }
+                if (usuario.fecha_nacimiento) {
+                  document.getElementById("fecha_nacimiento").value =
+                    usuario.fecha_nacimiento;
+                }
+                if (usuario.direccion) {
+                  document.getElementById("direccion").value =
+                    usuario.direccion;
+                }
+                if (usuario.telefono) {
+                  document.getElementById("telefono").value = usuario.telefono;
+                }
+                if (usuario.sexo) {
+                  // Convertir formato: masculino -> M, femenino -> F
+                  const sexoValue =
+                    usuario.sexo.toLowerCase() === "masculino"
+                      ? "M"
+                      : usuario.sexo.toLowerCase() === "femenino"
+                        ? "F"
+                        : "";
+                  if (sexoValue) {
+                    document.getElementById("sexo").value = sexoValue;
+                  }
+                }
+
+                console.log(
+                  "✅ Datos del usuario autocompletos:",
+                  usuario.nombre,
+                );
+              }
+            })
+            .catch((err) => {
+              console.log(
+                "ℹ️ Usuario no encontrado para autocompletado:",
+                err.message,
+              );
+            });
+        }
+        function mostrarPatologias(patologias) {
+          container.innerHTML = "";
+          if (!patologias.length) {
+            container.innerHTML =
+              '<span class="pat-empty">Sin patologías en BD</span>';
+            return;
+          }
+          patologias.forEach((p) => {
+            const span = document.createElement("span");
+            span.className = `pat-badge pat-${p.color || "default"}`;
+            span.textContent = `${p.nombre} (${p.cie10})`;
+            container.appendChild(span);
+          });
+        }
+        if (runInput) {
+          runInput.addEventListener("input", (e) => {
+            const previo = runInput.value;
+            const limpio = limpiarRun(previo);
+            if (limpio.length >= 4) {
+              runInput.value = formatearRun(limpio);
+            }
+            if (limpio.length >= 7) {
+              cargarPatologias(limpio);
+            }
+          });
+          runInput.addEventListener("blur", () => {
+            runInput.value = formatearRun(runInput.value);
+          });
+        }
+        setTimeout(() => cargarPatologias("83711868"), 2000);
+
+        // ---- Exámenes Recomendados ----
+        const tablaBody = document.querySelector("#tabla-examenes tbody");
+        const btnGenerar = document.getElementById("btn-generar-examenes");
+        const btnRefrescar = document.getElementById("btn-refrescar");
+        const filtroEstado = document.getElementById("filtro-estado");
+
+        function renderExamenes(examenes) {
+          tablaBody.innerHTML = "";
+          if (!examenes.length) {
+            tablaBody.innerHTML =
+              '<tr><td colspan="7" style="text-align:center;font-style:italic;">Sin exámenes</td></tr>';
+            return;
+          }
+          examenes.forEach((ex) => {
+            const tr = document.createElement("tr");
+            const estadoClass = `estado-${ex.estado || "pendiente"}`;
+            const prioridad =
+              ex.prioridad != null
+                ? `<span class="badge-prioridad">${ex.prioridad}</span>`
+                : "";
+            tr.innerHTML = `
+                        <td>${prioridad}</td>
+                        <td>${ex.codigo || ""}</td>
+                        <td>${ex.nombre || ""}</td>
+                        <td>${ex.categoria || ""}</td>
+                        <td>${(ex.origen_patologias || "").replace(/,/g, ", ")}</td>
+                        <td><span class="estado-tag ${estadoClass}">${ex.estado || "pendiente"}</span></td>
+                        <td class="acciones-col">
+                            ${botonesAcciones(ex)}
+                        </td>`;
+            tablaBody.appendChild(tr);
+          });
+        }
+        function botonesAcciones(ex) {
+          const e = ex.estado || "pendiente";
+          const id = ex.id;
+          const btn = (texto, estado, danger = false) =>
+            `<button data-id="${id}" data-nuevo="${estado}" class="btn-sm" style="background:${danger ? "#dc3545" : "#007bff"};color:#fff;">${texto}</button>`;
+          if (e === "pendiente")
+            return (
+              btn("Solicitar", "solicitado") +
+              btn("Realizado", "realizado") +
+              btn("Descartar", "descartado", true)
+            );
+          if (e === "solicitado")
+            return (
+              btn("Realizado", "realizado") +
+              btn("Descartar", "descartado", true)
+            );
+          return "<em>Sin acciones</em>";
+        }
+        function obtenerRunLimpio() {
+          return limpiarRun(runInput.value);
+        }
+        function cargarExamenes() {
+          const run = obtenerRunLimpio();
+          if (run.length < 7) {
+            renderExamenes([]);
+            return;
+          }
+          const params = new URLSearchParams();
+          if (filtroEstado.value) params.append("estado", filtroEstado.value);
+          fetch(`/api/exmenes/${run}?${params.toString()}`)
+            .then((r) => r.json())
+            .then((data) => renderExamenes(data.examenes || []))
+            .catch(() => renderExamenes([]));
+        }
+        function generarRecomendados() {
+          const run = obtenerRunLimpio();
+          if (run.length < 7) {
+            alert("RUN inválido");
+            return;
+          }
+          fetch("/api/examenes/recomendados", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ run: run, persist: true }),
+          })
+            .then((r) => r.json())
+            .then((data) => {
+              if (!data.success) {
+                alert("Error: " + (data.error || "desconocido"));
+                return;
+              }
+              cargarExamenes();
+            })
+            .catch(() => alert("Error generando recomendaciones"));
+        }
+        tablaBody.addEventListener("click", (e) => {
+          const t = e.target;
+          if (t.tagName === "BUTTON" && t.dataset.id) {
+            const id = t.dataset.id;
+            const nuevo = t.dataset.nuevo;
+            fetch(`/api/exmenes/${id}/estado`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ estado: nuevo }),
+            })
+              .then((r) => r.json())
+              .then((data) => {
+                if (!data.success) {
+                  alert("Error: " + (data.error || "desconocido"));
+                  return;
+                }
+                cargarExamenes();
+              })
+              .catch(() => alert("Error actualizando estado"));
+          }
+        });
+        btnGenerar.addEventListener("click", generarRecomendados);
+        btnRefrescar.addEventListener("click", cargarExamenes);
+        filtroEstado.addEventListener("change", cargarExamenes);
+      });
+
+      // ============= SISTEMA MANDRAKE PARTIAL =============
+      // Sistema inteligente de autollenado parcial con manejo de fechas
+      (function () {
+        // === Helpers de fecha ===
+        function _pad2(n) {
+          return String(n).padStart(2, "0");
+        }
+
+        function _normalizaFechaEntrada(raw) {
+          if (!raw) return "";
+          const s = String(raw).trim();
+
+          // yyyy-mm-dd (ISO) - devolver tal cual
+          if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+          // dd/mm/yyyy o dd-mm-yyyy -> yyyy-mm-dd
+          const m1 = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+          if (m1) {
+            const d = parseInt(m1[1], 10);
+            const mo = parseInt(m1[2], 10);
+            const y = parseInt(m1[3], 10);
+            if (d >= 1 && d <= 31 && mo >= 1 && mo <= 12) {
+              return `${y}-${_pad2(mo)}-${_pad2(d)}`;
+            }
+          }
+
+          return "";
+        }
+
+        function _validaRangoFecha(isoDate) {
+          if (!isoDate || !/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) return false;
+          const fecha = new Date(isoDate + "T00:00:00");
+          const minFecha = new Date("1900-01-01");
+          const maxFecha = new Date();
+          maxFecha.setDate(maxFecha.getDate() + 30); // +30 días desde hoy
+          return fecha >= minFecha && fecha <= maxFecha;
+        }
+
+        // Normaliza fecha de examen con reglas especiales
+        function normalizaFechaExamen(rawFechaExamen, fechaControlISO) {
+          // 1) Si ya viene en formato estándar por helper, úsalo
+          const tryIso = _normalizaFechaEntrada(rawFechaExamen || "");
+          if (_validaRangoFecha(tryIso)) return tryIso;
+
+          const s = String(rawFechaExamen || "").trim();
+          if (s) {
+            // 2) yyyy-mm (poco común pero útil) -> yyyy-mm-01
+            let m = s.match(/^(\d{4})[-/.](\d{1,2})$/);
+            if (m) {
+              const y = parseInt(m[1], 10);
+              const mo = Math.min(Math.max(parseInt(m[2], 10), 1), 12);
+              const iso = `${y}-${_pad2(mo)}-01`;
+              if (_validaRangoFecha(iso)) return iso;
+            }
+
+            // 3) mm/yy o m/yy -> 01/mm/20yy (pivot: 00-49 => 2000+, 50-99 => 1900+)
+            m = s.match(/^(\d{1,2})[-/.](\d{2})$/);
+            if (m) {
+              let mo = Math.min(Math.max(parseInt(m[1], 10), 1), 12);
+              const yy = parseInt(m[2], 10);
+              const yFull = yy < 50 ? 2000 + yy : 1900 + yy;
+              const iso = `${yFull}-${_pad2(mo)}-01`;
+              if (_validaRangoFecha(iso)) return iso;
+            }
+
+            // 4) mm/yyyy o m/yyyy -> 01/mm/yyyy
+            m = s.match(/^(\d{1,2})[-/.](\d{4})$/);
+            if (m) {
+              const mo = Math.min(Math.max(parseInt(m[1], 10), 1), 12);
+              const y = parseInt(m[2], 10);
+              const iso = `${y}-${_pad2(mo)}-01`;
+              if (_validaRangoFecha(iso)) return iso;
+            }
+          }
+
+          // 5) Fallback: usa la fecha de control si es válida
+          return _validaRangoFecha(fechaControlISO || "")
+            ? fechaControlISO
+            : "";
+        }
+
+        // === 1) Dónde buscar la fecha objetivo ===
+        function _getTargetISODate(
+          parsed,
+          {
+            dateFromParsedKey = "fecha_atencion",
+            dateFieldId = "fechaControl",
+          } = {},
+        ) {
+          // Prioridad 1: fecha de exámenes normalizada
+          if (parsed && parsed.fecha_examenes_iso) {
+            const v = String(parsed.fecha_examenes_iso);
+            if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+          }
+
+          // Prioridad 2: fecha del payload parseado
+          const v =
+            parsed && parsed[dateFromParsedKey]
+              ? String(parsed[dateFromParsedKey])
+              : "";
+          if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+
+          // Prioridad 3: fecha del formulario
+          const el = document.getElementById(dateFieldId);
+          const v2 = el && el.value ? String(el.value).slice(0, 10) : "";
+          return /^\d{4}-\d{2}-\d{2}$/.test(v2) ? v2 : "";
+        }
+
+        // === 2) Cómo leo/escribo un campo ===
+        function _getInput(selectors) {
+          if (!selectors) return null;
+          const list = Array.isArray(selectors) ? selectors : [selectors];
+          for (const s of list) {
+            const el = typeof s === "string" ? document.querySelector(s) : s;
+            if (el) return el;
+          }
+          return null;
+        }
+
+        function _isEmptyValue(el) {
+          if (!el) return true;
+          if (el.type === "checkbox" || el.type === "radio") {
+            const name = el.name;
+            if (!name) return !el.checked;
+            const group = document.querySelectorAll(
+              `[name="${CSS.escape(name)}"]`,
+            );
+            return !Array.from(group).some((x) => x.checked);
+          }
+          const val = (el.value ?? "").toString().trim();
+          return val === "";
+        }
+
+        // === 3) Estrategia de merge por fecha ===
+        function _shouldWriteForDate(el, targetISO) {
+          return _isEmptyValue(el); // Solo completar lo que está en blanco
+        }
+
+        // === 4) Aplicador parcial que respeta fechas ===
+        function applyPartialByDate(parsedInput, opts = {}) {
+          const parsed =
+            typeof parsedInput === "string" && window.MandrakePaste?.parse
+              ? MandrakePaste.parse(parsedInput)
+              : parsedInput;
+
+          if (!parsed || typeof parsed !== "object")
+            return { aplicados: 0, omitidos: 0 };
+
+          const {
+            FIELD_MAP = window.FIELD_MAP || {},
+            dateFromParsedKey = "fecha_atencion",
+            dateFieldId = "fechaControl",
+          } = opts;
+
+          // Normalizar fecha de exámenes antes de procesar
+          const fechaControlISO =
+            document.getElementById(dateFieldId)?.value?.slice(0, 10) || "";
+          if (parsed.fecha_examenes) {
+            parsed.fecha_examenes_iso = normalizaFechaExamen(
+              parsed.fecha_examenes,
+              fechaControlISO,
+            );
+          }
+
+          const targetISO = _getTargetISODate(parsed, {
+            dateFromParsedKey,
+            dateFieldId,
+          });
+          let aplicados = 0,
+            omitidos = 0;
+
+          for (const [key, value] of Object.entries(parsed)) {
+            if (value == null || value === "") continue;
+            const selectors = FIELD_MAP[key];
+            if (!selectors) continue;
+
+            const el = _getInput(selectors);
+            if (!el) continue;
+
+            if (_shouldWriteForDate(el, targetISO)) {
+              // Escribir sin romper formatos básicos
+              if (el.type === "checkbox" || el.type === "radio") {
+                const truthy =
+                  value === true ||
+                  String(value).toUpperCase() === "SI" ||
+                  String(value) === "1";
+                if (el.type === "checkbox") {
+                  el.checked = !!truthy;
+                } else {
+                  // Marcar el radio con ese valor si existe
+                  const name = el.name;
+                  const input = document.querySelector(
+                    `[name="${CSS.escape(name)}"][value="${CSS.escape(String(value))}"]`,
+                  );
+                  if (input) input.checked = true;
+                }
+              } else {
+                el.value = String(value);
+                el.dispatchEvent(new Event("input", { bubbles: true }));
+                el.dispatchEvent(new Event("change", { bubbles: true }));
+              }
+              aplicados++;
+            } else {
+              omitidos++;
+            }
+          }
+
+          return { aplicados, omitidos, targetISO };
+        }
+
+        // === 5) API pública ===
+        window.MandrakePartial = {
+          applyByDate(parsedOrText, options) {
+            return applyPartialByDate(parsedOrText, options);
+          },
+
+          // Helper adicional para normalización de fechas de exámenes
+          normalizaFechaExamen(rawFechaExamen, fechaControlISO) {
+            return normalizaFechaExamen(rawFechaExamen, fechaControlISO);
+          },
+        };
+
+        console.log(
+          "🎯 MandrakePartial cargado con soporte de fechas de exámenes",
+        );
+      })();
+      // ============= FIN MANDRAKE PARTIAL =============
+    </script>
+  </body>
+</html>

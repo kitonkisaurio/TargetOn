@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>PSCV Completo - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            --card-bg: #ffffff;
+            --primary-color: #dc2626;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            background: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .header-card {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #b91c1c 100%);
+            border: none;
+            color: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .filter-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .results-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #b91c1c 100%);
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            font-size: 0.85rem;
+        }
+
+        .table td {
+            padding: 8px 10px;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(220, 38, 38, 0.1);
+        }
+
+        .badge-imc {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .badge-imc.obesidad {
+            background: #dc2626;
+            color: white;
+        }
+
+        .badge-imc.sobrepeso {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .badge-imc.normal {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge-erc {
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .badge-erc.sin-erc {
+            background: #10b981;
+            color: white;
+        }
+
+        .badge-erc.erc {
+            background: #ef4444;
+            color: white;
+        }
+
+        .badge-condition {
+            background: var(--secondary-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            margin: 1px;
+            display: inline-block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .stats-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .stats-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin: 0;
+            font-size: 0.8rem;
+        }
+
+        .alert-info {
+            border-left: 4px solid var(--primary-color);
+            background: rgba(220, 38, 38, 0.1);
+            border-radius: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #b91c1c 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 4px;
+            align-items: center;
+        }
+
+        .indicator-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+
+        .indicator-icon.active {
+            background: #10b981;
+        }
+
+        .indicator-icon.inactive {
+            background: #e5e7eb;
+        }
+
+        .indicator-icon.risk {
+            background: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card header-card">
+                    <div class="card-body text-center py-4">
+                        <h1 class="card-title mb-2">
+                            <i class="bi bi-heart-pulse-fill me-2"></i>
+                            Programa de Salud Cardiovascular (PSCV)
+                        </h1>
+                        <p class="mb-0">Todas las personas en PSCV con clasificaciones por factores de riesgo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card filter-card">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-funnel me-2"></i>
+                            Filtros de Búsqueda
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" id="filtrosForm">
+                            <div class="row g-3">
+                                <!-- Fechas -->
+                                <div class="col-md-3">
+                                    <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                                           value="{{ request.args.get('fecha_inicio', '') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                                           value="{{ request.args.get('fecha_fin', '') }}">
+                                </div>
+                                
+                                <!-- Sexo -->
+                                <div class="col-md-3">
+                                    <label for="sexo" class="form-label">Sexo</label>
+                                    <select class="form-select" id="sexo" name="sexo">
+                                        <option value="">Ambos sexos</option>
+                                        <option value="M" {{ 'selected' if request.args.get('sexo') == 'M' }}>Masculino</option>
+                                        <option value="F" {{ 'selected' if request.args.get('sexo') == 'F' }}>Femenino</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Grupo Etario -->
+                                <div class="col-md-3">
+                                    <label for="grupo_etario" class="form-label">Grupo Etario</label>
+                                    <select class="form-select" id="grupo_etario" name="grupo_etario">
+                                        <option value="">Todos los grupos</option>
+                                        <option value="15-19" {{ 'selected' if request.args.get('grupo_etario') == '15-19' }}>15 a 19 años</option>
+                                        <option value="20-24" {{ 'selected' if request.args.get('grupo_etario') == '20-24' }}>20 a 24 años</option>
+                                        <option value="25-29" {{ 'selected' if request.args.get('grupo_etario') == '25-29' }}>25 a 29 años</option>
+                                        <option value="30-34" {{ 'selected' if request.args.get('grupo_etario') == '30-34' }}>30 a 34 años</option>
+                                        <option value="35-39" {{ 'selected' if request.args.get('grupo_etario') == '35-39' }}>35 a 39 años</option>
+                                        <option value="40-44" {{ 'selected' if request.args.get('grupo_etario') == '40-44' }}>40 a 44 años</option>
+                                        <option value="45-49" {{ 'selected' if request.args.get('grupo_etario') == '45-49' }}>45 a 49 años</option>
+                                        <option value="50-54" {{ 'selected' if request.args.get('grupo_etario') == '50-54' }}>50 a 54 años</option>
+                                        <option value="55-59" {{ 'selected' if request.args.get('grupo_etario') == '55-59' }}>55 a 59 años</option>
+                                        <option value="60-64" {{ 'selected' if request.args.get('grupo_etario') == '60-64' }}>60 a 64 años</option>
+                                        <option value="65-69" {{ 'selected' if request.args.get('grupo_etario') == '65-69' }}>65 a 69 años</option>
+                                        <option value="70-74" {{ 'selected' if request.args.get('grupo_etario') == '70-74' }}>70 a 74 años</option>
+                                        <option value="75-79" {{ 'selected' if request.args.get('grupo_etario') == '75-79' }}>75 a 79 años</option>
+                                        <option value="80+" {{ 'selected' if request.args.get('grupo_etario') == '80+' }}>80 y más años</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Sector -->
+                                <div class="col-md-6">
+                                    <label for="sector" class="form-label">Sector</label>
+                                    <select class="form-select" id="sector" name="sector">
+                                        <option value="">Todos los sectores</option>
+                                        {% for sector in sectores %}
+                                        <option value="{{ sector.id }}" {{ 'selected' if request.args.get('sector') == sector.id|string }}>{{ sector.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <!-- Condición específica -->
+                                <div class="col-md-6">
+                                    <label for="condicion" class="form-label">Condición Específica</label>
+                                    <select class="form-select" id="condicion" name="condicion">
+                                        <option value="">Todas las condiciones</option>
+                                        <option value="obesidad" {{ 'selected' if request.args.get('condicion') == 'obesidad' }}>Obesidad</option>
+                                        <option value="sobrepeso" {{ 'selected' if request.args.get('condicion') == 'sobrepeso' }}>Sobrepeso</option>
+                                        <option value="tabaquismo" {{ 'selected' if request.args.get('condicion') == 'tabaquismo' }}>Fumador ≥55 años</option>
+                                        <option value="erc" {{ 'selected' if request.args.get('condicion') == 'erc' }}>Con ERC</option>
+                                        <option value="iam" {{ 'selected' if request.args.get('condicion') == 'iam' }}>Antec. IAM</option>
+                                        <option value="acv" {{ 'selected' if request.args.get('condicion') == 'acv' }}>Antec. ACV</option>
+                                        <option value="actividad_fisica" {{ 'selected' if request.args.get('condicion') == 'actividad_fisica' }}>En actividad física</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Botones -->
+                                <div class="col-12 d-flex align-items-end gap-2 mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-search me-1"></i>
+                                        Filtrar
+                                    </button>
+                                    <a href="{{ url_for('usuarios_pscv_completo') }}" class="btn btn-outline-primary">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        Limpiar
+                                    </a>
+                                    <a href="{{ url_for('estadisticas') }}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-1"></i>
+                                        Volver
+                                    </a>
+                                    {% if usuarios %}
+                                    <button type="button" class="btn btn-success" onclick="exportarExcel()">
+                                        <i class="bi bi-file-excel me-1"></i>
+                                        Exportar Excel
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas Resumidas -->
+        {% if estadisticas %}
+        <div class="stats-grid">
+            <div class="stats-card">
+                <p class="stats-number">{{ estadisticas.total_pscv }}</p>
+                <p class="stats-label">Total PSCV</p>
+            </div>
+            <div class="stats-card">
+                <p class="stats-number">{{ estadisticas.sobrepeso_menores_65 + estadisticas.sobrepeso_mayores_65 }}</p>
+                <p class="stats-label">Con Sobrepeso</p>
+            </div>
+            <div class="stats-card">
+                <p class="stats-number">{{ estadisticas.obesidad_menores_65 + estadisticas.obesidad_mayores_65 }}</p>
+                <p class="stats-label">Con Obesidad</p>
+            </div>
+            <div class="stats-card">
+                <p class="stats-number">{{ estadisticas.en_actividad_fisica }}</p>
+                <p class="stats-label">Actividad Física</p>
+            </div>
+            <div class="stats-card">
+                <p class="stats-number">{{ estadisticas.fumador_actual_55_mas }}</p>
+                <p class="stats-label">Fumador ≥55 años</p>
+            </div>
+            <div class="stats-card">
+                <p class="stats-number">{{ estadisticas.antec_iam + estadisticas.antec_acv + estadisticas.antec_otras_ecv }}</p>
+                <p class="stats-label">Antec. Cardiovasculares</p>
+            </div>
+            <div class="stats-card">
+                <p class="stats-number">{{ estadisticas.total_pscv - estadisticas.sin_erc }}</p>
+                <p class="stats-label">Con ERC</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Criterios PSCV -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Criterios PSCV</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="mb-0">
+                                <li><strong>Sobrepeso &lt;65 años:</strong> IMC 25-29.9 kg/m²</li>
+                                <li><strong>Sobrepeso ≥65 años:</strong> IMC 28-31.9 kg/m²</li>
+                                <li><strong>Obesidad &lt;65 años:</strong> IMC ≥30 kg/m²</li>
+                                <li><strong>Obesidad ≥65 años:</strong> IMC ≥32 kg/m²</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="mb-0">
+                                <li><strong>Tabaquismo:</strong> Fumador actual ≥55 años</li>
+                                <li><strong>ERC:</strong> Etapas G1-G5 según VFG</li>
+                                <li><strong>Antec. Cardiovasculares:</strong> IAM, ACV, otras ECV</li>
+                                <li><strong>Actividad Física:</strong> Programa cardiovascular</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card results-card">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-table me-2"></i>
+                            Personas en PSCV
+                            {% if usuarios %}
+                            <span class="badge bg-danger ms-2">{{ usuarios|length }} encontrados</span>
+                            {% endif %}
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if usuarios %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="min-width: 200px;">Nombre</th>
+                                        <th>Edad</th>
+                                        <th>Sexo</th>
+                                        <th>Sector</th>
+                                        <th>IMC</th>
+                                        <th>Clasificación</th>
+                                        <th>ERC</th>
+                                        <th>Factores Riesgo</th>
+                                        <th>Actividad</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for usuario in usuarios %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ usuario.nombre }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ usuario.edad }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {{ 'bg-primary' if usuario.sexo == 'M' else 'bg-info' }}">
+                                                {{ 'M' if usuario.sexo == 'M' else 'F' }}
+                                            </span>
+                                        </td>
+                                        <td>{{ usuario.sector }}</td>
+                                        <td>
+                                            {% if usuario.imc %}
+                                            {{ "%.1f"|format(usuario.imc) }}
+                                            {% else %}
+                                            <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if usuario.clasificacion_imc %}
+                                            <span class="badge-imc {{ usuario.clasificacion_imc.lower() }}">
+                                                {{ usuario.clasificacion_imc }}
+                                            </span>
+                                            {% else %}
+                                            <span class="text-muted">N/A</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge-erc {{ 'sin-erc' if usuario.etapa_erc == 'Sin ERC' else 'erc' }}">
+                                                {{ usuario.etapa_erc }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="indicators-grid">
+                                                {% if usuario.antec_iam %}
+                                                <span class="badge-condition" title="Antecedente IAM">IAM</span>
+                                                {% endif %}
+                                                {% if usuario.antec_acv %}
+                                                <span class="badge-condition" title="Antecedente ACV">ACV</span>
+                                                {% endif %}
+                                                {% if usuario.antec_otras_ecv %}
+                                                <span class="badge-condition" title="Otras ECV">ECV</span>
+                                                {% endif %}
+                                                {% if usuario.fumador_actual_55_mas %}
+                                                <span class="badge-condition" title="Fumador ≥55 años">TAB</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="indicators-grid">
+                                                <span class="indicator-icon {{ 'active' if usuario.en_actividad_fisica else 'inactive' }}" 
+                                                      title="{{ 'En actividad física' if usuario.en_actividad_fisica else 'Sin actividad física' }}"></span>
+                                                <small>{{ 'AF' if usuario.en_actividad_fisica else 'N/A' }}</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-search display-1 text-muted"></i>
+                            <h4 class="text-muted mt-3">No se encontraron usuarios en PSCV</h4>
+                            <p class="text-muted">Intenta ajustar los filtros de búsqueda o haz clic en "Filtrar" para ver todos los usuarios</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estadísticas Detalladas por ERC -->
+        {% if estadisticas %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-pie-chart me-2"></i>
+                            Estadísticas Detalladas ERC
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Clasificación ERC</h6>
+                                <ul class="list-unstyled">
+                                    <li>Sin ERC: <strong>{{ estadisticas.sin_erc }}</strong> ({{ estadisticas.sin_erc_pct }}%)</li>
+                                    <li>Etapa G1: <strong>{{ estadisticas.erc_g1 }}</strong> ({{ estadisticas.erc_g1_pct }}%)</li>
+                                    <li>Etapa G2: <strong>{{ estadisticas.erc_g2 }}</strong> ({{ estadisticas.erc_g2_pct }}%)</li>
+                                    <li>Etapa G3a: <strong>{{ estadisticas.erc_g3a }}</strong> ({{ estadisticas.erc_g3a_pct }}%)</li>
+                                    <li>Etapa G3b: <strong>{{ estadisticas.erc_g3b }}</strong> ({{ estadisticas.erc_g3b_pct }}%)</li>
+                                    <li>Etapa G4: <strong>{{ estadisticas.erc_g4 }}</strong> ({{ estadisticas.erc_g4_pct }}%)</li>
+                                    <li>Etapa G5: <strong>{{ estadisticas.erc_g5 }}</strong> ({{ estadisticas.erc_g5_pct }}%)</li>
+                                    <li>Desconoce etapa: <strong>{{ estadisticas.erc_desconoce }}</strong> ({{ estadisticas.erc_desconoce_pct }}%)</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Clasificación IMC por Edad</h6>
+                                <ul class="list-unstyled">
+                                    <li>Sobrepeso &lt;65 años: <strong>{{ estadisticas.sobrepeso_menores_65 }}</strong> ({{ estadisticas.sobrepeso_menores_65_pct }}%)</li>
+                                    <li>Sobrepeso ≥65 años: <strong>{{ estadisticas.sobrepeso_mayores_65 }}</strong> ({{ estadisticas.sobrepeso_mayores_65_pct }}%)</li>
+                                    <li>Obesidad &lt;65 años: <strong>{{ estadisticas.obesidad_menores_65 }}</strong> ({{ estadisticas.obesidad_menores_65_pct }}%)</li>
+                                    <li>Obesidad ≥65 años: <strong>{{ estadisticas.obesidad_mayores_65 }}</strong> ({{ estadisticas.obesidad_mayores_65_pct }}%)</li>
+                                </ul>
+                                
+                                <h6>Antecedentes Cardiovasculares</h6>
+                                <ul class="list-unstyled">
+                                    <li>IAM: <strong>{{ estadisticas.antec_iam }}</strong> ({{ estadisticas.antec_iam_pct }}%)</li>
+                                    <li>ACV: <strong>{{ estadisticas.antec_acv }}</strong> ({{ estadisticas.antec_acv_pct }}%)</li>
+                                    <li>Otras ECV: <strong>{{ estadisticas.antec_otras_ecv }}</strong> ({{ estadisticas.antec_otras_ecv_pct }}%)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function exportarExcel() {
+            // Crear parámetros de la URL actual para mantener filtros
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('export', 'excel');
+            
+            // Redirigir a la misma página con parámetro de exportación
+            window.location.href = '{{ url_for("usuarios_pscv_completo") }}?' + urlParams.toString();
+        }
+        
+        // Auto-submit del formulario cuando cambian los filtros (opcional)
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('filtrosForm');
+            const selects = form.querySelectorAll('select');
+            
+            selects.forEach(select => {
+                select.addEventListener('change', function() {
+                    // Optional: auto-submit on change
+                    // form.submit();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<section id="{{ id_root|default('mod-riesgo') }}" class="card">
+  <div class="card-header">
+    <h3 class="card-title">Riesgo cardiovascular</h3>
+  </div>
+  <div class="card-body">
+    <div class="mini-grid">
+      <!-- Inputs base (ajústalos a tu lógica real) -->
+      <label class="mini-field">
+        <span class="mini-label">Edad</span>
+        <input type="number" name="rcv_edad" min="0" step="1" />
+      </label>
+      <label class="mini-field">
+        <span class="mini-label">PAS (mmHg)</span>
+        <input type="number" name="rcv_pas" min="0" step="1" />
+      </label>
+      <label class="mini-field">
+        <span class="mini-label">LDL (mg/dL)</span>
+        <input type="number" name="rcv_ldl" min="0" step="1" />
+      </label>
+      <label class="mini-field">
+        <span class="mini-label">Fumador/a</span>
+        <select name="rcv_fuma">
+          <option value="">—</option>
+          <option>si</option>
+          <option>no</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="mini-actions">
+      <button
+        type="button"
+        id="{{ id_root|default('mod-riesgo') }}-calcular"
+        class="btn btn-primary"
+      >
+        Calcular riesgo
+      </button>
+      <span
+        id="{{ id_root|default('mod-riesgo') }}-resultado"
+        class="mini-status"
+      ></span>
+    </div>
+
+    <!-- Campo de registro “oficial” (hidden si no lo muestras al usuario) -->
+    <input
+      type="hidden"
+      name="riesgo_cv"
+      id="{{ id_root|default('mod-riesgo') }}-valor"
+    />
+    <input
+      type="hidden"
+      name="riesgo_cv_clasificacion"
+      id="{{ id_root|default('mod-riesgo') }}-clasif"
+    />
+  </div>
+</section>

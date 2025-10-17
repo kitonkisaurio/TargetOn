@@ -1,0 +1,2599 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Buscador ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Sistema de búsqueda y gestión de usuarios ECICEP"
+    />
+
+    <!-- Preload crítico -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      media="screen"
+    />
+
+    <!-- SheetJS para exportar a Excel -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+      defer
+    ></script>
+    <style>
+      :root {
+        --bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        --ink: #1e293b;
+        --muted: #64748b;
+        --line: #e2e8f0;
+        --brand: #3b82f6;
+        --brand-600: #2563eb;
+        --success: #10b981;
+        --card: #ffffff;
+        --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Inter",
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      .navbar-brand img {
+        height: 45px;
+        transition: transform 0.3s ease;
+      }
+
+      .navbar-brand img:hover {
+        transform: scale(1.05);
+      }
+
+      .container {
+        width: 100%;
+        max-width: min(1600px, 96vw);
+        margin: 0 auto;
+      }
+
+      @media (min-width: 1800px) {
+        .container {
+          max-width: 1700px;
+        }
+      }
+
+      .navbar.bg-primary {
+        background: linear-gradient(
+          135deg,
+          #3b82f6 0%,
+          #1d4ed8 50%,
+          #1e40af 100%
+        ) !important;
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        backdrop-filter: blur(10px);
+      }
+
+      .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        background: linear-gradient(135deg, #ffffff, #f1f5f9);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* Botones modernos */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: 2px solid transparent;
+        background: var(--card);
+        color: var(--ink);
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        min-height: 44px;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow);
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--brand), var(--brand-600));
+        border-color: var(--brand);
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, var(--brand-600), #1d4ed8);
+        border-color: var(--brand-600);
+        color: #ffffff;
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, var(--success), #059669);
+        border-color: var(--success);
+        color: #ffffff;
+      }
+
+      .btn-outline-secondary {
+        background: var(--card);
+        border-color: var(--line);
+        color: var(--muted);
+      }
+
+      .btn-outline-secondary:hover {
+        background: #f8fafc;
+        border-color: var(--brand);
+        color: var(--brand);
+      }
+
+      .btn-xs {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        min-height: 32px;
+      }
+
+      .btn-black {
+        background: linear-gradient(135deg, #1f2937, #111827);
+        border-color: #374151;
+        color: #ffffff;
+      }
+
+      .btn-black:hover {
+        background: linear-gradient(135deg, #374151, #1f2937);
+        color: #ffffff;
+      }
+
+      /* Colores modernos para sectores */
+      .btn-sector-rojo {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #ffffff;
+        border-color: #dc2626;
+      }
+      .btn-sector-rojo:hover {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: #ffffff;
+      }
+
+      .btn-sector-azul {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: #ffffff;
+        border-color: #2563eb;
+      }
+      .btn-sector-azul:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+      }
+
+      .btn-sector-amarillo {
+        background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        color: #1f2937;
+        border-color: #f59e0b;
+      }
+      .btn-sector-amarillo:hover {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #1f2937;
+      }
+
+      .btn-sector-verde {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #ffffff;
+        border-color: #059669;
+      }
+      .btn-sector-verde:hover {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: #ffffff;
+      }
+
+      .btn-sector-verdeclaro {
+        background: linear-gradient(135deg, #86efac, #4ade80);
+        color: #1f2937;
+        border-color: #4ade80;
+      }
+      .btn-sector-verdeclaro:hover {
+        background: linear-gradient(135deg, #4ade80, #22c55e);
+        color: #1f2937;
+      }
+      .btn-sector-verdemusgo {
+        background: #8d9a5b;
+        color: #fff;
+        border-color: #6d7b3a;
+      }
+      .btn-sector-verdemusgo:hover {
+        background: #6d7b3a;
+        color: #fff;
+      }
+
+      /* Grid filtros - optimizado */
+      .grid {
+        display: grid;
+        gap: 10px;
+      }
+      .filters {
+        grid-template-columns: repeat(12, 1fr);
+        align-items: end;
+        margin-bottom: 8px;
+      }
+      .col-12 {
+        grid-column: 1/-1;
+      }
+      .col-10 {
+        grid-column: span 10;
+      }
+      .col-9 {
+        grid-column: span 9;
+      }
+      .col-6 {
+        grid-column: span 6;
+      }
+      .col-5 {
+        grid-column: span 5;
+      }
+      .col-4 {
+        grid-column: span 4;
+      }
+      .col-3 {
+        grid-column: span 3;
+      }
+      .col-2 {
+        grid-column: span 2;
+      }
+      .col-1 {
+        grid-column: span 1;
+      }
+      label {
+        display: block;
+        font-size: 0.92rem;
+        margin-bottom: 6px;
+        color: #374151;
+        font-weight: 600;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 0.6rem 0.9rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 0.45rem;
+        background: #fff;
+        font-size: 1rem;
+        line-height: 1.3;
+        min-height: 40px;
+      }
+      #run {
+        min-width: 12ch;
+        width: auto;
+        max-width: 100%;
+        font-family: monospace;
+      }
+
+      /* Compactar altura de RUN, Nombre y fechas para igualar selects */
+      .row-inline .inline-item input,
+      .row-inline .inline-item select,
+      #run,
+      #nombre,
+      input[type="date"] {
+        height: 36px;
+        min-height: 36px;
+        padding: 0.25rem 0.6rem;
+        font-size: 0.98rem;
+        box-sizing: border-box;
+      }
+
+      /* Inline row para agrupar campos en la misma fila */
+      .row-inline {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+      }
+      .row-inline .inline-item {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+      }
+      .row-inline .inline-item input,
+      .row-inline .inline-item select {
+        width: 100%;
+      }
+      .row-inline .inline-item.col-9 {
+        flex: 0 0 22%;
+      }
+      .row-inline .inline-item.col-10 {
+        flex: 0 0 30%;
+      }
+      .row-inline .inline-item.col-5 {
+        flex: 0 0 10%;
+      }
+      .row-inline .inline-item.col-6 {
+        flex: 0 0 22%;
+        min-width: 10ch;
+      }
+      /* Asegurar que el select de sector muestre texto completo */
+      #sector_id {
+        min-width: 20ch;
+      }
+
+      /* Colores para opciones de sexo */
+      #sexo option[value="masculino"] {
+        background: #b3e5fc;
+        color: #222;
+      }
+      #sexo option[value="femenino"] {
+        background: #f8bbd0;
+        color: #222;
+      }
+
+      /* Colores para opciones de categoría */
+      #categoria_id option[value="1"] {
+        background: #43a047;
+        color: #fff;
+      }
+      #categoria_id option[value="2"] {
+        background: #fff176;
+        color: #222;
+      }
+      #categoria_id option[value="3"] {
+        background: #e53935;
+        color: #fff;
+      }
+
+      input[type="date"] {
+        padding: 1rem 1.2rem;
+        font-size: 1.1rem;
+        min-height: 48px;
+      }
+      .actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+
+      /* Tabla */
+      .table-wrap {
+        overflow: auto;
+        border: 1px solid var(--line);
+        border-radius: 0.6rem;
+        background: var(--card);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1100px;
+        table-layout: fixed;
+      }
+      thead th {
+        position: sticky;
+        top: 0;
+        background: #f3f4f6;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        padding: 0.6rem 0.6rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
+      }
+      tbody td {
+        border-top: 1px solid var(--line);
+        padding: 0.55rem 0.6rem;
+        font-size: 0.92rem;
+        vertical-align: middle;
+      }
+      tbody tr:hover {
+        background: #fafafa;
+      }
+      .nowrap {
+        white-space: nowrap;
+      }
+      .muted {
+        color: var(--muted);
+      }
+
+      /* Columnas más anchas y nombre en una línea */
+      th.col-flag,
+      td.col-flag {
+        width: 10ch;
+      }
+      th.col-run,
+      td.col-run {
+        width: 12ch;
+      }
+      th.col-nombre,
+      td.col-nombre {
+        width: 20%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      th.col-fecha,
+      td.col-fecha {
+        width: 12ch;
+      }
+      th.col-sector,
+      td.col-sector {
+        width: 14ch;
+      }
+      th.col-prof,
+      td.col-prof {
+        width: auto;
+        max-width: 12ch;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      th.col-num,
+      td.col-num {
+        width: 8ch;
+      }
+
+      /* Badge Programa */
+      .badge-programa {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.82rem;
+        line-height: 1.1;
+        border: 1px solid transparent;
+      }
+      .badge-ecicep {
+        background: #ff8c00;
+        color: #fff;
+        border-color: #ff7a00;
+      }
+      .badge-cardio {
+        background: #eceff3;
+        color: #374151;
+        border-color: #d1d5db;
+      }
+
+      /* Footer */
+      footer.app-footer {
+        margin-top: 28px;
+        border-top: 2px solid var(--line);
+        padding: 14px 10px;
+        background: #fff;
+        border-radius: 10px 10px 0 0;
+      }
+      footer.app-footer .marca {
+        height: 150px;
+        width: auto;
+        margin: 0 auto;
+      }
+
+      @media (max-width: 1024px) {
+        .container {
+          max-width: 100%;
+          padding: 12px;
+        }
+      }
+      @media (max-width: 768px) {
+        .filters {
+          grid-template-columns: repeat(6, 1fr);
+        }
+        .col-10 {
+          grid-column: span 6;
+        }
+        .col-9 {
+          grid-column: span 6;
+        }
+        .col-6 {
+          grid-column: span 6;
+        }
+        .col-5 {
+          grid-column: span 6;
+        }
+        .col-4 {
+          grid-column: span 6;
+        }
+        .col-3 {
+          grid-column: span 3;
+        }
+        .col-2 {
+          grid-column: span 2;
+        }
+        .col-1 {
+          grid-column: span 2;
+        }
+        .row-inline {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .row-inline .inline-item {
+          flex-basis: 100%;
+        }
+      }
+      @media (max-width: 480px) {
+        .filters {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .col-10 {
+          grid-column: span 2;
+        }
+        .col-9 {
+          grid-column: span 2;
+        }
+        .col-6 {
+          grid-column: span 2;
+        }
+        .col-5 {
+          grid-column: span 2;
+        }
+        .col-4 {
+          grid-column: span 2;
+        }
+        .col-3 {
+          grid-column: span 2;
+        }
+        .col-2 {
+          grid-column: span 2;
+        }
+        .col-1 {
+          grid-column: span 1;
+        }
+        .row-inline {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .row-inline .inline-item {
+          flex-basis: 100%;
+        }
+      }
+      /* Botones grupo etario (mover desde el body) */
+      .btn-ge {
+        border: 1px solid #d1d5db;
+        background: #fff;
+        color: #374151;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 2px;
+        font-weight: 500;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+      .btn-ge:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .btn-ge.active,
+      .btn-ge:focus {
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        color: #fff;
+        border-color: #3b82f6;
+        outline: none;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+      }
+      .btn-ge.active:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+      }
+
+      /* Mejoras adicionales para tabla */
+      tbody tr {
+        transition: all 0.2s ease;
+      }
+      tbody tr:hover {
+        background: linear-gradient(
+          135deg,
+          #fafbfc 0%,
+          #f8fafc 100%
+        ) !important;
+        transform: translateX(2px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Tarjetas con animaciones sutiles */
+      .card {
+        transition: all 0.3s ease;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1) !important;
+      }
+
+      /* Scroll bars modernos */
+      .table-wrap::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+      }
+      .table-wrap::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+      .table-wrap::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+        border-radius: 4px;
+      }
+      .table-wrap::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #94a3b8, #64748b);
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img src="/static/logo_ecicep.jpg" alt="ECICEP" class="me-2" />
+          <span> </span>
+        </a>
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link active" href="/">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Inicio</title>
+              <path
+                d="M12 3l8 6v11a1 1 0 0 1-1 1h-5v-7H10v7H5a1 1 0 0 1-1-1V9l8-6z"
+              />
+            </svg>
+            Inicio
+          </a>
+          <a class="nav-link" href="/graficos">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Estadísticas</title>
+              <path
+                d="M3 3h3v18H3V3zm6 6h3v12H9V9zm6-4h3v16h-3V5zm6 8h3v8h-3v-8z"
+              />
+            </svg>
+            Gráficos
+          </a>
+          <a class="nav-link" href="/estadisticas">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Tablas</title>
+              <path
+                d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm1 2v10h16V7H4zm3 2h3v2H7V9zm0 4h3v2H7v-2zm5-4h3v2h-3V9zm0 4h3v2h-3v-2zm5-4h3v2h-3V9zm0 4h3v2h-3v-2z"
+              />
+            </svg>
+            Estadísticas
+          </a>
+          <a class="nav-link" href="/usuarios_compensados">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #10b981;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Compensación Vigente</title>
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z M9 11l-1.5 1.5L12 17l6-6-1.5-1.5L12 14l-3-3z"
+              />
+            </svg>
+            Compensación Vigente
+          </a>
+          <a class="nav-link" href="/gestionacompanamiento">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Gestión</title>
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              />
+            </svg>
+            Gestión
+          </a>
+          {% if session.is_admin %}
+          <a class="nav-link" href="/tarjeton">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Ingreso/control</title>
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              />
+            </svg>
+            Ingreso/control
+          </a>
+          <a class="nav-link" href="/tarjeton">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Tarjetón</title>
+              <path
+                d="M4 4h16a2 2 0 0 1 2 2v3H2V6a2 2 0 0 1 2-2zm-2 9v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5H2zm5 2h6v2H7v-2z"
+              />
+            </svg>
+            Tarjetón
+          </a>
+          <a class="nav-link" href="/egreso_patologia">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Egreso Patologías</title>
+              <path
+                d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7H3v16h2v2h16V4h-2zm0 16H5V6h14v14z"
+              />
+            </svg>
+            Egreso Patologías
+          </a>
+          <a class="nav-link" href="/lista_egresos_patologias">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Egreso Patologias</title>
+              <path d="M3 3h18v2H3V3zm0 6h18v2H3V9zm0 6h18v2H3v-2z" />
+            </svg>
+            Egreso Patologias
+          </a>
+          <a class="nav-link" href="/egresos">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Egreso Usuario</title>
+              <path
+                d="M3 5v14a2 2 0 0 0 2 2h14V5H3zm4 2h10v2H7V7zm0 4h10v2H7v-2z"
+              />
+            </svg>
+            Egreso Usuario
+          </a>
+          <a class="nav-link" href="/egresos/listar">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Lista Egresos</title>
+              <path d="M3 3h18v2H3V3zm0 6h18v2H3V9zm0 6h18v2H3v-2z" />
+            </svg>
+            Lista Egresos
+          </a>
+          <a class="nav-link" href="/admin/usuarios">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Admin Usuarios</title>
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              />
+            </svg>
+            Admin Usuarios
+          </a>
+          {% endif %}
+          <a class="nav-link" href="https://grafana.ecicep.org" target="_blank">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Monitoreo</title>
+              <path
+                d="M3 17h2v3H3v-3zm4-6h2v9H7v-9zm4-4h2v13h-2V7zm4-3h2v16h-2V4zm4 7h2v9h-2v-9z"
+              />
+            </svg>
+            Monitoreo
+          </a>
+          <a class="nav-link" href="/logout">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Salir</title>
+              <path
+                d="M16 13v-2H7V8l-5 4 5 4v-3h9zM20 3h-8v2h8v14h-8v2h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"
+              />
+            </svg>
+            Salir
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+      <!-- Botones por sector -->
+      <section class="grid col-12" style="margin-bottom: 20px">
+        <div
+          class="card"
+          style="
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          "
+        >
+          <h3
+            style="
+              margin: 0 0 16px 0;
+              font-size: 1.5rem;
+              font-weight: 700;
+              color: #1e293b;
+              background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+            "
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1.5rem;
+                height: 1.5rem;
+                vertical-align: -0.25em;
+                margin-right: 8px;
+                color: #3b82f6;
+              "
+              fill="currentColor"
+            >
+              <path
+                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+              />
+            </svg>
+            Sectores
+          </h3>
+          <div class="flex wrap" style="gap: 8px">
+            {% for s in sectores %} {% set color = 'rojo' if s.nombre|lower ==
+            'rojo' else 'azul' if s.nombre|lower in ['tres pinos', 'antihuala']
+            else 'amarillo' if s.nombre|lower == 'amarillo' else 'verde' if
+            s.nombre|lower == 'verde' else 'verdeclaro' if s.nombre|lower ==
+            'pangue' else 'verdemusgo' if s.nombre|lower == 'ranquilco' else
+            'default' %}
+            <a
+              class="btn btn-xs btn-sector-{{color}}"
+              href="/sector/{{s.id}}"
+              title="Ver planilla de {{s.nombre}}"
+              style="
+                text-decoration: none;
+                transition: all 0.2s ease;
+                transform: scale(1);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+              "
+              onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'"
+              onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                style="
+                  width: 1rem;
+                  height: 1rem;
+                  vertical-align: -0.15em;
+                  margin-right: 6px;
+                "
+                fill="currentColor"
+              >
+                <path d="M3 3h18v2H3V3zm0 6h18v2H3V9zm0 6h18v2H3v-2z" />
+              </svg>
+              Planilla {{s.nombre}}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <!-- Filtros -->
+      <div
+        class="card"
+        style="
+          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 24px;
+          margin-bottom: 24px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        "
+      >
+        <h4
+          style="
+            margin: 0 0 20px 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+          "
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            style="
+              width: 1.25rem;
+              height: 1.25rem;
+              margin-right: 8px;
+              color: #6366f1;
+            "
+            fill="currentColor"
+          >
+            <path
+              d="M3 4a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2a1 1 0 0 1-.293.707L15 12.414V19a1 1 0 0 1-.553.894l-4 2A1 1 0 0 1 9 21v-8.586L3.293 6.707A1 1 0 0 1 3 6V4z"
+            />
+          </svg>
+          Filtros de Búsqueda
+        </h4>
+        <form id="frm" class="grid filters" onsubmit="evBuscar(event)">
+          <div class="col-12 row-inline">
+            <div class="col-9 inline-item">
+              <label
+                for="run"
+                style="
+                  color: #374151;
+                  font-weight: 600;
+                  display: flex;
+                  align-items: center;
+                  margin-bottom: 8px;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  style="
+                    width: 1rem;
+                    height: 1rem;
+                    margin-right: 6px;
+                    color: #6b7280;
+                  "
+                  fill="currentColor"
+                >
+                  <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-6-6" />
+                </svg>
+                RUN
+              </label>
+              <input
+                id="run"
+                placeholder="12.345.678-0"
+                autocomplete="off"
+                style="
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                  border: 1px solid #d1d5db;
+                  transition: all 0.2s ease;
+                  border-radius: 8px;
+                "
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
+                onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'"
+              />
+              <small
+                id="run-error"
+                style="color: #e53935; display: none; font-size: 0.85em"
+                >RUN inválido</small
+              >
+            </div>
+
+            <div class="col-10 inline-item">
+              <label
+                for="nombre"
+                style="
+                  color: #374151;
+                  font-weight: 600;
+                  display: flex;
+                  align-items: center;
+                  margin-bottom: 8px;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  style="
+                    width: 1rem;
+                    height: 1rem;
+                    margin-right: 6px;
+                    color: #6b7280;
+                  "
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                  />
+                </svg>
+                Nombre
+              </label>
+              <input
+                id="nombre"
+                placeholder="Juan Clodomiro Schwarzenegger Simpson"
+                autocomplete="off"
+                style="
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                  border: 1px solid #d1d5db;
+                  transition: all 0.2s ease;
+                  border-radius: 8px;
+                "
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
+                onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'"
+              />
+            </div>
+
+            <div class="col-6 inline-item">
+              <label
+                for="fecha_desde"
+                style="
+                  color: #374151;
+                  font-weight: 600;
+                  display: flex;
+                  align-items: center;
+                  margin-bottom: 8px;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  style="
+                    width: 1rem;
+                    height: 1rem;
+                    margin-right: 6px;
+                    color: #6b7280;
+                  "
+                  fill="currentColor"
+                >
+                  <path
+                    d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
+                  />
+                </svg>
+                Ingreso desde
+              </label>
+              <input
+                id="fecha_desde"
+                type="date"
+                style="
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                  border: 1px solid #d1d5db;
+                  transition: all 0.2s ease;
+                  border-radius: 8px;
+                "
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
+                onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'"
+              />
+            </div>
+
+            <div class="col-6 inline-item">
+              <label
+                for="fecha_hasta"
+                style="
+                  color: #374151;
+                  font-weight: 600;
+                  display: flex;
+                  align-items: center;
+                  margin-bottom: 8px;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  style="
+                    width: 1rem;
+                    height: 1rem;
+                    margin-right: 6px;
+                    color: #6b7280;
+                  "
+                  fill="currentColor"
+                >
+                  <path
+                    d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
+                  />
+                </svg>
+                Ingreso hasta
+              </label>
+              <input
+                id="fecha_hasta"
+                type="date"
+                style="
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                  border: 1px solid #d1d5db;
+                  transition: all 0.2s ease;
+                  border-radius: 8px;
+                "
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
+                onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'"
+              />
+            </div>
+
+            <div class="col-5 inline-item">
+              <label
+                for="sexo"
+                style="
+                  color: #374151;
+                  font-weight: 600;
+                  display: flex;
+                  align-items: center;
+                  margin-bottom: 8px;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  style="
+                    width: 1rem;
+                    height: 1rem;
+                    margin-right: 6px;
+                    color: #6b7280;
+                  "
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4z"
+                  />
+                </svg>
+                Sexo
+              </label>
+              <select
+                id="sexo"
+                style="
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                  border: 1px solid #d1d5db;
+                  transition: all 0.2s ease;
+                  border-radius: 8px;
+                  background: #fff;
+                "
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
+                onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'"
+              >
+                <option value="">Todos</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+              </select>
+            </div>
+
+            <div class="col-5 inline-item">
+              <label
+                for="categoria_id"
+                style="
+                  color: #374151;
+                  font-weight: 600;
+                  display: flex;
+                  align-items: center;
+                  margin-bottom: 8px;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  style="
+                    width: 1rem;
+                    height: 1rem;
+                    margin-right: 6px;
+                    color: #6b7280;
+                  "
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                  />
+                </svg>
+                Categoría
+              </label>
+              <select
+                id="categoria_id"
+                style="
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                  border: 1px solid #d1d5db;
+                  transition: all 0.2s ease;
+                  border-radius: 8px;
+                  background: #fff;
+                "
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
+                onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'"
+              >
+                <option value="">Todas</option>
+                <option value="1">G1</option>
+                <option value="2">G2</option>
+                <option value="3">G3</option>
+              </select>
+            </div>
+
+            <div class="col-6 inline-item">
+              <label
+                for="sector_id"
+                style="
+                  color: #374151;
+                  font-weight: 600;
+                  display: flex;
+                  align-items: center;
+                  margin-bottom: 8px;
+                "
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  style="
+                    width: 1rem;
+                    height: 1rem;
+                    margin-right: 6px;
+                    color: #6b7280;
+                  "
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                  />
+                </svg>
+                Sector
+              </label>
+              <select
+                id="sector_id"
+                style="
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                  border: 1px solid #d1d5db;
+                  transition: all 0.2s ease;
+                  border-radius: 8px;
+                  background: #fff;
+                "
+                onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59, 130, 246, 0.1)'"
+                onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)'"
+              >
+                <option value="">Todos los sectores</option>
+                {% for s in sectores %}
+                <option value="{{ s.id }}">{{ s.nombre }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="col-12 actions" style="margin-top: 20px">
+            <button
+              type="submit"
+              class="btn btn-success"
+              onclick="evBuscar(event)"
+              style="
+                background: linear-gradient(135deg, #10b981, #059669);
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                color: #fff;
+                font-weight: 600;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+              "
+              onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(0, 0, 0, 0.15)'"
+              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                style="width: 1rem; height: 1rem; margin-right: 6px"
+                fill="currentColor"
+              >
+                <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-6-6" />
+              </svg>
+              Buscar
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              id="btn-limpiar"
+              style="
+                background: #fff;
+                border: 1px solid #d1d5db;
+                padding: 12px 24px;
+                border-radius: 8px;
+                color: #6b7280;
+                font-weight: 600;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+              "
+              onmouseover="this.style.borderColor='#9ca3af'; this.style.color='#374151'; this.style.transform='translateY(-1px)'"
+              onmouseout="this.style.borderColor='#d1d5db'; this.style.color='#6b7280'; this.style.transform='translateY(0)'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                style="width: 1rem; height: 1rem; margin-right: 6px"
+                fill="currentColor"
+              >
+                <path
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              Limpiar
+            </button>
+            <a
+              href="/usuario/nuevo"
+              class="btn btn-primary"
+              style="
+                background: linear-gradient(135deg, #3b82f6, #2563eb);
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                color: #fff;
+                font-weight: 600;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                text-decoration: none;
+              "
+              onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 8px -1px rgba(0, 0, 0, 0.15)'"
+              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.1)'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                style="width: 1rem; height: 1rem; margin-right: 6px"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                />
+                <path d="M16 8h2v2h-2v2h-2v-2h-2V8h2V6h2v2z" />
+              </svg>
+              Nuevo Usuario
+            </a>
+          </div>
+        </form>
+      </div>
+
+      <div
+        class="card"
+        style="
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 24px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        "
+      >
+        <div
+          id="resumen"
+          style="
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+          "
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            style="width: 1.25rem; height: 1.25rem; color: #6366f1"
+            fill="currentColor"
+          >
+            <path d="M3 3h18v2H3V3zm0 6h18v2H3V9zm0 6h18v2H3v-2z" />
+          </svg>
+          <span style="font-weight: 600; color: #374151; font-size: 1rem"
+            >Resultados:</span
+          >
+          <span
+            id="contador"
+            style="
+              background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+              color: #fff;
+              padding: 6px 12px;
+              border-radius: 20px;
+              font-size: 0.9rem;
+              font-weight: 600;
+              box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+            "
+            >0</span
+          >
+        </div>
+
+        <div style="margin-bottom: 20px">
+          <div style="margin-bottom: 12px">
+            <h5
+              style="
+                font-weight: 600;
+                color: #374151;
+                margin: 0;
+                display: flex;
+                align-items: center;
+              "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                style="
+                  width: 1.25rem;
+                  height: 1.25rem;
+                  margin-right: 8px;
+                  color: #8b5cf6;
+                "
+                fill="currentColor"
+              >
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                />
+              </svg>
+              Filtrar por grupo etario:
+            </h5>
+          </div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 16px;
+              flex-wrap: wrap;
+            "
+          >
+            <div
+              id="grupo-etareo-btns"
+              style="
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+                background: linear-gradient(135deg, #f6f7f9 0%, #f1f5f9 100%);
+                padding: 6px;
+                border-radius: 10px;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+              "
+            >
+              <button
+                type="button"
+                class="btn-ge active"
+                data-value=""
+                style="
+                  padding: 6px 12px;
+                  font-size: 0.85rem;
+                  min-width: unset;
+                  background: var(--brand);
+                  color: #fff;
+                  border: none;
+                  border-radius: 6px;
+                  font-weight: 600;
+                  transition: all 0.2s ease;
+                "
+              >
+                Todos
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="15-19"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                15-19
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="20-24"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                20-24
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="25-29"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                25-29
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="30-34"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                30-34
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="35-39"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                35-39
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="40-44"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                40-44
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="45-49"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                45-49
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="50-54"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                50-54
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="55-59"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                55-59
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="60-64"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                60-64
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="65-69"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                65-69
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="70-74"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                70-74
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="75-79"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                75-79
+              </button>
+              <button
+                type="button"
+                class="btn-ge"
+                data-value="80+"
+                style="
+                  padding: 6px 10px;
+                  font-size: 0.8rem;
+                  min-width: unset;
+                  background: #fff;
+                  color: #374151;
+                  border: 1px solid #d1d5db;
+                  border-radius: 6px;
+                  transition: all 0.2s ease;
+                "
+              >
+                80+
+              </button>
+            </div>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              id="btn-excel"
+              style="
+                padding: 8px 16px;
+                font-size: 0.9rem;
+                white-space: nowrap;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+              "
+              onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 6px rgba(16, 185, 129, 0.3)'"
+              onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(16, 185, 129, 0.2)'"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                style="width: 1rem; height: 1rem; margin-right: 6px"
+                fill="currentColor"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"
+                />
+                <path d="M14 2v6h6" />
+              </svg>
+              Descargar Excel
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="table-wrap"
+          style="
+            overflow: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          "
+        >
+          <table
+            style="
+              width: 100%;
+              border-collapse: collapse;
+              min-width: 1100px;
+              table-layout: fixed;
+            "
+          >
+            <thead>
+              <tr
+                style="
+                  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                "
+              >
+                <th
+                  class="col-flag"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  Programa
+                </th>
+                <th
+                  class="col-run"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  RUN
+                </th>
+                <th
+                  class="col-nombre"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  Nombre
+                </th>
+                <th
+                  class="col-fecha"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  Ingreso
+                </th>
+                <th
+                  class="col-num"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  Sexo
+                </th>
+                <th
+                  class="col-num"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  Cat
+                </th>
+                <th
+                  class="col-sector"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  Sector
+                </th>
+                <th
+                  class="col-fecha"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  Últ. control
+                </th>
+                <th
+                  class="col-prof"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  Profesional
+                </th>
+                <th
+                  class="nowrap"
+                  style="
+                    position: sticky;
+                    top: 0;
+                    background: linear-gradient(
+                      135deg,
+                      #f8fafc 0%,
+                      #f1f5f9 100%
+                    );
+                    border-bottom: 2px solid #e2e8f0;
+                    text-align: left;
+                    padding: 12px 8px;
+                    font-size: 0.85rem;
+                    white-space: nowrap;
+                    font-weight: 700;
+                    color: #374151;
+                  "
+                >
+                  Detalle
+                </th>
+              </tr>
+            </thead>
+            <tbody id="tbody" style="background: #ffffff"></tbody>
+          </table>
+        </div>
+        <div
+          id="paginacion"
+          class="actions"
+          style="justify-content: center; margin-top: 20px"
+        ></div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer
+      style="
+        margin-top: 40px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          flex-wrap: wrap;
+        "
+      >
+        <img
+          src="{{ url_for('static', filename='yomandrake.png') }}"
+          alt="yomandrake"
+          style="
+            height: 120px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          "
+        />
+        <div style="text-align: left; color: #64748b; line-height: 1.6">
+          <p
+            style="
+              margin: 0;
+              font-weight: 600;
+              color: #1e293b;
+              font-size: 1.1rem;
+            "
+          >
+            ECICEP 2025
+          </p>
+          <p style="margin: 4px 0 0 0; font-size: 0.9rem">
+            Sistema de Gestión de Pacientes
+          </p>
+          <p style="margin: 2px 0 0 0; font-size: 0.85rem">
+            Versión Producción
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // ========== Exportar tabla a Excel (.xlsx) =============
+      document
+        .getElementById("btn-excel")
+        .addEventListener("click", async function () {
+          try {
+            // Usar los mismos filtros actuales
+            const p = new URLSearchParams();
+            const run = runNormalizado(document.getElementById("run").value);
+            const nombre = document.getElementById("nombre").value.trim();
+            const fdesde = document.getElementById("fecha_desde").value;
+            const fhasta = document.getElementById("fecha_hasta").value;
+            const sexo = document.getElementById("sexo").value;
+            const catId = document.getElementById("categoria_id").value;
+            const sector = document.getElementById("sector_id").value;
+            const grupoEtareo =
+              document
+                .querySelector("#grupo-etareo-btns .btn-ge.active")
+                ?.getAttribute("data-value") || "";
+
+            if (run) p.set("run", run);
+            if (nombre) p.set("nombre", nombre);
+            if (fdesde) p.set("desde", fdesde);
+            if (fhasta) p.set("hasta", fhasta);
+            if (sexo) p.set("sexo", sexo);
+            if (catId) p.set("categoria_id", catId);
+            if (sector) p.set("sector_id", sector);
+            if (grupoEtareo) p.set("grupo_etareo", grupoEtareo);
+
+            // Usar el nuevo endpoint del backend en lugar de generar Excel en el cliente
+            const url = "/excel/usuarios?" + p.toString();
+            window.open(url, "_blank");
+          } catch (error) {
+            console.error("Error al exportar Excel:", error);
+            alert("Error al generar el archivo Excel: " + error.message);
+          }
+        });
+      // Mapeo de códigos de sector a nombres
+      const sectoresMap = {
+        1: "ROJO",
+        2: "ANTIHUALA",
+        3: "TRES PINOS",
+        4: "PANGUE",
+        5: "RANQUILCO",
+        6: "AMARILLO",
+        7: "VERDE",
+      };
+
+      // ========= (1) Máscara RUN =========
+      const runInput = document.getElementById("run");
+      const runError = document.getElementById("run-error");
+      let validationTimeout;
+
+      runInput.addEventListener("input", function (e) {
+        // Obtener solo números y K, en mayúscula
+        let v = e.target.value.replace(/[^0-9kK]/g, "").toUpperCase();
+
+        // Formatear automáticamente con puntos y guión
+        if (v.length >= 2) {
+          // Separar cuerpo y dígito verificador
+          const cuerpo = v.slice(0, -1);
+          const dv = v.slice(-1);
+
+          // Agregar puntos cada 3 dígitos desde la derecha
+          const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+          // Combinar con guión
+          e.target.value = cuerpoFormateado + "-" + dv;
+        } else {
+          // Si solo hay 1 carácter o menos, mostrar sin formato
+          e.target.value = v;
+        }
+
+        // Validar RUN con timeout para evitar muchas consultas
+        clearTimeout(validationTimeout);
+        validationTimeout = setTimeout(() => validarRUN(e.target.value), 500);
+      });
+
+      // Función para validar RUN y cambiar colores
+      async function validarRUN(runFormateado) {
+        const runLimpio = runFormateado.replace(/[^0-9kK]/g, "");
+
+        if (!runLimpio || runLimpio.length < 8) {
+          // RUN muy corto - color normal
+          runInput.style.color = "#333";
+          runError.style.display = "none";
+          return;
+        }
+
+        // Validar formato y dígito verificador
+        const runNorm = normalizarRun(runFormateado);
+        const esValido = dvValido(runNorm);
+
+        if (!esValido) {
+          // RUN inválido - color rojo
+          runInput.style.color = "#e53935";
+          runError.textContent = "RUN inválido";
+          runError.style.display = "";
+          return;
+        }
+
+        // RUN válido - verificar si existe en la base
+        runInput.style.color = "#333"; // Negro mientras verifica
+        runError.style.display = "none";
+
+        try {
+          const response = await fetch(
+            `/api/usuarios?run=${encodeURIComponent(runLimpio)}&limit=1`,
+          );
+          if (response.ok) {
+            const data = await response.json();
+            if (data.items && data.items.length > 0) {
+              // RUN existe - color verde
+              runInput.style.color = "#2e7d32";
+              runError.style.display = "none";
+            } else {
+              // RUN válido pero no existe - mostrar mensaje
+              runInput.style.color = "#333";
+              runError.textContent = "Usuario no existe";
+              runError.style.color = "#f57c00";
+              runError.style.display = "";
+            }
+          }
+        } catch (error) {
+          // Error en consulta - mantener color negro
+          runInput.style.color = "#333";
+          runError.style.display = "none";
+        }
+      }
+
+      // ========= (2) Normalizar para API (12345678-9) =========
+      function normalizarRun(s) {
+        s = (s || "").toUpperCase().replace(/[^0-9K]/g, "");
+        if (s.length < 2) return s;
+        return s.slice(0, -1) + "-" + s.slice(-1);
+      }
+
+      // --- Normalización para búsqueda (API espera 12345678K sin separadores) ---
+      function runNormalizado(run) {
+        if (!run) return "";
+        return (run + "").replace(/[^0-9kK]/g, "").toUpperCase();
+      }
+
+      // ========= (3) Validador DV =========
+      function dvValido(runNorm) {
+        const m = /^(\d{7,8})-([\dK])$/.exec(runNorm);
+        if (!m) return false;
+        const cuerpo = m[1],
+          dv = m[2];
+        const factores = [2, 3, 4, 5, 6, 7];
+        let s = 0;
+        for (let i = 0; i < cuerpo.length; i++) {
+          s +=
+            parseInt(cuerpo[cuerpo.length - 1 - i], 10) *
+            factores[i % factores.length];
+        }
+        const resto = 11 - (s % 11);
+        const dvCalc = resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+        return dv === dvCalc;
+      }
+
+      function fmtFecha(x) {
+        if (!x) return "";
+        const d = new Date(x);
+        if (!isNaN(d)) return d.toLocaleDateString("es-CL");
+        const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(x);
+        return m ? `${m[3]}-${m[2]}-${m[1]}` : x;
+      }
+
+      function obtenerNombreSector(sectorId, sectorNombre) {
+        return sectorNombre || sectoresMap[sectorId] || sectorId || "";
+      }
+
+      function setResumen(n) {
+        document.getElementById("contador").textContent = n;
+      }
+      function limpiar() {
+        document.getElementById("run").value = "";
+        document.getElementById("nombre").value = "";
+        document.getElementById("fecha_desde").value = "";
+        document.getElementById("fecha_hasta").value = "";
+        document.getElementById("sexo").value = "";
+        document.getElementById("categoria_id").value = "";
+        document.getElementById("sector_id").value = "";
+        document.getElementById("tbody").innerHTML = "";
+        document.getElementById("contador").textContent = "0";
+        runError.style.display = "none";
+      }
+      document.getElementById("btn-limpiar").addEventListener("click", limpiar);
+
+      // Búsqueda + paginación
+      let paginaActual = 1;
+      let totalPaginas = 1;
+
+      async function evBuscar(e, pagina) {
+        if (e) e.preventDefault();
+        pagina = pagina || 1;
+        paginaActual = pagina;
+
+        try {
+          const p = new URLSearchParams();
+          const run = runNormalizado(document.getElementById("run").value);
+          const nombre = document.getElementById("nombre").value.trim();
+          const fdesde = document.getElementById("fecha_desde").value;
+          const fhasta = document.getElementById("fecha_hasta").value;
+          const sexo = document.getElementById("sexo").value;
+          const catId = document.getElementById("categoria_id").value;
+          const sector = document.getElementById("sector_id").value;
+          // Nuevo: grupo etario
+          const grupoEtareo =
+            document
+              .querySelector("#grupo-etareo-btns .btn-ge.active")
+              ?.getAttribute("data-value") || "";
+
+          if (run) p.set("run", run);
+          if (nombre) p.set("nombre", nombre);
+          if (fdesde) p.set("desde", fdesde);
+          if (fhasta) p.set("hasta", fhasta);
+          if (sexo) p.set("sexo", sexo);
+          if (catId) p.set("categoria_id", catId);
+          if (sector) p.set("sector_id", sector);
+          if (grupoEtareo) p.set("grupo_etareo", grupoEtareo);
+
+          const limit = 30;
+          const offset = (pagina - 1) * limit;
+          p.set("limit", limit);
+          p.set("offset", offset);
+
+          const r = await fetch("/api/usuarios?" + p.toString());
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const data = await r.json();
+          renderTabla(data.items || []);
+          const total = data.total ?? (data.items || []).length;
+          setResumen(total);
+          totalPaginas = Math.ceil(total / limit) || 1;
+          renderPaginacion();
+        } catch (err) {
+          console.error("Error consultando /api/usuarios:", err);
+          alert("Error consultando el backend: " + (err.message || err));
+        }
+      }
+
+      function renderPaginacion() {
+        const pagDiv = document.getElementById("paginacion");
+        pagDiv.innerHTML = "";
+        if (totalPaginas <= 1) return;
+        for (let i = 1; i <= totalPaginas; i++) {
+          const btn = document.createElement("button");
+          btn.textContent = i;
+          btn.className =
+            "btn btn-xs" + (i === paginaActual ? " btn-primary" : "");
+          btn.onclick = () => evBuscar(null, i);
+          pagDiv.appendChild(btn);
+        }
+      }
+
+      function renderTabla(items) {
+        const tb = document.getElementById("tbody");
+        // Guardar posición de scroll
+        const tableWrap = document.querySelector(".table-wrap");
+        const prevScroll = tableWrap ? tableWrap.scrollTop : null;
+        tb.innerHTML = "";
+        for (const it of items) {
+          const tr = document.createElement("tr");
+          // Limpiar espacios antes de normalizar el RUN
+          const runLimpio = (it.run || "").trim();
+          const runCanonico = formatearRunCanonico(runLimpio); // 10.000.141-1
+          const urlVer = "/usuario/" + encodeURIComponent(runCanonico);
+          const urlXls = "/excel/usuario/" + encodeURIComponent(runCanonico); // ⇦ ajustado a Excel
+
+          const esEcicep =
+            it.ingreso_ecicep === true ||
+            it.ingreso_ecicep === 1 ||
+            it.ingreso_ecicep === "t";
+          const flagPrograma = esEcicep
+            ? '<span class="badge-programa badge-ecicep">ECICEP</span>'
+            : '<span class="badge-programa badge-cardio">cardio</span>';
+          tr.innerHTML = `
+        <td class="col-flag nowrap">${flagPrograma}</td>
+        <td class="col-run nowrap">${it.run || ""}</td>
+        <td class="col-nombre">${it.nombre || ""}</td>
+        <td class="col-fecha nowrap">${fmtFecha(it.fecha_ingreso) || ""}</td>
+        <td class="col-num">${it.sexo || ""}</td>
+        <td class="col-num">${it.categoria_nombre || (it.categoria_id ? "G" + it.categoria_id : "")}</td>
+        <td class="col-sector">${obtenerNombreSector(it.sector_id, it.sector_nombre)}</td>
+        <td class="col-fecha nowrap">${fmtFecha(it.ultima_fecha_control) || ""}</td>
+        <td class="col-prof">${it.ultimo_profesional || ""}</td>
+        <td class="nowrap">
+          <a class="btn btn-outline-secondary btn-xs" href="${urlVer}" target="_blank" rel="noopener" title="Ver ficha">Ver</a>
+          <a class="btn btn-outline-secondary btn-xs" href="${urlXls}" target="_blank" rel="noopener" title="Descargar Excel">Excel</a>
+        </td>
+      `;
+          tb.appendChild(tr);
+        }
+        // Restaurar posición de scroll
+        if (tableWrap && prevScroll !== null) {
+          tableWrap.scrollTop = prevScroll;
+        }
+      }
+
+      // Formatea un RUN chileno a formato canónico: 10.000.141-1
+      function formatearRunCanonico(run) {
+        if (!run) return "";
+        // Elimina espacios y caracteres no válidos
+        run = (run + "").replace(/[^0-9kK]/g, "").toUpperCase();
+        if (run.length < 2) return run;
+        const cuerpo = run.slice(0, -1);
+        const dv = run.slice(-1);
+        // Agrega puntos cada 3 dígitos desde la derecha
+        let cuerpoConPuntos = "";
+        for (let i = cuerpo.length; i > 0; i -= 3) {
+          const start = Math.max(i - 3, 0);
+          const chunk = cuerpo.substring(start, i);
+          cuerpoConPuntos = (start > 0 ? "." : "") + chunk + cuerpoConPuntos;
+        }
+        return cuerpoConPuntos + "-" + dv;
+      }
+
+      // ===== Tabla de rangos estándar =====
+      const _RANGOS = [
+        { low: 15, high: 19, label: "15-19" },
+        { low: 20, high: 24, label: "20-24" },
+        { low: 25, high: 29, label: "25-29" },
+        { low: 30, high: 34, label: "30-34" },
+        { low: 35, high: 39, label: "35-39" },
+        { low: 40, high: 44, label: "40-44" },
+        { low: 45, high: 49, label: "45-49" },
+        { low: 50, high: 54, label: "50-54" },
+        { low: 55, high: 59, label: "55-59" },
+        { low: 60, high: 64, label: "60-64" },
+        { low: 65, high: 69, label: "65-69" },
+        { low: 70, high: 74, label: "70-74" },
+        { low: 75, high: 79, label: "75-79" },
+      ];
+
+      function _labelFromNumbers(desde, hasta) {
+        // Regla original: devolver el primer tramo cuyo rango contenga [desde..hasta]
+        for (const r of _RANGOS) {
+          if (desde >= r.low && hasta <= r.high) return r.label;
+        }
+        if (desde >= 80) return "80+";
+        return "";
+      }
+
+      function _labelFromPrefix(grupo) {
+        for (const r of _RANGOS) {
+          const re = new RegExp(`^${r.low} ?- ?${r.high}`);
+          if (re.test(grupo)) return r.label;
+        }
+        if (/^80/.test(grupo)) return "80+";
+        return "";
+      }
+
+      // Filtro grupo etario (refactorizado - misma firma y semántica)
+      function grupoEtareoToRango(grupo) {
+        if (!grupo) return "";
+        const g = String(grupo).toLowerCase();
+
+        // 1) Intentar dos números internos, como en el original
+        const m = g.match(/(\d+)[^\d]+(\d+)/);
+        if (m) {
+          const desde = parseInt(m[1], 10);
+          const hasta = parseInt(m[2], 10);
+          const label = _labelFromNumbers(desde, hasta);
+          if (label) return label;
+        }
+
+        // 2) Caer a comparación por prefijo textual de cada tramo y "80"
+        return _labelFromPrefix(g);
+      }
+      // Nuevo: recargar búsqueda al cambiar grupo etario
+      document
+        .getElementById("grupo-etareo-btns")
+        ?.addEventListener("click", function (e) {
+          if (e.target && e.target.matches("button.btn-ge")) {
+            document
+              .querySelectorAll("#grupo-etareo-btns .btn-ge")
+              .forEach(function (btn) {
+                btn.classList.toggle("active", btn === e.target);
+              });
+            evBuscar();
+          }
+        });
+      // Log remoto de errores en consola para debugging
+      window.onerror = function (msg, url, line, col, err) {
+        console.error(
+          "JS Error:",
+          msg,
+          "at",
+          url + ":" + line + ":" + col,
+          err,
+        );
+        return false;
+      };
+
+      // Bloquear envío si RUN inválido
+      document.getElementById("frm").addEventListener("submit", function (e) {
+        const norm = normalizarRun(runInput.value);
+        if (runInput.value && (norm.length < 9 || !dvValido(norm))) {
+          runError.style.display = "";
+          runInput.focus();
+          e.preventDefault();
+          return false;
+        }
+      });
+    </script>
+    <!-- Helpers comunes: validación RUN, apiFetch, EventBus -->
+    <script
+      type="module"
+      src="{{ url_for('static', filename='js/common.js') }}"
+    ></script>
+    <!-- Formateador universal de RUN -->
+    <script src="{{ url_for('static', filename='js/run-formatter.js') }}"></script>
+  </body>
+</html>

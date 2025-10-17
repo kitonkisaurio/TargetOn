@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Patologías - Múltiples Selecciones</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .patologia-item {
+        margin: 5px 0;
+      }
+      .results {
+        margin-top: 20px;
+        padding: 10px;
+        background: #f0f0f0;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 10px 0;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Test de Patologías - Verificar Límite de Guardado</h1>
+
+    <form method="POST" action="/usuario/nuevo" id="testForm">
+      <h3>Datos básicos:</h3>
+      <input
+        type="text"
+        name="run"
+        value="11.964.835-1"
+        placeholder="RUN"
+        required
+      /><br /><br />
+      <input
+        type="text"
+        name="nombre"
+        value="Test Usuario"
+        placeholder="Nombre"
+        required
+      /><br /><br />
+
+      <h3>Seleccionar múltiples patologías (más de 3):</h3>
+
+      <div class="patologia-item">
+        <input
+          type="checkbox"
+          name="patologia[]"
+          value="M05.0"
+          id="p1"
+          checked
+        />
+        <label for="p1">M05.0 — Síndrome de Felty</label>
+      </div>
+
+      <div class="patologia-item">
+        <input
+          type="checkbox"
+          name="patologia[]"
+          value="M05.1"
+          id="p2"
+          checked
+        />
+        <label for="p2">M05.1 — Enfermedad pulmonar reumatoide con AR</label>
+      </div>
+
+      <div class="patologia-item">
+        <input
+          type="checkbox"
+          name="patologia[]"
+          value="M05.2"
+          id="p3"
+          checked
+        />
+        <label for="p3">M05.2 — Vasculitis reumatoide con AR</label>
+      </div>
+
+      <div class="patologia-item">
+        <input
+          type="checkbox"
+          name="patologia[]"
+          value="M05.3"
+          id="p4"
+          checked
+        />
+        <label for="p4">M05.3 — Cardiopatía reumatoide con AR</label>
+      </div>
+
+      <div class="patologia-item">
+        <input
+          type="checkbox"
+          name="patologia[]"
+          value="M05.8"
+          id="p5"
+          checked
+        />
+        <label for="p5">M05.8 — Otras AR con factor reumatoide</label>
+      </div>
+
+      <div class="patologia-item">
+        <input
+          type="checkbox"
+          name="patologia[]"
+          value="M05.9"
+          id="p6"
+          checked
+        />
+        <label for="p6"
+          >M05.9 — AR con factor reumatoide, no especificada</label
+        >
+      </div>
+
+      <div class="patologia-item">
+        <input
+          type="checkbox"
+          name="patologia[]"
+          value="M06.0"
+          id="p7"
+          checked
+        />
+        <label for="p7">M06.0 — AR seronegativa (sin factor reumatoide)</label>
+      </div>
+
+      <input type="hidden" name="guardar_solo_patologias" value="1" />
+
+      <button type="submit">Guardar Patologías (7 seleccionadas)</button>
+    </form>
+
+    <div class="results">
+      <h3>Instrucciones de prueba:</h3>
+      <p>1. Este formulario envía 7 patologías seleccionadas</p>
+      <p>2. Todas están marcadas por defecto</p>
+      <p>
+        3. El formulario solo guardará las patologías
+        (guardar_solo_patologias=1)
+      </p>
+      <p>4. Revisar en la consola/logs cuántas se procesan</p>
+      <p>5. Verificar en la base de datos cuántas se guardaron realmente</p>
+    </div>
+
+    <script>
+      document.getElementById("testForm").onsubmit = function (e) {
+        const checkboxes = document.querySelectorAll(
+          'input[name="patologia[]"]:checked',
+        );
+        console.log(
+          "Enviando " + checkboxes.length + " patologías:",
+          Array.from(checkboxes).map((cb) => cb.value),
+        );
+
+        if (checkboxes.length === 0) {
+          e.preventDefault();
+          alert("Selecciona al menos una patología");
+          return false;
+        }
+
+        return true;
+      };
+    </script>
+  </body>
+</html>

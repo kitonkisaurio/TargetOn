@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}ECICEP{% endblock %}</title>
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/static/apple-touch-icon.png"
+    />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/ecicep2025.css" />
+    <style>
+      body {
+        background: var(--bg, #E0E0E0);
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        margin: 0;
+        padding: 16px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        margin-bottom: 18px;
+      }
+      .btn {
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        padding: 8px 14px;
+        background: #fff;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      .btn-verde {
+        background: #10b981;
+        border-color: #059669;
+        color: #fff;
+      }
+      .btn-outlined {
+        background: #fff;
+        color: #334155;
+        border-color: #94a3b8;
+      }
+      .btn-outlined:hover {
+        background: #f1f5f9;
+      }
+      .btn-verde:hover {
+        background: #059669;
+      }
+    </style>
+    <script src="/static/js/run-formatter.js" defer></script>
+  </head>
+  <body class="ec-compact">
+    <div
+      id="ai-disabled-banner"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 8px 16px;
+        font-size: 14px;
+        border-bottom: 1px solid #fecaca;
+        font-weight: 500;
+      "
+    >
+      ⚠️ Funcionalidad AI deshabilitada (<span id="ai-disabled-reason"></span>).
+      Configure la clave OPENAI_API_KEY para habilitar extracción asistida.
+    </div>
+    <main class="container-fluid" style="max-width: 1400px">
+      {% block content %}{% endblock %}
+    </main>
+    <script>
+      (function () {
+        function checkAI() {
+          fetch("/api/ai/status", { cache: "no-store" })
+            .then((r) => r.json())
+            .then((data) => {
+              const banner = document.getElementById("ai-disabled-banner");
+              const reasonEl = document.getElementById("ai-disabled-reason");
+              if (!banner || !reasonEl) {
+                return;
+              }
+
+              if (!data.status || !data.status.enabled) {
+                reasonEl.textContent = data.status
+                  ? data.status.reason || "unknown"
+                  : "unknown";
+                banner.style.display = "block";
+              } else {
+                banner.style.display = "none";
+                reasonEl.textContent = "";
+              }
+            })
+            .catch((error) => {
+              // Registra el error para facilitar diagnósticos sin alterar la UI
+              console.debug("AI status check failed", error);
+            });
+        }
+        window.addEventListener("load", checkAI);
+        // Re-chequear cada 60s por si se agrega la clave sin recargar todo
+        setInterval(checkAI, 60000);
+      })();
+    </script>
+  </body>
+</html>

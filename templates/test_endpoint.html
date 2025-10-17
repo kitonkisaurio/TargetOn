@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Endpoint</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 10px;
+        font-size: 16px;
+      }
+      .resultado {
+        background: #f0f0f0;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .success {
+        background: #d4edda;
+      }
+      .error {
+        background: #f8d7da;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧪 Test Endpoint ECICEP</h1>
+
+      <button onclick="testEndpoint()">Probar /usuario/buscar</button>
+      <button onclick="testInvalidRun()">Probar RUN Inválido</button>
+
+      <div id="resultado" class="resultado">
+        Presiona un botón para probar...
+      </div>
+    </div>
+
+    <script>
+      async function testEndpoint() {
+        const resultado = document.getElementById("resultado");
+        resultado.className = "resultado";
+        resultado.innerHTML = "🔄 Probando endpoint...";
+
+        try {
+          console.log("Enviando petición a /usuario/buscar");
+
+          const response = await fetch("/usuario/buscar", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ run: "8.352.262-3" }),
+          });
+
+          console.log("Response status:", response.status);
+          console.log("Response headers:", response.headers);
+
+          const data = await response.json();
+          console.log("Response data:", data);
+
+          if (data.encontrado) {
+            resultado.className = "resultado success";
+            resultado.innerHTML = `
+                        ✅ <strong>Endpoint funcionando!</strong><br>
+                        • RUN: ${data.run}<br>
+                        • Nombre: ${data.nombre}<br>
+                        • Encontrado: ${data.encontrado}
+                    `;
+          } else {
+            resultado.className = "resultado error";
+            resultado.innerHTML = `❌ Usuario no encontrado: ${JSON.stringify(data)}`;
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          resultado.className = "resultado error";
+          resultado.innerHTML = `❌ Error: ${error.message}`;
+        }
+      }
+
+      async function testInvalidRun() {
+        const resultado = document.getElementById("resultado");
+        resultado.className = "resultado";
+        resultado.innerHTML = "🔄 Probando RUN inválido...";
+
+        try {
+          const response = await fetch("/usuario/buscar", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ run: "12345678-9" }),
+          });
+
+          const data = await response.json();
+          console.log("Response data (invalid):", data);
+
+          resultado.className = "resultado";
+          resultado.innerHTML = `
+                    ℹ️ <strong>Respuesta para RUN inválido:</strong><br>
+                    ${JSON.stringify(data, null, 2)}
+                `;
+        } catch (error) {
+          console.error("Error:", error);
+          resultado.className = "resultado error";
+          resultado.innerHTML = `❌ Error: ${error.message}`;
+        }
+      }
+    </script>
+  </body>
+</html>

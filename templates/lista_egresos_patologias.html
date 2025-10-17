@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista de Egresos de Patologías - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --ink: #222;
+        --muted: #6c757d;
+        --line: #e5e7eb;
+        --brand: #0d6efd;
+        --brand-600: #0b5ed7;
+        --success: #198754;
+        --warning: #ffc107;
+        --danger: #dc3545;
+        --card: #fff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          "Helvetica Neue",
+          Arial;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: var(--card);
+        padding: 24px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid var(--line);
+      }
+
+      .header h1 {
+        color: var(--ink);
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        margin: 4px;
+      }
+
+      .btn-primary {
+        background: var(--brand);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--brand-600);
+      }
+
+      .btn-secondary {
+        background: #6c757d;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #5a6268;
+      }
+
+      .filters {
+        background: #f8f9fa;
+        padding: 16px;
+        border-radius: 6px;
+        margin-bottom: 24px;
+        border: 1px solid var(--line);
+      }
+
+      .filters-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+        align-items: end;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .filter-group label {
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 13px;
+        color: #374151;
+      }
+
+      .filter-group input,
+      .filter-group select {
+        padding: 8px 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .table-container {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        font-size: 13px;
+      }
+
+      th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #374151;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      tr:hover {
+        background: #f8f9fa;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .badge-auto {
+        background: #e3f2fd;
+        color: #1976d2;
+      }
+
+      .badge-manual {
+        background: #fff3e0;
+        color: #f57c00;
+      }
+
+      .cie10-code {
+        font-family: "Courier New", monospace;
+        font-weight: bold;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 3px;
+        color: #0f172a;
+      }
+
+      .run-code {
+        font-family: "Courier New", monospace;
+        font-weight: bold;
+        color: var(--brand);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 16px;
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--brand);
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      .no-data {
+        text-align: center;
+        padding: 40px;
+        color: var(--muted);
+        font-style: italic;
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-top: 24px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .pagination button {
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        background: white;
+        color: var(--ink);
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .pagination button:hover:not(:disabled) {
+        background: var(--brand);
+        color: white;
+        border-color: var(--brand);
+      }
+
+      .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .pagination .current {
+        background: var(--brand);
+        color: white;
+        border-color: var(--brand);
+      }
+
+      .export-buttons {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .btn-export {
+        background: var(--success);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .btn-export:hover {
+        background: #157347;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📋 Lista de Egresos de Patologías</h1>
+        <div>
+          <a href="/egreso_patologia" class="btn btn-primary">+ Nuevo Egreso</a>
+          <a href="/" class="btn btn-secondary">← Volver al Inicio</a>
+        </div>
+      </div>
+
+      <!-- Estadísticas -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-number" id="total-egresos">0</div>
+          <div class="stat-label">Total Egresos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="egresos-automaticos">0</div>
+          <div class="stat-label">Egresos Automáticos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="egresos-manuales">0</div>
+          <div class="stat-label">Egresos Manuales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="egresos-mes">0</div>
+          <div class="stat-label">Este Mes</div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filters">
+        <div class="filters-row">
+          <div class="filter-group">
+            <label for="filtro-run">RUN</label>
+            <input type="text" id="filtro-run" placeholder="12345678-9" />
+          </div>
+          <div class="filter-group">
+            <label for="filtro-cie10">Código CIE-10</label>
+            <input type="text" id="filtro-cie10" placeholder="E66.9" />
+          </div>
+          <div class="filter-group">
+            <label for="filtro-funcionario">Funcionario</label>
+            <select id="filtro-funcionario">
+              <option value="">Todos los funcionarios</option>
+              <option value="TargetOn">TargetOn (Automático)</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filtro-fecha-desde">Desde</label>
+            <input type="date" id="filtro-fecha-desde" />
+          </div>
+          <div class="filter-group">
+            <label for="filtro-fecha-hasta">Hasta</label>
+            <input type="date" id="filtro-fecha-hasta" />
+          </div>
+          <div class="filter-group">
+            <label>&nbsp;</label>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="aplicarFiltros()"
+            >
+              🔍 Filtrar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de exportación -->
+      <div class="export-buttons">
+        <button class="btn-export" onclick="exportarExcel()">
+          📊 Exportar Excel
+        </button>
+        <button class="btn-export" onclick="exportarCSV()">
+          📄 Exportar CSV
+        </button>
+      </div>
+
+      <!-- Tabla de egresos -->
+      <div class="table-container">
+        <table id="tabla-egresos">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>RUN</th>
+              <th>CIE-10</th>
+              <th>Patología</th>
+              <th>Fecha Egreso</th>
+              <th>Motivo</th>
+              <th>Funcionario</th>
+              <th>Tipo</th>
+              <th>Fecha Registro</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-egresos">
+            <tr>
+              <td colspan="10" class="no-data">🔄 Cargando egresos...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination" id="pagination">
+        <!-- Se llena dinámicamente -->
+      </div>
+    </div>
+
+    <script>
+      console.log("🎯 Inicializando lista de egresos de patologías...");
+
+      let egresosData = [];
+      let filteredData = [];
+      let currentPage = 1;
+      const itemsPerPage = 50;
+
+      // Establecer fechas por defecto (último mes)
+      document.addEventListener("DOMContentLoaded", function () {
+        const today = new Date();
+        const lastMonth = new Date();
+        lastMonth.setMonth(today.getMonth() - 1);
+
+        document.getElementById("filtro-fecha-hasta").value = today
+          .toISOString()
+          .split("T")[0];
+        document.getElementById("filtro-fecha-desde").value = lastMonth
+          .toISOString()
+          .split("T")[0];
+
+        cargarEgresos();
+      });
+
+      async function cargarEgresos() {
+        try {
+          console.log("🔄 Cargando egresos de patologías...");
+
+          // Simulación de datos - en producción esto vendría de una API
+          const response = await fetch("/api/egresos_patologias");
+
+          if (!response.ok) {
+            throw new Error("Error cargando egresos");
+          }
+
+          const data = await response.json();
+          egresosData = data.egresos || [];
+
+          actualizarEstadisticas();
+          aplicarFiltros();
+
+          console.log("✅ Egresos cargados:", egresosData.length);
+        } catch (error) {
+          console.error("❌ Error cargando egresos:", error);
+
+          // Datos de ejemplo para demo
+          egresosData = [
+            {
+              id: 1,
+              run: "12345678-9",
+              cie10: "E66.9",
+              patologia_nombre: "Obesidad, no especificada",
+              fecha_egreso: "2025-09-10",
+              motivo_egreso: "mejoria_clinica",
+              funcionario: "TargetOn",
+              observaciones:
+                "Deselección automática por reducción de IMC. IMC actual: 28.5. Sistema automático detectó que el paciente ya no cumple criterios de obesidad.",
+              fecha_registro: "2025-09-10 13:45:23",
+            },
+            {
+              id: 2,
+              run: "98765432-1",
+              cie10: "F33.9",
+              patologia_nombre:
+                "Trastorno depresivo recurrente, sin especificación",
+              fecha_egreso: "2025-09-08",
+              motivo_egreso: "resolucion_patologia",
+              funcionario: "Dr. García",
+              observaciones:
+                "Paciente presenta mejoría significativa tras tratamiento. Alta médica.",
+              fecha_registro: "2025-09-08 10:30:15",
+            },
+          ];
+
+          actualizarEstadisticas();
+          aplicarFiltros();
+        }
+      }
+
+      function actualizarEstadisticas() {
+        const total = egresosData.length;
+        const automaticos = egresosData.filter(
+          (e) => e.funcionario === "TargetOn",
+        ).length;
+        const manuales = total - automaticos;
+
+        const hoy = new Date();
+        const primerDiaMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+        const esteMes = egresosData.filter((e) => {
+          const fechaEgreso = new Date(e.fecha_egreso);
+          return fechaEgreso >= primerDiaMes;
+        }).length;
+
+        document.getElementById("total-egresos").textContent = total;
+        document.getElementById("egresos-automaticos").textContent =
+          automaticos;
+        document.getElementById("egresos-manuales").textContent = manuales;
+        document.getElementById("egresos-mes").textContent = esteMes;
+      }
+
+      function aplicarFiltros() {
+        const filtroRun = document
+          .getElementById("filtro-run")
+          .value.toLowerCase();
+        const filtroCie10 = document
+          .getElementById("filtro-cie10")
+          .value.toLowerCase();
+        const filtroFuncionario =
+          document.getElementById("filtro-funcionario").value;
+        const filtroFechaDesde =
+          document.getElementById("filtro-fecha-desde").value;
+        const filtroFechaHasta =
+          document.getElementById("filtro-fecha-hasta").value;
+
+        filteredData = egresosData.filter((egreso) => {
+          // Filtro por RUN
+          if (filtroRun && !egreso.run.toLowerCase().includes(filtroRun)) {
+            return false;
+          }
+
+          // Filtro por CIE-10
+          if (
+            filtroCie10 &&
+            !egreso.cie10.toLowerCase().includes(filtroCie10)
+          ) {
+            return false;
+          }
+
+          // Filtro por funcionario
+          if (filtroFuncionario && egreso.funcionario !== filtroFuncionario) {
+            return false;
+          }
+
+          // Filtro por fecha desde
+          if (filtroFechaDesde && egreso.fecha_egreso < filtroFechaDesde) {
+            return false;
+          }
+
+          // Filtro por fecha hasta
+          if (filtroFechaHasta && egreso.fecha_egreso > filtroFechaHasta) {
+            return false;
+          }
+
+          return true;
+        });
+
+        currentPage = 1;
+        renderizarTabla();
+        renderizarPaginacion();
+      }
+
+      function renderizarTabla() {
+        const tbody = document.getElementById("tbody-egresos");
+
+        if (filteredData.length === 0) {
+          tbody.innerHTML =
+            '<tr><td colspan="10" class="no-data">😕 No se encontraron egresos con los filtros aplicados</td></tr>';
+          return;
+        }
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageData = filteredData.slice(startIndex, endIndex);
+
+        const html = pageData
+          .map((egreso) => {
+            const tipoEgreso =
+              egreso.funcionario === "TargetOn" ? "auto" : "manual";
+            const badgeClass =
+              tipoEgreso === "auto" ? "badge-auto" : "badge-manual";
+            const badgeText = tipoEgreso === "auto" ? "Automático" : "Manual";
+
+            const motivoTexto =
+              {
+                resolucion_patologia: "Resolución",
+                mejoria_clinica: "Mejoría",
+                cambio_diagnostico: "Cambio Diagnóstico",
+                error_inicial: "Error Inicial",
+                traslado_otro_centro: "Traslado",
+                fallecimiento: "Fallecimiento",
+                alta_voluntaria: "Alta Voluntaria",
+                otros: "Otros",
+              }[egreso.motivo_egreso] || egreso.motivo_egreso;
+
+            return `
+                    <tr>
+                        <td>${egreso.id}</td>
+                        <td><span class="run-code">${egreso.run}</span></td>
+                        <td><span class="cie10-code">${egreso.cie10}</span></td>
+                        <td>${egreso.patologia_nombre || "No especificada"}</td>
+                        <td>${formatearFecha(egreso.fecha_egreso)}</td>
+                        <td>${motivoTexto}</td>
+                        <td>${egreso.funcionario}</td>
+                        <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                        <td>${formatearFechaHora(egreso.fecha_registro)}</td>
+                        <td title="${egreso.observaciones || ""}">${truncarTexto(egreso.observaciones || "", 50)}</td>
+                    </tr>
+                `;
+          })
+          .join("");
+
+        tbody.innerHTML = html;
+      }
+
+      function renderizarPaginacion() {
+        const pagination = document.getElementById("pagination");
+        const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+        if (totalPages <= 1) {
+          pagination.innerHTML = "";
+          return;
+        }
+
+        let html = "";
+
+        // Botón anterior
+        html += `<button ${currentPage === 1 ? "disabled" : ""} onclick="cambiarPagina(${currentPage - 1})">« Anterior</button>`;
+
+        // Números de página
+        for (let i = 1; i <= totalPages; i++) {
+          if (i === currentPage) {
+            html += `<button class="current">${i}</button>`;
+          } else if (
+            i === 1 ||
+            i === totalPages ||
+            Math.abs(i - currentPage) <= 2
+          ) {
+            html += `<button onclick="cambiarPagina(${i})">${i}</button>`;
+          } else if (Math.abs(i - currentPage) === 3) {
+            html += "<span>...</span>";
+          }
+        }
+
+        // Botón siguiente
+        html += `<button ${currentPage === totalPages ? "disabled" : ""} onclick="cambiarPagina(${currentPage + 1})">Siguiente »</button>`;
+
+        pagination.innerHTML = html;
+      }
+
+      function cambiarPagina(page) {
+        currentPage = page;
+        renderizarTabla();
+        renderizarPaginacion();
+      }
+
+      function formatearFecha(fecha) {
+        if (!fecha) return "";
+        const date = new Date(fecha);
+        return date.toLocaleDateString("es-ES");
+      }
+
+      function formatearFechaHora(fechaHora) {
+        if (!fechaHora) return "";
+        const date = new Date(fechaHora);
+        return date.toLocaleDateString("es-ES");
+      }
+
+      function truncarTexto(texto, longitud) {
+        if (!texto) return "";
+        return texto.length > longitud
+          ? texto.substring(0, longitud) + "..."
+          : texto;
+      }
+
+      function exportarExcel() {
+        console.log("📊 Exportando a Excel...");
+        // Implementar exportación a Excel usando SheetJS
+        alert("🚧 Función de exportación Excel en desarrollo");
+      }
+
+      function exportarCSV() {
+        console.log("📄 Exportando a CSV...");
+
+        const headers = [
+          "ID",
+          "RUN",
+          "CIE-10",
+          "Patología",
+          "Fecha Egreso",
+          "Motivo",
+          "Funcionario",
+          "Tipo",
+          "Fecha Registro",
+          "Observaciones",
+        ];
+
+        const csvContent = [
+          headers.join(","),
+          ...filteredData.map((egreso) =>
+            [
+              egreso.id,
+              `"${egreso.run}"`,
+              `"${egreso.cie10}"`,
+              `"${(egreso.patologia_nombre || "").replace(/"/g, '""')}"`,
+              egreso.fecha_egreso,
+              `"${egreso.motivo_egreso}"`,
+              `"${egreso.funcionario}"`,
+              egreso.funcionario === "TargetOn" ? "Automático" : "Manual",
+              egreso.fecha_registro,
+              `"${(egreso.observaciones || "").replace(/"/g, '""')}"`,
+            ].join(","),
+          ),
+        ].join("\n");
+
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute(
+          "download",
+          `egresos_patologias_${new Date().toISOString().split("T")[0]}.csv`,
+        );
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Event listeners para filtros en tiempo real
+      document
+        .getElementById("filtro-run")
+        .addEventListener("input", aplicarFiltros);
+      document
+        .getElementById("filtro-cie10")
+        .addEventListener("input", aplicarFiltros);
+      document
+        .getElementById("filtro-funcionario")
+        .addEventListener("change", aplicarFiltros);
+      document
+        .getElementById("filtro-fecha-desde")
+        .addEventListener("change", aplicarFiltros);
+      document
+        .getElementById("filtro-fecha-hasta")
+        .addEventListener("change", aplicarFiltros);
+
+      console.log(
+        "✅ Lista de egresos de patologías inicializada correctamente",
+      );
+    </script>
+  </body>
+</html>

@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formulario Usuario - ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      input,
+      select,
+      textarea {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      input[type="text"],
+      input[type="date"],
+      input[type="tel"] {
+        width: 300px;
+      }
+      select {
+        width: 320px;
+      }
+      textarea {
+        width: 100%;
+        height: 80px;
+      }
+      .btn {
+        background: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .btn:hover {
+        background: #0056b3;
+      }
+      .mensaje-run {
+        margin-top: 5px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .run-valido {
+        border-color: #28a745 !important;
+        border-width: 2px !important;
+      }
+      .run-invalido {
+        border-color: #dc3545 !important;
+        border-width: 2px !important;
+      }
+      .run-neutro {
+        border-color: #6c757d !important;
+        border-width: 1px !important;
+      }
+
+      /* Estilos para resumen de patologías */
+      .patologias-resumen {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 12px;
+      }
+      .patologias-titulo {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 8px;
+      }
+      .pat-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .pat-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        border: 1px solid;
+      }
+      .pat-green {
+        background-color: #d4edda;
+        color: #155724;
+        border-color: #c3e6cb;
+      }
+      .pat-red {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+      }
+      .pat-yellow {
+        background-color: #fff3cd;
+        color: #856404;
+        border-color: #ffeaa7;
+      }
+      .pat-default {
+        background-color: #e2e3e5;
+        color: #383d41;
+        border-color: #d6d8db;
+      }
+      .pat-empty {
+        color: #6c757d;
+        font-style: italic;
+        font-size: 14px;
+      }
+
+      /* Estilos para patologías */
+      .patologias-resumen {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 12px;
+        margin: 10px 0;
+      }
+      .patologias-titulo {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+      .pat-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: flex-start;
+      }
+      .pat-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        text-align: center;
+        border: 1px solid;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .pat-green {
+        background-color: #d4edda;
+        color: #155724;
+        border-color: #c3e6cb;
+      }
+      .pat-red {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+      }
+      .pat-yellow {
+        background-color: #fff3cd;
+        color: #856404;
+        border-color: #ffeaa7;
+      }
+      .pat-default {
+        background-color: #e2e3e5;
+        color: #383d41;
+        border-color: #d6d8db;
+      }
+      .pat-empty {
+        color: #6c757d;
+        font-style: italic;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Ingresar nuevo usuario y control</h1>
+
+      <form method="POST" action="/usuario/guardar">
+        <h2>Datos del usuario</h2>
+
+        <div class="form-group">
+          <label for="run">RUN:</label>
+          <input
+            type="text"
+            id="run"
+            name="run"
+            required
+            maxlength="12"
+            placeholder="Ej: 12.345.678-9"
+          />
+        </div>
+
+        <!-- Resumen de patologías al inicio -->
+        <div class="patologias-resumen" style="margin: 8px 0 12px 0">
+          <div class="patologias-titulo">Patologías Guardadas en BD:</div>
+          <div id="patologias-badges" class="pat-badges">
+            <span class="pat-empty"
+              >Sin patologías guardadas en base de datos</span
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="nombre">Nombre:</label>
+          <input type="text" id="nombre" name="nombre" required />
+        </div>
+
+        <div class="form-group">
+          <label for="fecha_nacimiento">Fecha de nacimiento:</label>
+          <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" />
+        </div>
+
+        <div class="form-group">
+          <label for="direccion">Dirección:</label>
+          <input type="text" id="direccion" name="direccion" />
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">Teléfono:</label>
+          <input type="tel" id="telefono" name="telefono" />
+        </div>
+
+        <div class="form-group">
+          <label for="fecha_ingreso">Fecha de ingreso:</label>
+          <input type="date" id="fecha_ingreso" name="fecha_ingreso" />
+        </div>
+
+        <div class="form-group">
+          <label for="sexo">Sexo:</label>
+          <select id="sexo" name="sexo">
+            <option value="">-- Seleccione --</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="categoria_id">Categoría:</label>
+          <select id="categoria_id" name="categoria_id">
+            <option value="">-- Seleccione --</option>
+            <option value="1">G1</option>
+            <option value="2">G2</option>
+            <option value="3">G3</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sector_id">Sector:</label>
+          <select id="sector_id" name="sector_id">
+            <option value="">-- Seleccione --</option>
+            <option value="1">Sector 1</option>
+            <option value="2">Sector 2</option>
+            <option value="3">Sector 3</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <h3>Patologías</h3>
+          <div id="patologias-container">
+            <label
+              ><input type="checkbox" name="patologia[]" value="1" />
+              Diabetes</label
+            ><br />
+            <label
+              ><input type="checkbox" name="patologia[]" value="2" />
+              Hipertensión</label
+            ><br />
+            <label
+              ><input type="checkbox" name="patologia[]" value="3" />
+              Obesidad</label
+            ><br />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <button type="submit" class="btn">Guardar Usuario</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- SCRIPT COMPLETAMENTE RECONSTRUIDO PARA RUN -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("🚀 Iniciando script reconstruido de RUN...");
+
+        const runInput = document.getElementById("run");
+        if (!runInput) {
+          console.error("❌ Campo RUN no encontrado");
+          return;
+        }
+
+        console.log("✅ Campo RUN encontrado");
+
+        let timeoutBusqueda;
+
+        // FUNCIÓN 1: FORMATEAR RUN
+        function formatearRUN(valor) {
+          // Limpiar: solo números y K
+          let limpio = valor.replace(/[^0-9kK]/gi, "").toUpperCase();
+
+          if (limpio.length <= 1) {
+            return limpio;
+          }
+
+          // Separar cuerpo y dígito verificador
+          const cuerpo = limpio.slice(0, -1);
+          const dv = limpio.slice(-1);
+
+          // Formatear cuerpo con puntos
+          const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+          return cuerpoFormateado + "-" + dv;
+        }
+
+        // FUNCIÓN 2: VALIDAR RUN CHILENO
+        function validarRUN(run) {
+          const limpio = run.replace(/[^0-9kK]/gi, "");
+
+          if (limpio.length < 8 || limpio.length > 9) {
+            return false;
+          }
+
+          const cuerpo = limpio.slice(0, -1);
+          const dv = limpio.slice(-1).toUpperCase();
+
+          let suma = 0;
+          let multiplicador = 2;
+
+          // Calcular suma ponderada
+          for (let i = cuerpo.length - 1; i >= 0; i--) {
+            suma += parseInt(cuerpo[i]) * multiplicador;
+            multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+          }
+
+          // Calcular dígito verificador
+          const resto = suma % 11;
+          const dvCalculado =
+            resto < 2
+              ? resto.toString()
+              : resto === 10
+                ? "K"
+                : (11 - resto).toString();
+
+          return dv === dvCalculado;
+        }
+
+        // FUNCIÓN 3: MOSTRAR ESTADO DEL RUN
+        function mostrarEstadoRUN(estado, mensaje = "") {
+          const runInput = document.getElementById("run");
+
+          // Limpiar estados anteriores
+          runInput.classList.remove("run-valido", "run-invalido", "run-neutro");
+          runInput.style.borderColor = "";
+          runInput.style.borderWidth = "";
+
+          // Aplicar nuevo estado
+          if (estado === "valido") {
+            runInput.style.borderColor = "#28a745";
+            runInput.style.borderWidth = "2px";
+            runInput.classList.add("run-valido");
+            runInput.title = "RUN válido";
+          } else if (estado === "invalido") {
+            runInput.style.borderColor = "#dc3545";
+            runInput.style.borderWidth = "2px";
+            runInput.classList.add("run-invalido");
+            runInput.title = "RUN inválido";
+          } else {
+            runInput.style.borderColor = "#6c757d";
+            runInput.style.borderWidth = "1px";
+            runInput.classList.add("run-neutro");
+            runInput.title = "";
+          }
+
+          // Mostrar mensaje si existe
+          mostrarMensaje(estado, mensaje);
+        }
+
+        // FUNCIÓN 4: MOSTRAR MENSAJES AL USUARIO
+        function mostrarMensaje(tipo, mensaje) {
+          // Eliminar mensajes anteriores
+          const mensajesAnteriores = document.querySelectorAll(".mensaje-run");
+          mensajesAnteriores.forEach((msg) => msg.remove());
+
+          if (!mensaje) return;
+
+          // Crear nuevo mensaje
+          const div = document.createElement("div");
+          div.className = "mensaje-run";
+
+          if (tipo === "valido") {
+            div.style.backgroundColor = "#d4edda";
+            div.style.color = "#155724";
+            div.style.border = "1px solid #c3e6cb";
+            div.innerHTML = "✅ " + mensaje;
+          } else if (tipo === "invalido") {
+            div.style.backgroundColor = "#f8d7da";
+            div.style.color = "#721c24";
+            div.style.border = "1px solid #f5c6cb";
+            div.innerHTML = "❌ " + mensaje;
+          } else if (tipo === "nuevo") {
+            div.style.backgroundColor = "#fff3cd";
+            div.style.color = "#856404";
+            div.style.border = "1px solid #ffeaa7";
+            div.innerHTML =
+              "🆕 " +
+              mensaje +
+              " <strong>Completa los datos para crear el usuario.</strong>";
+          } else {
+            div.style.backgroundColor = "#e2e3e5";
+            div.style.color = "#383d41";
+            div.style.border = "1px solid #d6d8db";
+            div.innerHTML = "ℹ️ " + mensaje;
+          }
+
+          // Insertar después del campo RUN
+          runInput.parentNode.insertBefore(div, runInput.nextSibling);
+        }
+
+        // FUNCIÓN 5.5: CARGAR PATOLOGÍAS DEL USUARIO
+        function cargarPatologiasUsuario(run) {
+          console.log("🏥 Cargando patologías para RUN:", run);
+
+          fetch("/usuario/patologias", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ run: run }),
+          })
+            .then((response) => {
+              console.log(
+                "📡 Status de respuesta patologías:",
+                response.status,
+              );
+              return response.json();
+            })
+            .then((data) => {
+              console.log("📥 Patologías recibidas:", data);
+              if (data.error) {
+                console.error("❌ Error del servidor:", data.error);
+                mostrarPatologiasResumen([]);
+              } else {
+                mostrarPatologiasResumen(data.patologias || []);
+              }
+            })
+            .catch((error) => {
+              console.error("❌ Error cargando patologías:", error);
+              mostrarPatologiasResumen([]);
+            });
+        }
+
+        // FUNCIÓN 5.6: MOSTRAR RESUMEN DE PATOLOGÍAS
+        function mostrarPatologiasResumen(patologias) {
+          console.log("🎨 Mostrando patologías:", patologias);
+          const container = document.getElementById("patologias-badges");
+          if (!container) {
+            console.error("❌ No se encontró el contenedor patologias-badges");
+            return;
+          }
+
+          // Limpiar contenido anterior
+          container.innerHTML = "";
+
+          if (!patologias || patologias.length === 0) {
+            container.innerHTML =
+              '<span class="pat-empty">Sin patologías registradas</span>';
+            console.log("📝 Mostrando mensaje: Sin patologías");
+            return;
+          }
+
+          console.log(`📊 Creando ${patologias.length} badges de patologías`);
+
+          // Crear badges para cada patología
+          patologias.forEach((patologia, index) => {
+            const badge = document.createElement("span");
+            badge.className = `pat-badge pat-${patologia.color || "default"}`;
+
+            const nombre = patologia.nombre || "Sin nombre";
+            const codigo = patologia.cie10 || "Sin código";
+            badge.textContent = `${nombre} (${codigo})`;
+
+            console.log(
+              `🏷️ Badge ${index + 1}: ${nombre} (${codigo}) - Color: ${patologia.color}`,
+            );
+
+            container.appendChild(badge);
+          });
+
+          console.log("✅ Patologías mostradas correctamente");
+        }
+
+        // FUNCIÓN 5: BUSCAR USUARIO EN BASE DE DATOS
+        function buscarUsuario(run) {
+          console.log("🔍 Buscando usuario con RUN:", run);
+
+          fetch("/usuario/buscar", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ run: run }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              console.log("📥 Respuesta de búsqueda:", data);
+
+              // SIEMPRE CARGAR PATOLOGÍAS INDEPENDIENTEMENTE SI EXISTE EL USUARIO
+              console.log(
+                "🏥 Cargando patologías para cualquier RUN válido...",
+              );
+              cargarPatologiasSimple(run);
+
+              if (data.encontrado) {
+                // USUARIO ENCONTRADO - AUTOCOMPLETAR
+                console.log("✅ Usuario encontrado:", data.nombre);
+                mostrarEstadoRUN(
+                  "valido",
+                  `Usuario encontrado: ${data.nombre}`,
+                );
+
+                // Autocompletar todos los campos
+                autocompletarCampos(data);
+              } else {
+                // RUN VÁLIDO PERO USUARIO NO EXISTE
+                console.log("🆕 RUN válido pero usuario no encontrado");
+                mostrarEstadoRUN(
+                  "nuevo",
+                  "RUN válido - Usuario no registrado.",
+                );
+                limpiarCampos();
+              }
+            })
+            .catch((error) => {
+              console.error("❌ Error en búsqueda:", error);
+              mostrarEstadoRUN(
+                "invalido",
+                "Error al buscar usuario. Intenta nuevamente.",
+              );
+            });
+        }
+
+        // FUNCIÓN 6: AUTOCOMPLETAR CAMPOS
+        function autocompletarCampos(data) {
+          const campos = {
+            nombre: data.nombre,
+            fecha_nacimiento: data.fecha_nacimiento,
+            direccion: data.direccion,
+            telefono: data.telefono,
+            fecha_ingreso: data.fecha_ingreso,
+            sexo: data.sexo,
+            categoria_id: data.categoria_id,
+            sector_id: data.sector_id,
+          };
+
+          // Llenar campos básicos
+          Object.entries(campos).forEach(([id, valor]) => {
+            const elemento = document.getElementById(id);
+            if (
+              elemento &&
+              valor !== null &&
+              valor !== undefined &&
+              valor !== ""
+            ) {
+              elemento.value = valor;
+              console.log(`✅ Campo ${id} completado: ${valor}`);
+            }
+          });
+
+          // Marcar patologías si existen
+          if (data.patologias && Array.isArray(data.patologias)) {
+            console.log("🔍 Marcando patologías:", data.patologias);
+
+            // Limpiar patologías anteriores
+            document
+              .querySelectorAll('input[name="patologia[]"]')
+              .forEach((cb) => {
+                cb.checked = false;
+              });
+
+            // Marcar patologías del usuario
+            data.patologias.forEach((patologiaId) => {
+              const checkbox = document.querySelector(
+                `input[name="patologia[]"][value="${patologiaId}"]`,
+              );
+              if (checkbox) {
+                checkbox.checked = true;
+                console.log(`✅ Patología marcada: ${patologiaId}`);
+              }
+            });
+          }
+
+          console.log("🎉 Autocompletado exitoso");
+        }
+
+        // FUNCIÓN 7: LIMPIAR CAMPOS
+        function limpiarCampos() {
+          const campos = [
+            "nombre",
+            "fecha_nacimiento",
+            "direccion",
+            "telefono",
+            "fecha_ingreso",
+          ];
+          campos.forEach((id) => {
+            const elemento = document.getElementById(id);
+            if (elemento) {
+              elemento.value = "";
+            }
+          });
+
+          // Limpiar selects
+          const selects = ["sexo", "categoria_id", "sector_id"];
+          selects.forEach((id) => {
+            const elemento = document.getElementById(id);
+            if (elemento) {
+              elemento.selectedIndex = 0;
+            }
+          });
+
+          // Limpiar patologías
+          document
+            .querySelectorAll('input[name="patologia[]"]')
+            .forEach((cb) => {
+              cb.checked = false;
+            });
+
+          console.log("🧹 Campos limpiados para nuevo usuario");
+        }
+
+        // FUNCIÓN 8: MANEJAR INPUT DEL RUN
+        function manejarInputRUN() {
+          const valorOriginal = runInput.value;
+
+          // Formatear automáticamente
+          const valorFormateado = formatearRUN(valorOriginal);
+          runInput.value = valorFormateado;
+
+          console.log(
+            `⌨️ Input RUN: "${valorOriginal}" → "${valorFormateado}"`,
+          );
+
+          // Verificar longitud mínima
+          const limpio = valorFormateado.replace(/[^0-9kK]/gi, "");
+
+          if (limpio.length < 8) {
+            // RUN INCOMPLETO
+            console.log("⏳ RUN incompleto");
+            mostrarEstadoRUN("neutro");
+            limpiarCampos();
+            return;
+          }
+
+          if (validarRUN(valorFormateado)) {
+            // RUN VÁLIDO - BUSCAR USUARIO
+            console.log("✅ RUN válido, buscando usuario...");
+            mostrarEstadoRUN("valido");
+
+            // Cancelar búsqueda anterior
+            clearTimeout(timeoutBusqueda);
+
+            // Programar nueva búsqueda
+            timeoutBusqueda = setTimeout(() => {
+              buscarUsuario(valorFormateado);
+            }, 600);
+          } else {
+            // RUN INVÁLIDO
+            console.log("❌ RUN inválido");
+            mostrarEstadoRUN("invalido", "RUN inválido. Verifica los dígitos.");
+            limpiarCampos();
+          }
+        }
+
+        // CONFIGURAR EVENT LISTENERS
+        runInput.addEventListener("input", manejarInputRUN);
+
+        // AGREGAR LISTENER SIMPLE PARA PATOLOGÍAS (COMO EN EL TEST)
+        runInput.addEventListener("input", function () {
+          const valor = this.value;
+          console.log("📝 RUN input para patologías:", valor);
+
+          // Si tiene al menos 7 caracteres, intentar cargar patologías
+          if (valor.length >= 7) {
+            cargarPatologiasSimple(valor);
+          }
+        });
+
+        runInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            console.log("🚀 Enter presionado");
+            clearTimeout(timeoutBusqueda);
+
+            const limpio = this.value.replace(/[^0-9kK]/gi, "");
+            if (limpio.length >= 8 && validarRUN(this.value)) {
+              buscarUsuario(this.value);
+            }
+          }
+        });
+
+        runInput.addEventListener("blur", function () {
+          console.log("👁️ Blur en RUN");
+          if (this.value) {
+            this.value = formatearRUN(this.value);
+          }
+        });
+
+        // FUNCIÓN SIMPLE PARA CARGAR PATOLOGÍAS (COPIADA DEL TEST QUE FUNCIONA)
+        function cargarPatologiasSimple(run) {
+          console.log("🔥 Cargando patologías para RUN:", run);
+
+          // Limpiar RUN
+          const runLimpio = run.replace(/[\.\-\s]/g, "");
+          console.log("🧹 RUN limpio:", runLimpio);
+
+          const url = `/api/patologias/${runLimpio}`;
+          console.log("🔗 URL:", url);
+
+          fetch(url)
+            .then((response) => {
+              console.log("📡 Status:", response.status);
+              return response.json();
+            })
+            .then((data) => {
+              console.log("📦 Datos:", data);
+              mostrarPatologiasSimple(data.patologias || []);
+            })
+            .catch((error) => {
+              console.error("❌ Error:", error);
+              mostrarPatologiasSimple([]);
+            });
+        }
+
+        // FUNCIÓN SIMPLE PARA MOSTRAR PATOLOGÍAS (COPIADA DEL TEST QUE FUNCIONA)
+        function mostrarPatologiasSimple(patologias) {
+          console.log("🎨 Mostrando", patologias.length, "patologías");
+
+          // DEBUG: Verificar que el DOM esté listo
+          console.log("🔍 Verificando DOM...");
+          console.log("📋 document.readyState:", document.readyState);
+
+          const container = document.getElementById("patologias-badges");
+          console.log("📦 Container encontrado:", container);
+
+          if (!container) {
+            console.error("❌ No se encontró patologias-badges");
+            // Buscar todos los elementos con patologias en el ID
+            const todosLosElementos =
+              document.querySelectorAll('[id*="patologias"]');
+            console.log(
+              '🔍 Elementos con "patologias" en ID:',
+              todosLosElementos,
+            );
+            return;
+          }
+
+          console.log("✅ Container encontrado, limpiando...");
+          container.innerHTML = "";
+
+          if (patologias.length === 0) {
+            console.log("⚪ Sin patologías, mostrando mensaje vacío");
+            container.innerHTML =
+              '<span class="pat-empty">Sin patologías en BD</span>';
+            return;
+          }
+
+          console.log("🎨 Creando badges...");
+          patologias.forEach((pat, index) => {
+            const badge = document.createElement("span");
+            badge.className = `pat-badge pat-${pat.color}`;
+            badge.textContent = `${pat.nombre} (${pat.cie10})`;
+            container.appendChild(badge);
+            console.log(
+              `🏷️ Badge ${index + 1} creado:`,
+              pat.nombre,
+              pat.cie10,
+              pat.color,
+            );
+          });
+
+          console.log(
+            "✅ Patologías mostradas! HTML final:",
+            container.innerHTML,
+          );
+        }
+
+        console.log("✅ Script de RUN completamente configurado");
+
+        // DEBUG: Probar cargar patologías inmediatamente
+        setTimeout(() => {
+          console.log("🧪 TEST DEBUG: Probando cargar patologías...");
+          cargarPatologiasSimple("8.371.186-8");
+        }, 2000);
+      });
+    </script>
+  </body>
+</html>

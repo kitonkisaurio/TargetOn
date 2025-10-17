@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Administrar usuarios</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-light">
+    <div class="container py-4">
+      <h2 class="mb-3">Administración de usuarios</h2>
+
+      {% if mensaje %}
+      <div class="alert alert-info">{{ mensaje }}</div>
+      {% endif %}
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="card p-3 h-100">
+            <h5>Crear/actualizar usuario</h5>
+            <form method="post" action="{{ url_for('admin.admin_usuarios') }}">
+              <div class="mb-2">
+                <label for="username" class="form-label">Usuario</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  name="username"
+                  required
+                />
+              </div>
+              <div class="mb-2">
+                <label for="password" class="form-label">Contraseña</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  required
+                />
+              </div>
+              <div class="mb-2">
+                <label for="role" class="form-label">Rol</label>
+                <select class="form-select" id="role" name="role">
+                  {% for r in ROLES %}
+                  <option value="{{ r }}">{{ r }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="can_create_users" class="form-label"
+                  >¿Puede crear usuarios?</label
+                >
+                <select
+                  class="form-select"
+                  id="can_create_users"
+                  name="can_create_users"
+                >
+                  <option value="false">No</option>
+                  <option value="true">Sí</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-success">Guardar</button>
+            </form>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card p-3 h-100">
+            <h5>Cambiar contraseña</h5>
+            <form
+              method="post"
+              action="{{ url_for('admin.admin_cambiar_password') }}"
+            >
+              <div class="mb-2">
+                <label for="username_pw" class="form-label">Usuario</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username_pw"
+                  name="username"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="new_password" class="form-label"
+                  >Nueva contraseña</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  id="new_password"
+                  name="new_password"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Cambiar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-3 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="m-0">Usuarios del sistema</h5>
+          <div class="d-flex gap-2">
+            <button
+              type="button"
+              class="btn btn-warning btn-sm"
+              onclick="calcularRiesgoMasivo()"
+              id="btnCalcRiesgoMasivo"
+            >
+              <span id="iconCalcRiesgo">🧮</span> Calcular Riesgo ECICEP (Todos)
+            </button>
+            <form
+              method="post"
+              action="{{ url_for('admin.admin_aplicar_indices') }}"
+            >
+              <button type="submit" class="btn btn-outline-secondary btn-sm">
+                Aplicar índices
+              </button>
+            </form>
+            <form
+              method="post"
+              action="{{ url_for('admin.admin_aplicar_tablas_historicas') }}"
+            >
+              <button type="submit" class="btn btn-outline-secondary btn-sm">
+                Aplicar tablas históricas
+              </button>
+            </form>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Rol</th>
+                <th>P. crear usuarios</th>
+                <th>Activo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for u in usuarios or [] %}
+              <tr>
+                <td class="fw-semibold">{{ u.username }}</td>
+                <td>
+                  <form
+                    class="d-inline"
+                    method="post"
+                    action="{{ url_for('admin.admin_actualizar_rol') }}"
+                  >
+                    <input
+                      type="hidden"
+                      name="username"
+                      value="{{ u.username }}"
+                    />
+                    <select
+                      class="form-select form-select-sm d-inline w-auto"
+                      name="role"
+                    >
+                      {% for r in ROLES %}
+                      <option
+                        value="{{ r }}"
+                        {% if u.role == r %}selected{% endif %}
+                      >
+                        {{ r }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-outline-primary ms-1"
+                    >
+                      Actualizar
+                    </button>
+                  </form>
+                </td>
+                <td>
+                  <form
+                    class="d-inline"
+                    method="post"
+                    action="{{ url_for('admin.admin_actualizar_flags') }}"
+                  >
+                    <input
+                      type="hidden"
+                      name="username"
+                      value="{{ u.username }}"
+                    />
+                    <select
+                      class="form-select form-select-sm d-inline w-auto"
+                      name="can_create_users"
+                    >
+                      <option
+                        value="false"
+                        {%
+                        if
+                        not
+                        u.can_create_users
+                        %}selected{%
+                        endif
+                        %}
+                      >
+                        No
+                      </option>
+                      <option
+                        value="true"
+                        {%
+                        if
+                        u.can_create_users
+                        %}selected{%
+                        endif
+                        %}
+                      >
+                        Sí
+                      </option>
+                    </select>
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-outline-primary ms-1"
+                    >
+                      Actualizar
+                    </button>
+                  </form>
+                </td>
+                <td>
+                  <form
+                    class="d-inline"
+                    method="post"
+                    action="{{ url_for('admin.admin_toggle_activo') }}"
+                  >
+                    <input
+                      type="hidden"
+                      name="username"
+                      value="{{ u.username }}"
+                    />
+                    <input
+                      type="hidden"
+                      name="active"
+                      value="{{ 'false' if u.active else 'true' }}"
+                    />
+                    {% if u.active %}
+                    <span class="badge text-bg-success">Activo</span>
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-outline-danger ms-1"
+                    >
+                      Desactivar
+                    </button>
+                    {% else %}
+                    <span class="badge text-bg-secondary">Inactivo</span>
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-outline-success ms-1"
+                    >
+                      Activar
+                    </button>
+                    {% endif %}
+                  </form>
+                </td>
+                <td>
+                  <form
+                    class="row row-cols-lg-auto g-2 align-items-center"
+                    method="post"
+                    action="{{ url_for('admin.admin_renombrar_usuario') }}"
+                  >
+                    <div class="col-auto">
+                      <input
+                        type="hidden"
+                        name="username"
+                        value="{{ u.username }}"
+                      />
+                      <input
+                        type="text"
+                        name="nuevo_username"
+                        class="form-control form-control-sm"
+                        placeholder="Nuevo nombre"
+                      />
+                    </div>
+                    <div class="col-auto">
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-secondary"
+                      >
+                        Renombrar
+                      </button>
+                    </div>
+                  </form>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="5">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <h6 class="mb-2">Permisos por sector</h6>
+                      <div class="table-responsive">
+                        <table class="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Sector</th>
+                              <th>Leer</th>
+                              <th>Escribir</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for s in sectores or [] %} {% set perm =
+                            (perms_sector.get(u.username, {}) or {}).get(s.id)
+                            %}
+                            <tr>
+                              <td>{{ s.nombre }}</td>
+                              <td>
+                                <form
+                                  class="d-inline"
+                                  method="post"
+                                  action="{{ url_for('admin.admin_guardar_perm_sector') }}"
+                                >
+                                  <input
+                                    type="hidden"
+                                    name="username"
+                                    value="{{ u.username }}"
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="sector_id"
+                                    value="{{ s.id }}"
+                                  />
+                                  <div class="form-check form-check-inline">
+                                    <input
+                                      class="form-check-input"
+                                      type="checkbox"
+                                      name="can_read"
+                                      value="true"
+                                      {%
+                                      if
+                                      perm
+                                      and
+                                      perm.can_read
+                                      %}checked{%
+                                      endif
+                                      %}
+                                    />
+                                    <label class="form-check-label">Leer</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input
+                                      class="form-check-input"
+                                      type="checkbox"
+                                      name="can_write"
+                                      value="true"
+                                      {%
+                                      if
+                                      perm
+                                      and
+                                      perm.can_write
+                                      %}checked{%
+                                      endif
+                                      %}
+                                    />
+                                    <label class="form-check-label"
+                                      >Escribir</label
+                                    >
+                                  </div>
+                                  <button
+                                    type="submit"
+                                    class="btn btn-sm btn-outline-primary"
+                                  >
+                                    Guardar
+                                  </button>
+                                </form>
+                              </td>
+                              <td></td>
+                              <td></td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <h6 class="mb-2">Permisos por página</h6>
+                      <div class="table-responsive">
+                        <table class="table table-sm">
+                          <thead>
+                            <tr>
+                              <th>Página</th>
+                              <th>Leer</th>
+                              <th>Escribir</th>
+                              <th></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {% for pk, pdesc in PAGE_KEYS or [] %} {% set p =
+                            (perms_pagina.get(u.username, {}) or {}).get(pk) %}
+                            <tr>
+                              <td>{{ pdesc }}</td>
+                              <td>
+                                <form
+                                  class="d-inline"
+                                  method="post"
+                                  action="{{ url_for('admin.admin_guardar_perm_pagina') }}"
+                                >
+                                  <input
+                                    type="hidden"
+                                    name="username"
+                                    value="{{ u.username }}"
+                                  />
+                                  <input
+                                    type="hidden"
+                                    name="page_key"
+                                    value="{{ pk }}"
+                                  />
+                                  <div class="form-check form-check-inline">
+                                    <input
+                                      class="form-check-input"
+                                      type="checkbox"
+                                      name="can_read"
+                                      value="true"
+                                      {%
+                                      if
+                                      p
+                                      and
+                                      p.can_read
+                                      %}checked{%
+                                      endif
+                                      %}
+                                    />
+                                    <label class="form-check-label">Leer</label>
+                                  </div>
+                                  <div class="form-check form-check-inline">
+                                    <input
+                                      class="form-check-input"
+                                      type="checkbox"
+                                      name="can_write"
+                                      value="true"
+                                      {%
+                                      if
+                                      p
+                                      and
+                                      p.can_write
+                                      %}checked{%
+                                      endif
+                                      %}
+                                    />
+                                    <label class="form-check-label"
+                                      >Escribir</label
+                                    >
+                                  </div>
+                                  <button
+                                    type="submit"
+                                    class="btn btn-sm btn-outline-primary"
+                                  >
+                                    Guardar
+                                  </button>
+                                </form>
+                              </td>
+                              <td></td>
+                              <td></td>
+                            </tr>
+                            {% endfor %}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ==========================================
+      // CALCULAR RIESGO ECICEP MASIVO
+      // ==========================================
+
+      let intervaloProgreso = null;
+
+      async function calcularRiesgoMasivo() {
+        const btn = document.getElementById("btnCalcRiesgoMasivo");
+        const icon = document.getElementById("iconCalcRiesgo");
+
+        if (
+          !confirm(
+            "¿Estás seguro de calcular el riesgo ECICEP para TODOS los usuarios?\n\nEsto puede tomar varios minutos.",
+          )
+        ) {
+          return;
+        }
+
+        try {
+          // Deshabilitar botón
+          btn.disabled = true;
+          icon.textContent = "⏳";
+          btn.innerHTML = '<span id="iconCalcRiesgo">⏳</span> Iniciando...';
+
+          // Iniciar cálculo
+          const respuesta = await fetch("/api/admin/calcular-riesgo-masivo", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await respuesta.json();
+
+          if (!data.ok) {
+            alert("Error: " + (data.error || "Error desconocido"));
+            btn.disabled = false;
+            icon.textContent = "🧮";
+            btn.innerHTML =
+              '<span id="iconCalcRiesgo">🧮</span> Calcular Riesgo ECICEP (Todos)';
+            return;
+          }
+
+          // Mostrar progreso
+          mostrarProgreso();
+
+          // Iniciar monitoreo de progreso
+          intervaloProgreso = setInterval(actualizarProgreso, 2000);
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Error al iniciar el cálculo: " + error.message);
+          btn.disabled = false;
+          icon.textContent = "🧮";
+          btn.innerHTML =
+            '<span id="iconCalcRiesgo">🧮</span> Calcular Riesgo ECICEP (Todos)';
+        }
+      }
+
+      function mostrarProgreso() {
+        const container = document.createElement("div");
+        container.id = "progressoContainer";
+        container.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: white;
+          border: 2px solid #f59e0b;
+          border-radius: 8px;
+          padding: 20px;
+          min-width: 300px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          z-index: 10000;
+        `;
+
+        container.innerHTML = `
+          <h5 style="margin: 0 0 15px; color: #f59e0b;">
+            🧮 Calculando Riesgo ECICEP
+          </h5>
+          <div id="progressoInfo" style="font-size: 0.9rem;">
+            <p><strong>Estado:</strong> <span id="progresoEstado">Iniciando...</span></p>
+            <p><strong>Procesados:</strong> <span id="progresoProcesados">0</span> / <span id="progresoTotal">?</span></p>
+            <p><strong>Exitosos:</strong> <span id="progresoExitosos" style="color: #10b981;">0</span></p>
+            <p><strong>Errores:</strong> <span id="progresoErrores" style="color: #ef4444;">0</span></p>
+            <p><strong>Progreso:</strong> <span id="progresoPorcentaje">0%</span></p>
+            <div style="background: #e5e7eb; height: 20px; border-radius: 10px; overflow: hidden; margin-top: 10px;">
+              <div id="progresoBar" style="background: linear-gradient(90deg, #f59e0b, #10b981); height: 100%; width: 0%; transition: width 0.3s;"></div>
+            </div>
+          </div>
+          <button 
+            onclick="cerrarProgreso()" 
+            style="margin-top: 15px; padding: 8px 16px; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer;"
+          >
+            Cerrar
+          </button>
+        `;
+
+        document.body.appendChild(container);
+      }
+
+      async function actualizarProgreso() {
+        try {
+          const respuesta = await fetch(
+            "/api/admin/calcular-riesgo-masivo/progreso",
+          );
+          const data = await respuesta.json();
+
+          if (!data.ok) {
+            console.error("Error obteniendo progreso:", data);
+            return;
+          }
+
+          // Actualizar UI
+          document.getElementById("progresoEstado").textContent =
+            data.en_progreso ? "En progreso..." : "Completado";
+          document.getElementById("progresoProcesados").textContent =
+            data.procesados;
+          document.getElementById("progresoTotal").textContent = data.total;
+          document.getElementById("progresoExitosos").textContent =
+            data.exitosos;
+          document.getElementById("progresoErrores").textContent = data.errores;
+          document.getElementById("progresoPorcentaje").textContent =
+            data.porcentaje.toFixed(1) + "%";
+          document.getElementById("progresoBar").style.width =
+            data.porcentaje + "%";
+
+          // Si terminó, detener monitoreo
+          if (!data.en_progreso && data.procesados > 0) {
+            clearInterval(intervaloProgreso);
+            intervaloProgreso = null;
+
+            // Rehabilitar botón
+            const btn = document.getElementById("btnCalcRiesgoMasivo");
+            btn.disabled = false;
+            btn.innerHTML =
+              '<span id="iconCalcRiesgo">✅</span> Cálculo Completado';
+
+            // Cambiar color del contenedor a verde
+            const container = document.getElementById("progressoContainer");
+            if (container) {
+              container.style.borderColor = "#10b981";
+            }
+
+            // Notificación
+            alert(
+              `✅ Cálculo completado!\n\nExitosos: ${data.exitosos}\nErrores: ${data.errores}\nTiempo: ${data.duracion_segundos.toFixed(1)} segundos`,
+            );
+
+            // Después de 5 segundos, restaurar botón
+            setTimeout(() => {
+              btn.innerHTML =
+                '<span id="iconCalcRiesgo">🧮</span> Calcular Riesgo ECICEP (Todos)';
+            }, 5000);
+          }
+        } catch (error) {
+          console.error("Error actualizando progreso:", error);
+        }
+      }
+
+      function cerrarProgreso() {
+        const container = document.getElementById("progressoContainer");
+        if (container) {
+          container.remove();
+        }
+
+        if (intervaloProgreso) {
+          clearInterval(intervaloProgreso);
+          intervaloProgreso = null;
+        }
+
+        // Restaurar botón
+        const btn = document.getElementById("btnCalcRiesgoMasivo");
+        btn.disabled = false;
+        btn.innerHTML =
+          '<span id="iconCalcRiesgo">🧮</span> Calcular Riesgo ECICEP (Todos)';
+      }
+    </script>
+  </body>
+</html>

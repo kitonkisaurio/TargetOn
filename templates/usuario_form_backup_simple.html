@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <title>Formulario de Usuario - ECICEP (Versión Reparada)</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .form-group {
+        margin: 10px 0;
+      }
+      label {
+        display: inline-block;
+        width: 120px;
+        font-weight: bold;
+      }
+      input[type="text"],
+      input[type="date"] {
+        padding: 8px;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        width: 200px;
+      }
+      .run-valid {
+        border-color: #28a745 !important;
+        background-color: #d4edda;
+      }
+      .run-invalid {
+        border-color: #dc3545 !important;
+        background-color: #f8d7da;
+      }
+      #loading {
+        display: none;
+        color: #007cba;
+        margin: 10px 0;
+      }
+      #usuario-encontrado {
+        display: none;
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+      }
+      .btn-primary {
+        background: #007cba;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .btn-primary:hover {
+        background: #005a87;
+      }
+      .form-section {
+        background: #f8f9fa;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📋 Formulario de Usuario - ECICEP</h1>
+
+    <form id="usuarioForm" method="POST" action="/usuario/guardar">
+      <div class="form-section">
+        <h3>🆔 Datos de Identificación</h3>
+
+        <div class="form-group">
+          <label>RUN: *</label>
+          <input
+            type="text"
+            name="run"
+            id="run"
+            required
+            maxlength="13"
+            value="{{ (request.form.get('run') or (usuario.run if usuario and usuario.run else request.args.get('run'))) or '' }}"
+          />
+          <div id="loading">🔄 Buscando usuario...</div>
+          <div id="usuario-encontrado">
+            <strong>✅ Usuario encontrado:</strong>
+            <div id="datos-usuario"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Nombre: *</label>
+          <input
+            type="text"
+            name="nombre"
+            id="nombre"
+            required
+            value="{{ request.form.get('nombre') or (usuario.nombre if usuario and usuario.nombre else '') }}"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Fecha Nac.: *</label>
+          <input
+            type="date"
+            name="fecha_nacimiento"
+            id="fecha_nacimiento"
+            required
+            value="{{ request.form.get('fecha_nacimiento') or (usuario.fecha_nacimiento if usuario and usuario.fecha_nacimiento else '') }}"
+          />
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3>📍 Datos de Contacto</h3>
+
+        <div class="form-group">
+          <label>Dirección:</label>
+          <input
+            type="text"
+            name="direccion"
+            id="direccion"
+            value="{{ request.form.get('direccion') or (usuario.direccion if usuario and usuario.direccion else '') }}"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono:</label>
+          <input
+            type="text"
+            name="telefono"
+            id="telefono"
+            value="{{ request.form.get('telefono') or (usuario.telefono if usuario and usuario.telefono else '') }}"
+          />
+        </div>
+      </div>
+
+      <div class="form-section">
+        <button type="submit" class="btn-primary">💾 Guardar Usuario</button>
+      </div>
+    </form>
+
+    <script>
+      console.log("🚀 Formulario ECICEP - Versión reparada cargada");
+
+      // Variables globales
+      let timeoutId = null;
+
+      // Función para normalizar RUN
+      function normalizarRun(s) {
+        s = (s || "").toUpperCase().replace(/[^0-9K]/g, "");
+        if (s.length < 2) return s;
+        return s.slice(0, -1) + "-" + s.slice(-1);
+      }
+
+      // Función para validar dígito verificador
+      function dvValido(runNorm) {
+        runNorm = (runNorm || "").toUpperCase();
+        const m = /^(\d{7,8})-([\dK])$/.exec(runNorm);
+        if (!m) return false;
+
+        const cuerpo = m[1];
+        const dv = m[2];
+
+        const factores = [2, 3, 4, 5, 6, 7];
+        let s = 0;
+        for (let i = 0; i < cuerpo.length; i++) {
+          const dig = parseInt(cuerpo[cuerpo.length - 1 - i], 10);
+          s += dig * factores[i % factores.length];
+        }
+        const resto = 11 - (s % 11);
+        const dvCalc = resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+        return dv === dvCalc;
+      }
+
+      // Función para establecer estado visual del RUN
+      function setRunEstado(esValido) {
+        const runInput = document.getElementById("run");
+        if (runInput) {
+          runInput.classList.remove("run-valid", "run-invalid");
+          runInput.classList.add(esValido ? "run-valid" : "run-invalid");
+          runInput.title = esValido ? "RUN válido" : "RUN inválido";
+        }
+      }
+
+      // Función para buscar usuario
+      function buscarUsuario(run) {
+        console.log("🔍 Buscando usuario con RUN:", run);
+
+        if (!run || run.length < 8) {
+          console.log("❌ RUN muy corto o vacío");
+          return;
+        }
+
+        const loading = document.getElementById("loading");
+        const encontrado = document.getElementById("usuario-encontrado");
+
+        if (loading) loading.style.display = "block";
+        if (encontrado) encontrado.style.display = "none";
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ run: run }),
+        })
+          .then((response) => {
+            console.log("📡 Respuesta recibida:", response.status);
+            return response.json();
+          })
+          .then((data) => {
+            console.log("✅ Datos recibidos:", data);
+
+            if (loading) loading.style.display = "none";
+
+            if (data.error) {
+              console.log("⚠️ Error en búsqueda:", data.error);
+              return;
+            }
+
+            // Autocompletar campos si se encontró usuario
+            if (data.nombre) {
+              const nombreInput = document.getElementById("nombre");
+              if (nombreInput && !nombreInput.value) {
+                nombreInput.value = data.nombre;
+                console.log("📝 Nombre autocompletado:", data.nombre);
+              }
+            }
+
+            if (data.fecha_nacimiento) {
+              const fechaInput = document.getElementById("fecha_nacimiento");
+              if (fechaInput && !fechaInput.value) {
+                fechaInput.value = data.fecha_nacimiento;
+                console.log(
+                  "📅 Fecha nacimiento autocompletada:",
+                  data.fecha_nacimiento,
+                );
+              }
+            }
+
+            if (data.direccion) {
+              const direccionInput = document.getElementById("direccion");
+              if (direccionInput && !direccionInput.value) {
+                direccionInput.value = data.direccion;
+                console.log("🏠 Dirección autocompletada:", data.direccion);
+              }
+            }
+
+            if (data.telefono) {
+              const telefonoInput = document.getElementById("telefono");
+              if (telefonoInput && !telefonoInput.value) {
+                telefonoInput.value = data.telefono;
+                console.log("📞 Teléfono autocompletado:", data.telefono);
+              }
+            }
+
+            // Mostrar mensaje de usuario encontrado
+            if (encontrado) {
+              const datosDiv = document.getElementById("datos-usuario");
+              if (datosDiv) {
+                datosDiv.innerHTML = `
+                            <div><strong>Nombre:</strong> ${data.nombre || "No disponible"}</div>
+                            <div><strong>Fecha Nac.:</strong> ${data.fecha_nacimiento || "No disponible"}</div>
+                            ${data.sector_nombre ? `<div><strong>Sector:</strong> ${data.sector_nombre}</div>` : ""}
+                            ${data.categoria_nombre ? `<div><strong>Categoría:</strong> ${data.categoria_nombre}</div>` : ""}
+                        `;
+              }
+              encontrado.style.display = "block";
+            }
+          })
+          .catch((error) => {
+            console.log("❌ Error en fetch:", error);
+            if (loading) loading.style.display = "none";
+          });
+      }
+
+      // Función para manejar cambios en el campo RUN
+      function manejarCambioRun(event) {
+        console.log("📝 Campo RUN modificado:", event.target.value);
+
+        // Formatear el RUN automáticamente
+        let v = event.target.value.replace(/[^0-9kK]/g, "").toUpperCase();
+
+        if (v.length >= 2) {
+          const cuerpo = v.slice(0, -1);
+          const dv = v.slice(-1);
+          const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          event.target.value = cuerpoFormateado + "-" + dv;
+        } else {
+          event.target.value = v;
+        }
+
+        const runNormalizado = normalizarRun(event.target.value);
+        const runLimpio = event.target.value.replace(/[^0-9kK]/g, "");
+
+        // Validar solo si tiene 8+ caracteres
+        if (runLimpio.length >= 8) {
+          const esValido = dvValido(runNormalizado);
+          setRunEstado(esValido);
+
+          if (esValido) {
+            // Limpiar timeout anterior
+            if (timeoutId) clearTimeout(timeoutId);
+
+            // Buscar después de 800ms de inactividad
+            timeoutId = setTimeout(() => {
+              buscarUsuario(event.target.value);
+            }, 800);
+          }
+        } else {
+          setRunEstado(false);
+        }
+      }
+
+      // Configurar eventos cuando el DOM esté listo
+      document.addEventListener("DOMContentLoaded", function () {
+        console.log("🔧 Configurando eventos del formulario...");
+
+        const runInput = document.getElementById("run");
+        if (runInput) {
+          // Eventos para formateo y búsqueda
+          runInput.addEventListener("input", manejarCambioRun);
+          runInput.addEventListener("blur", manejarCambioRun);
+
+          // Evento para pegar texto
+          runInput.addEventListener("paste", function () {
+            setTimeout(() => {
+              manejarCambioRun({ target: runInput });
+            }, 100);
+          });
+
+          // Evento para Enter
+          runInput.addEventListener("keyup", function (e) {
+            if (e.key === "Enter") {
+              const runNormalizado = normalizarRun(runInput.value);
+              const runLimpio = runInput.value.replace(/[^0-9kK]/g, "");
+              if (runLimpio.length >= 8 && dvValido(runNormalizado)) {
+                buscarUsuario(runInput.value);
+              }
+            }
+          });
+
+          console.log("✅ Eventos configurados para campo RUN");
+
+          // Si ya hay un RUN, validarlo
+          if (runInput.value) {
+            manejarCambioRun({ target: runInput });
+          }
+        } else {
+          console.log("❌ No se encontró el campo RUN");
+        }
+      });
+
+      console.log("✅ Script de formulario cargado completamente");
+    </script>
+  </body>
+</html>

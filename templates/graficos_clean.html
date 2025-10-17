@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Gráficos de evolución — {{ run }}</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg: #f6f7f9;
+        --card: #fff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Ubuntu,
+          Cantarell,
+          Noto Sans,
+          Helvetica,
+          Arial;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 20px auto;
+        padding: 0 16px;
+      }
+      .row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .col {
+        flex: 1 1 520px;
+        min-width: 320px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        padding: 18px;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 6px 0 18px 0;
+      }
+      h3 {
+        margin: 0 0 10px 0;
+      }
+      .topbar {
+        display: flex;
+        gap: 12px;
+        margin: 6px 0 16px 0;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fff;
+        text-decoration: none;
+        color: var(--text);
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 14px;
+        margin: 10px 0 0 4px;
+      }
+      .chart-wrap {
+        position: relative;
+        width: 100%;
+        height: 320px;
+        min-height: 320px;
+      }
+      canvas {
+        display: block;
+        position: absolute;
+        inset: 0;
+        width: 100% !important;
+        height: 100% !important;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <a class="btn" href="{{ url_for('usuario_detalle', run=run) }}"
+          >← Volver</a
+        >
+      </div>
+
+      <h1>Gráficos de evolución — {{ run }}</h1>
+
+      <p id="msg" class="muted hidden">No hay gráficos disponibles.</p>
+
+      <div id="charts" class="row">
+        <div class="col">
+          <div class="card">
+            <h3>Peso (kg) e IMC</h3>
+            <div class="chart-wrap"><canvas id="pesoImc"></canvas></div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3>Presión arterial (mmHg)</h3>
+            <div class="chart-wrap"><canvas id="pa"></canvas></div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3>HGT (mg/dL) y CC (cm)</h3>
+            <div class="chart-wrap"><canvas id="hgtCc"></canvas></div>
+          </div>
+        </div>
+        {% if tiene_diabetes %}
+        <div class="col">
+          <div class="card">
+            <h3>HbA1c (%)</h3>
+            <div class="chart-wrap"><canvas id="hba1c"></canvas></div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <script>
+        console.log('=== INICIO GRÁFICOS ===');
+
+        // Verificar Chart.js
+        if (typeof Chart === 'undefined') {
+          console.error('❌ Chart.js NO está cargado');
+          document.getElementById('charts').innerHTML = '<p style="color:red;">Error: Chart.js no está cargado</p>';
+          throw new Error('Chart.js no está disponible');
+        }
+        console.log('✅ Chart.js cargado:', Chart.version);
+
+        // Registrar plugin de anotaciones
+        try {
+          if (typeof annotationPlugin !== 'undefined') {
+            Chart.register(annotationPlugin);
+            console.log('✅ Plugin registrado (annotationPlugin)');
+          } else if (window.ChartAnnotation) {
+            Chart.register(window.ChartAnnotation);
+            console.log('✅ Plugin registrado (ChartAnnotation)');
+          } else if (window['chartjs-plugin-annotation']) {
+            Chart.register(window['chartjs-plugin-annotation']);
+            console.log('✅ Plugin registrado (window object)');
+          } else {
+            console.warn('⚠️ Plugin de anotaciones no encontrado');
+          }
+        } catch (e) {
+          console.error('❌ Error registrando plugin:', e);
+        }
+
+        // Datos del backend
+        const labels = {{ fechas|tojson }};
+        const s = {{ series|tojson }};
+
+        console.log('📊 Datos recibidos:');
+        console.log('Labels:', labels);
+        console.log('Series:', s);
+
+        // Verificar si hay datos
+        if (!labels || labels.length === 0) {
+          console.log('❌ No hay fechas/labels');
+          document.getElementById('msg').classList.remove('hidden');
+          document.getElementById('charts').style.display = 'none';
+          return;
+        }
+
+        // Función auxiliar para construir datasets con validación de datos
+        function buildXY(fechas, valores) {
+          const result = { xs: [], ys: [] };
+          for (let i = 0; i < fechas.length; i++) {
+            const valor = valores[i];
+            if (valor !== null && valor !== undefined && !isNaN(valor)) {
+              result.xs.push(fechas[i]);
+              result.ys.push(valor);
+            }
+          }
+          return result;
+        }
+
+        // Configuración común
+        const commonOpts = {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { type: 'time', time: { unit: 'day' } },
+            y: { beginAtZero: false }
+          }
+        };
+
+        // Calcular edad para IMC
+        const fechaNacimiento = '{{ fecha_nacimiento }}';
+        let edad = 30; // default
+        if (fechaNacimiento) {
+          const hoy = new Date();
+          const nacimiento = new Date(fechaNacimiento);
+          edad = hoy.getFullYear() - nacimiento.getFullYear();
+        }
+
+        const esAdultoMayor = edad >= 65;
+        const imc1 = esAdultoMayor ? 28 : 25;
+        const imc2 = esAdultoMayor ? 32 : 30;
+        const label1 = esAdultoMayor ? 'IMC 28 SP (AM)' : 'IMC 25 SP';
+        const label2 = esAdultoMayor ? 'IMC 32 OB (AM)' : 'IMC 30 OB';
+
+        // GRÁFICO 1: Peso e IMC
+        try {
+          const peso = buildXY(labels, s.peso || []);
+          const imc = buildXY(labels, s.imc || []);
+
+          if (peso.ys.length > 0 || imc.ys.length > 0) {
+            new Chart(document.getElementById('pesoImc'), {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Peso (kg)',
+                    data: peso.ys,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.2
+                  },
+                  {
+                    label: 'IMC',
+                    data: imc.ys,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.2
+                  }
+                ]
+              },
+              options: {
+                ...commonOpts,
+                plugins: {
+                  annotation: {
+                    annotations: [
+                      {
+                        type: 'line',
+                        yMin: imc1,
+                        yMax: imc1,
+                        borderColor: '#ff8c00',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                          content: label1,
+                          enabled: true,
+                          position: 'end'
+                        }
+                      },
+                      {
+                        type: 'line',
+                        yMin: imc2,
+                        yMax: imc2,
+                        borderColor: '#ff8c00',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                          content: label2,
+                          enabled: true,
+                          position: 'end'
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            });
+            console.log('✅ Gráfico Peso/IMC creado');
+          }
+        } catch (e) {
+          console.error('❌ Error en gráfico Peso/IMC:', e);
+        }
+
+        // GRÁFICO 2: Presión Arterial
+        try {
+          const sistolica = buildXY(labels, s.psis || []);
+          const diastolica = buildXY(labels, s.pdia || []);
+
+          if (sistolica.ys.length > 0 || diastolica.ys.length > 0) {
+            new Chart(document.getElementById('pa'), {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Sistólica',
+                    data: sistolica.ys,
+                    borderColor: '#dc2626',
+                    backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.2
+                  },
+                  {
+                    label: 'Diastólica',
+                    data: diastolica.ys,
+                    borderColor: '#7c3aed',
+                    backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.2
+                  }
+                ]
+              },
+              options: {
+                ...commonOpts,
+                plugins: {
+                  annotation: {
+                    annotations: [
+                      {
+                        type: 'line',
+                        yMin: 140,
+                        yMax: 140,
+                        borderColor: '#ff8c00',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                          content: 'PA 140 SIS',
+                          enabled: true,
+                          position: 'end'
+                        }
+                      },
+                      {
+                        type: 'line',
+                        yMin: 90,
+                        yMax: 90,
+                        borderColor: '#ff8c00',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                          content: 'PA 90 DIAS',
+                          enabled: true,
+                          position: 'end'
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            });
+            console.log('✅ Gráfico Presión Arterial creado');
+          }
+        } catch (e) {
+          console.error('❌ Error en gráfico Presión Arterial:', e);
+        }
+
+        // GRÁFICO 3: HGT y CC COMBINADO
+        try {
+          const hgt = buildXY(labels, s.hgt || []);
+          const cc = buildXY(labels, s.cc || []);
+
+          if (hgt.ys.length > 0 || cc.ys.length > 0) {
+            const sexo = '{{ sexo }}';
+            const ccThreshold = sexo === 'M' ? 102 : 88;
+            const ccLabel = sexo === 'M' ? 'CC 102(H)' : 'CC 88(M)';
+
+            new Chart(document.getElementById('hgtCc'), {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'HGT (mg/dL)',
+                    data: hgt.ys,
+                    borderColor: '#059669',
+                    backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    yAxisID: 'y'
+                  },
+                  {
+                    label: 'CC (cm)',
+                    data: cc.ys,
+                    borderColor: '#ea580c',
+                    backgroundColor: 'rgba(234, 88, 12, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.2,
+                    yAxisID: 'y1'
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                  x: { type: 'time', time: { unit: 'day' } },
+                  y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: 'HGT (mg/dL)' }
+                  },
+                  y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: 'CC (cm)' },
+                    grid: { drawOnChartArea: false }
+                  }
+                },
+                plugins: {
+                  annotation: {
+                    annotations: [
+                      {
+                        type: 'line',
+                        yMin: 100,
+                        yMax: 100,
+                        borderColor: '#ff8c00',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        scaleID: 'y',
+                        label: {
+                          content: 'HGT 100',
+                          enabled: true,
+                          position: 'end'
+                        }
+                      },
+                      {
+                        type: 'line',
+                        yMin: ccThreshold,
+                        yMax: ccThreshold,
+                        borderColor: '#ff8c00',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        scaleID: 'y1',
+                        label: {
+                          content: ccLabel,
+                          enabled: true,
+                          position: 'end'
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            });
+            console.log('✅ Gráfico HGT y CC creado');
+          }
+        } catch (e) {
+          console.error('❌ Error en gráfico HGT y CC:', e);
+        }
+
+        // GRÁFICO 4: HbA1c (si tiene diabetes)
+        {% if tiene_diabetes %}
+        try {
+          const hba1c = buildXY(labels, s.hba1c || []);
+
+          if (hba1c.ys.length > 0) {
+            new Chart(document.getElementById('hba1c'), {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'HbA1c (%)',
+                    data: hba1c.ys,
+                    borderColor: '#8b5cf6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.2
+                  }
+                ]
+              },
+              options: {
+                ...commonOpts,
+                plugins: {
+                  annotation: {
+                    annotations: [
+                      {
+                        type: 'line',
+                        yMin: 7,
+                        yMax: 7,
+                        borderColor: '#ff8c00',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        label: {
+                          content: 'HbA1c 7%',
+                          enabled: true,
+                          position: 'end'
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            });
+            console.log('✅ Gráfico HbA1c creado');
+          }
+        } catch (e) {
+          console.error('❌ Error en gráfico HbA1c:', e);
+        }
+        {% endif %}
+
+        console.log('🎉 Todos los gráficos creados exitosamente');
+      </script>
+    </div>
+  </body>
+</html>

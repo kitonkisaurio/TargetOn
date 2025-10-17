@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test RUN Simple</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      input {
+        padding: 10px;
+        margin: 10px;
+        font-size: 16px;
+        width: 200px;
+      }
+      .resultado {
+        background: #f0f0f0;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .success {
+        background: #d4edda;
+      }
+      .error {
+        background: #f8d7da;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🧪 Test RUN Autocompletado Simple</h1>
+
+      <div>
+        <label>RUN:</label><br />
+        <input
+          type="text"
+          id="runInput"
+          placeholder="Ej: 8.352.262-3"
+          maxlength="13"
+        />
+      </div>
+
+      <div id="resultado" class="resultado">Ingrese un RUN válido...</div>
+    </div>
+
+    <script>
+      const runInput = document.getElementById("runInput");
+      const resultado = document.getElementById("resultado");
+      let timeoutId;
+
+      // Función para formatear RUN
+      function formatearRUN(value) {
+        let v = value.replace(/[^0-9kK]/g, "").toUpperCase();
+
+        if (v.length >= 2) {
+          const cuerpo = v.slice(0, -1);
+          const dv = v.slice(-1);
+          const cuerpoFormateado = cuerpo.replace(
+            /\\B(?=(\\d{3})+(?!\\d))/g,
+            ".",
+          );
+          return cuerpoFormateado + "-" + dv;
+        }
+        return v;
+      }
+
+      // Función para validar DV
+      function validarDV(run) {
+        const runLimpio = run.replace(/[^0-9kK]/g, "").toUpperCase();
+        if (runLimpio.length < 8) return false;
+
+        const cuerpo = runLimpio.slice(0, -1);
+        const dv = runLimpio.slice(-1);
+
+        let suma = 0;
+        let multiplicador = 2;
+
+        for (let i = cuerpo.length - 1; i >= 0; i--) {
+          suma += parseInt(cuerpo[i]) * multiplicador;
+          multiplicador = multiplicador === 7 ? 2 : multiplicador + 1;
+        }
+
+        const resto = suma % 11;
+        const dvCalculado =
+          resto === 0 ? "0" : resto === 1 ? "K" : (11 - resto).toString();
+
+        return dv === dvCalculado;
+      }
+
+      // Función para buscar usuario
+      async function buscarUsuario(run) {
+        resultado.className = "resultado";
+        resultado.innerHTML = "🔄 Buscando...";
+
+        try {
+          const response = await fetch("/usuario/buscar", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ run: run }),
+          });
+
+          const data = await response.json();
+
+          if (data.encontrado) {
+            resultado.className = "resultado success";
+            resultado.innerHTML = `
+                        ✅ <strong>Usuario encontrado:</strong><br>
+                        • RUN: ${data.run || "N/A"}<br>
+                        • Nombre: ${data.nombre || "N/A"}<br>
+                        • Sexo: ${data.sexo || "N/A"}<br>
+                        • Fecha Nacimiento: ${data.fecha_nacimiento || "N/A"}
+                    `;
+          } else {
+            resultado.className = "resultado error";
+            resultado.innerHTML = "❌ Usuario no encontrado";
+          }
+        } catch (error) {
+          resultado.className = "resultado error";
+          resultado.innerHTML = `❌ Error: ${error.message}`;
+        }
+      }
+
+      // Event listeners
+      runInput.addEventListener("input", function (e) {
+        // Formatear el RUN
+        e.target.value = formatearRUN(e.target.value);
+
+        // Validar y buscar
+        const runLimpio = e.target.value.replace(/[^0-9kK]/g, "");
+
+        if (runLimpio.length >= 8) {
+          if (validarDV(e.target.value)) {
+            // Limpiar timeout anterior
+            clearTimeout(timeoutId);
+
+            // Buscar después de 500ms
+            timeoutId = setTimeout(() => {
+              buscarUsuario(e.target.value);
+            }, 500);
+          } else {
+            resultado.className = "resultado error";
+            resultado.innerHTML =
+              "❌ RUN inválido (dígito verificador incorrecto)";
+          }
+        } else {
+          resultado.className = "resultado";
+          resultado.innerHTML = "Ingrese un RUN válido...";
+        }
+      });
+
+      runInput.addEventListener("keyup", function (e) {
+        if (e.key === "Enter") {
+          const runLimpio = e.target.value.replace(/[^0-9kK]/g, "");
+          if (runLimpio.length >= 8 && validarDV(e.target.value)) {
+            clearTimeout(timeoutId);
+            buscarUsuario(e.target.value);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

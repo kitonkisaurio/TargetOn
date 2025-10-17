@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro de Egresos - ECICEP 2025</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .navbar-brand img {
+        height: 40px;
+      }
+      .navbar.bg-primary {
+        background-color: #3032de !important;
+      }
+      .form-control:focus,
+      .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+      }
+      .run-input {
+        font-family: "Courier New", monospace;
+        font-weight: bold;
+      }
+      .run-valid {
+        color: green !important;
+      }
+      .run-invalid {
+        color: red !important;
+      }
+      .run-exists {
+        color: green !important;
+        background-color: #d4edda !important;
+        border-color: #c3e6cb !important;
+      }
+      .run-not-exists {
+        color: orange !important;
+        background-color: #fff3cd !important;
+        border-color: #ffecb5 !important;
+      }
+      .card {
+        border-left: 4px solid #0d6efd;
+      }
+      .autocomplete-message {
+        margin: 15px 15px 0 15px;
+        border-radius: 0.375rem;
+      }
+      .form-control.autocompleted {
+        background-color: #e7f3ff !important;
+        border-color: #86cfda !important;
+      }
+      .form-select.autocompleted {
+        background-color: #e7f3ff !important;
+        border-color: #86cfda !important;
+      }
+      .autocomplete-indicator {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #28a745;
+        font-size: 16px;
+      }
+      .form-group-with-indicator {
+        position: relative;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="/">
+          <img src="/static/logo_ecicep.jpg" alt="ECICEP" class="me-2" />
+          <span>ECICEP 2025</span>
+        </a>
+        <div class="navbar-nav ms-auto">
+          <a class="nav-link" href="/">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Inicio</title>
+              <path
+                d="M12 3l8 6v11a1 1 0 0 1-1 1h-5v-7H10v7H5a1 1 0 0 1-1-1V9l8-6z"
+              />
+            </svg>
+            Inicio
+          </a>
+          <a class="nav-link" href="/estadisticas">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Estadísticas</title>
+              <path
+                d="M3 3h3v18H3V3zm6 6h3v12H9V9zm6-4h3v16h-3V5zm6 8h3v8h-3v-8z"
+              />
+            </svg>
+            Estadísticas
+          </a>
+          <a class="nav-link" href="/usuario/nuevo">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Nuevo Usuario</title>
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              />
+            </svg>
+            Nuevo Usuario
+          </a>
+          <a class="nav-link active" href="/egresos">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Egresos</title>
+              <path
+                d="M3 5v14a2 2 0 0 0 2 2h14V5H3zm4 2h10v2H7V7zm0 4h10v2H7v-2z"
+              />
+            </svg>
+            Egresos
+          </a>
+          <a class="nav-link" href="/egresos/listar">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Lista Egresos</title>
+              <path d="M3 3h18v2H3V3zm0 6h18v2H3V9zm0 6h18v2H3v-2z" />
+            </svg>
+            Lista Egresos
+          </a>
+          <a class="nav-link" href="/logout">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              style="
+                width: 1rem;
+                height: 1rem;
+                vertical-align: -0.15em;
+                margin-right: 6px;
+                color: #6e6e6e;
+              "
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <title>Salir</title>
+              <path
+                d="M16 13v-2H7V8l-5 4 5 4v-3h9zM20 3h-8v2h8v14h-8v2h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1z"
+              />
+            </svg>
+            Salir
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+      <div class="row justify-content-center">
+        <div class="col-md-10">
+          <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+              <h4 class="mb-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  style="
+                    width: 1.15rem;
+                    height: 1.15rem;
+                    vertical-align: -0.12em;
+                    margin-right: 8px;
+                    color: #6e6e6e;
+                  "
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <title>Registro de Egresos</title>
+                  <path
+                    d="M3 5v14a2 2 0 0 0 2 2h14V5H3zm4 2h10v2H7V7zm0 4h10v2H7v-2z"
+                  />
+                </svg>
+                Registro de Egresos
+              </h4>
+            </div>
+            <div class="card-body">
+              {% if mensaje %}
+              <div
+                class="alert {% if 'correctamente' in mensaje %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show"
+                role="alert"
+              >
+                {{ mensaje }}
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="alert"
+                ></button>
+              </div>
+              {% endif %}
+
+              <form method="POST">
+                <div class="row">
+                  <!-- Datos obligatorios -->
+                  <div class="col-md-6 mb-3">
+                    <label for="run" class="form-label"
+                      >RUN <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="text"
+                      class="form-control run-input"
+                      id="run"
+                      name="run"
+                      maxlength="12"
+                      placeholder="12345678-9"
+                      required
+                    />
+                    <div class="form-text">
+                      <span>Formato: 12.345.678-9</span>
+                      <br /><small class="text-info"
+                        >💡 Los datos del usuario se completarán automáticamente
+                        si existe en la base de datos</small
+                      >
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="causa_egreso" class="form-label"
+                      >Causa de Egreso <span class="text-danger">*</span></label
+                    >
+                    <select
+                      class="form-select"
+                      id="causa_egreso"
+                      name="causa_egreso"
+                      required
+                    >
+                      <option value="">Seleccionar...</option>
+                      <option value="Fallecimiento">Fallecimiento</option>
+                      <option value="Traslado">Traslado</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="fecha_egreso" class="form-label"
+                      >Fecha de Egreso <span class="text-danger">*</span></label
+                    >
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="fecha_egreso"
+                      name="fecha_egreso"
+                      required
+                    />
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="edad_egreso" class="form-label"
+                      >Edad al Egreso</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="edad_egreso"
+                      name="edad_egreso"
+                      min="0"
+                      max="150"
+                    />
+                  </div>
+                </div>
+
+                <hr class="my-4" />
+                <h5 class="text-primary mb-3">Datos del Usuario</h5>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="nombre" class="form-label"
+                      >Nombre Completo</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="nombre"
+                      name="nombre"
+                      maxlength="100"
+                    />
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="fecha_nacimiento" class="form-label"
+                      >Fecha de Nacimiento</label
+                    >
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="fecha_nacimiento"
+                      name="fecha_nacimiento"
+                    />
+                  </div>
+
+                  <div class="col-md-12 mb-3">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="direccion"
+                      name="direccion"
+                      maxlength="255"
+                    />
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="telefono"
+                      name="telefono"
+                      maxlength="255"
+                    />
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="sexo" class="form-label">Sexo</label>
+                    <select class="form-select" id="sexo" name="sexo">
+                      <option value="">Seleccionar...</option>
+                      <option value="Masculino">Masculino</option>
+                      <option value="Femenino">Femenino</option>
+                    </select>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label for="fecha_ingreso" class="form-label"
+                      >Fecha de Ingreso</label
+                    >
+                    <input
+                      type="date"
+                      class="form-control"
+                      id="fecha_ingreso"
+                      name="fecha_ingreso"
+                    />
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="categoria_id" class="form-label"
+                      >Categoría</label
+                    >
+                    <select
+                      class="form-select"
+                      id="categoria_id"
+                      name="categoria_id"
+                    >
+                      <option value="">Seleccionar...</option>
+                      {% for cat in categorias %}
+                      <option value="{{ cat.id }}">{{ cat.nombre }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="sector_id" class="form-label">Sector</label>
+                    <select class="form-select" id="sector_id" name="sector_id">
+                      <option value="">Seleccionar...</option>
+                      {% for sector in sectores %}
+                      <option value="{{ sector.id }}">
+                        {{ sector.nombre }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                  <a
+                    href="/egresos/listar"
+                    class="btn btn-outline-primary me-md-2"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      style="
+                        width: 0.95rem;
+                        height: 0.95rem;
+                        vertical-align: -0.12em;
+                        margin-right: 6px;
+                        color: #6e6e6e;
+                      "
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <title>Ver Lista de Egresos</title>
+                      <path d="M3 3h18v2H3V3zm0 6h18v2H3V9zm0 6h18v2H3v-2z" />
+                    </svg>
+                    Ver Lista de Egresos
+                  </a>
+                  <button type="submit" class="btn btn-primary">
+                    💾 Registrar Egreso
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const runInput = document.getElementById("run");
+        let validationTimeout;
+
+        // Event listener para formateo, validación y autocompletado
+        runInput.addEventListener("input", function () {
+          let value = this.value;
+          const formatted = Common.formatRun(value);
+
+          if (formatted !== value) {
+            const cursorPos = this.selectionStart;
+            this.value = formatted;
+            this.setSelectionRange(cursorPos, cursorPos);
+          }
+
+          // Limpiar clases previas
+          this.classList.remove(
+            "run-valid",
+            "run-invalid",
+            "run-exists",
+            "run-not-exists",
+          );
+
+          // Limpiar campos si está escribiendo
+          clearUserFields();
+
+          // Validación con timeout para evitar múltiples llamadas
+          clearTimeout(validationTimeout);
+          validationTimeout = setTimeout(() => {
+            const cleanedRun = formatted.replace(/[^0-9kK]/g, "");
+
+            if (cleanedRun.length >= 8) {
+              if (Common.validateRun(cleanedRun)) {
+                // RUN es válido, ahora verificar si existe en la BD
+                console.log(
+                  "RUN válido:",
+                  cleanedRun,
+                  "Consultando base de datos...",
+                );
+
+                fetch("/api/usuario/" + cleanedRun)
+                  .then((response) => {
+                    console.log("Respuesta de API:", response.status);
+                    if (response.ok) {
+                      return response.json();
+                    }
+                    throw new Error("Usuario no encontrado");
+                  })
+                  .then((data) => {
+                    console.log("Datos del usuario:", data);
+                    this.classList.add("run-exists");
+
+                    // Autocompletar campos
+                    autoCompleteField("nombre", data.nombre || "");
+                    autoCompleteField(
+                      "fecha_nacimiento",
+                      data.fecha_nacimiento || "",
+                    );
+                    autoCompleteField("direccion", data.direccion || "");
+                    autoCompleteField("telefono", data.telefono || "");
+                    autoCompleteField("sexo", data.sexo || "");
+                    autoCompleteField("categoria_id", data.categoria_id || "");
+                    autoCompleteField("sector_id", data.sector_id || "");
+                    autoCompleteField(
+                      "fecha_ingreso",
+                      data.fecha_ingreso || "",
+                    );
+
+                    // Si hay edad actual, ponerla como edad de egreso por defecto
+                    if (data.edad_actual) {
+                      autoCompleteField("edad_egreso", data.edad_actual);
+                    }
+
+                    // Mostrar notificación de éxito
+                    showAutoCompleteMessage(
+                      "✅ Datos del usuario cargados automáticamente",
+                      "success",
+                    );
+                  })
+                  .catch((error) => {
+                    console.log("Usuario no encontrado:", error.message);
+                    this.classList.add("run-not-exists");
+
+                    // Limpiar campos si el usuario no existe
+                    clearUserFields();
+                    showAutoCompleteMessage(
+                      "ℹ️ RUN válido pero usuario no encontrado en la base de datos",
+                      "info",
+                    );
+                  });
+              } else {
+                console.log("RUN inválido:", cleanedRun);
+                this.classList.add("run-invalid");
+                clearUserFields();
+              }
+            } else {
+              // RUN muy corto, limpiar campos
+              clearUserFields();
+            }
+          }, 800); // Aumento el timeout a 800ms para evitar intermitencia
+        });
+
+        // Función para limpiar campos de usuario
+        function clearUserFields() {
+          const fields = [
+            "nombre",
+            "fecha_nacimiento",
+            "direccion",
+            "telefono",
+            "sexo",
+            "categoria_id",
+            "sector_id",
+            "fecha_ingreso",
+            "edad_egreso",
+          ];
+          fields.forEach((fieldId) => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+              // Limpiar valor
+              if (
+                fieldId !== "sexo" &&
+                fieldId !== "categoria_id" &&
+                fieldId !== "sector_id"
+              ) {
+                field.value = "";
+              } else {
+                field.selectedIndex = 0;
+              }
+
+              // Remover clases de autocompletado
+              field.classList.remove("autocompleted");
+
+              // Remover indicador visual
+              const indicator = field.parentNode.querySelector(
+                ".autocomplete-indicator",
+              );
+              if (indicator) {
+                indicator.remove();
+              }
+            }
+          });
+        }
+
+        // Función para autocompletar un campo con indicadores visuales
+        function autoCompleteField(fieldId, value) {
+          const field = document.getElementById(fieldId);
+          if (field && value !== "") {
+            let finalValue = value;
+
+            // Mapeo especial para campos select
+            if (
+              fieldId === "sexo" &&
+              field.tagName.toLowerCase() === "select"
+            ) {
+              // Convertir sexo a formato correcto para el select
+              if (value.toLowerCase() === "femenino") {
+                finalValue = "Femenino";
+              } else if (value.toLowerCase() === "masculino") {
+                finalValue = "Masculino";
+              }
+            }
+
+            field.value = finalValue;
+            field.classList.add("autocompleted");
+
+            // Agregar indicador visual si no existe
+            if (!field.parentNode.querySelector(".autocomplete-indicator")) {
+              const indicator = document.createElement("span");
+              indicator.className = "autocomplete-indicator";
+              indicator.innerHTML = "✓";
+              indicator.title = "Campo completado automáticamente";
+              field.parentNode.style.position = "relative";
+              field.parentNode.appendChild(indicator);
+            }
+          }
+        }
+
+        // Función para mostrar mensajes de autocompletado
+        function showAutoCompleteMessage(message, type) {
+          // Remover mensaje anterior si existe
+          const existingMessage = document.querySelector(
+            ".autocomplete-message",
+          );
+          if (existingMessage) {
+            existingMessage.remove();
+          }
+
+          // Crear nuevo mensaje
+          const messageDiv = document.createElement("div");
+          messageDiv.className = `alert alert-${type === "success" ? "success" : "info"} alert-dismissible fade show autocomplete-message`;
+          messageDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+
+          // Insertar después del título
+          const cardHeader = document.querySelector(".card-header");
+          cardHeader.parentNode.insertBefore(
+            messageDiv,
+            cardHeader.nextSibling,
+          );
+
+          // Auto-remover después de 5 segundos
+          setTimeout(() => {
+            if (messageDiv && messageDiv.parentNode) {
+              messageDiv.remove();
+            }
+          }, 5000);
+        }
+
+        // Establecer fecha actual por defecto
+        const today = new Date().toISOString().split("T")[0];
+        document.getElementById("fecha_egreso").value = today;
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,240 @@
+<!doctype html>
+<html>
+  <head>
+    <title>🔧 Debug Directo - Formulario Principal</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+      }
+      .debug {
+        background: #f1f1f1;
+        padding: 15px;
+        margin: 15px 0;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .btn {
+        background: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      .btn:hover {
+        background: #0056b3;
+      }
+      .result {
+        background: #e7f3ff;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        border: 1px solid #bee5eb;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Debug Directo - Formulario Principal</h1>
+
+      <p>
+        <strong>Objetivo:</strong> Verificar si el JavaScript del formulario
+        principal funciona correctamente.
+      </p>
+
+      <div class="debug" id="debug-log">
+        <strong>🐛 Log de Debug:</strong><br />
+      </div>
+
+      <div>
+        <button class="btn" onclick="testFormulario()">
+          🧪 Test Formulario Principal
+        </button>
+        <button class="btn" onclick="testAPI()">🔍 Test API Directo</button>
+        <button class="btn" onclick="clearLog()">🧹 Limpiar Log</button>
+      </div>
+
+      <div id="result" class="result" style="display: none">
+        <div id="result-content"></div>
+      </div>
+
+      <div
+        style="
+          margin-top: 20px;
+          padding: 10px;
+          background: #fff3cd;
+          border-radius: 4px;
+        "
+      >
+        <strong>📋 Instrucciones:</strong>
+        <ol>
+          <li>
+            Haz clic en "Test Formulario Principal" para verificar si el
+            JavaScript funciona
+          </li>
+          <li>Revisa el log para ver qué funciones están disponibles</li>
+          <li>Si hay errores, aparecerán en rojo en el log</li>
+        </ol>
+      </div>
+    </div>
+
+    <script>
+      let debugLog = document.getElementById("debug-log");
+
+      function log(message, isError = false) {
+        const timestamp = new Date().toLocaleTimeString();
+        const color = isError ? "color: red; font-weight: bold;" : "";
+        debugLog.innerHTML += `<span style="${color}">[${timestamp}] ${message}</span><br>`;
+        debugLog.scrollTop = debugLog.scrollHeight;
+      }
+
+      function clearLog() {
+        debugLog.innerHTML = "<strong>🐛 Log de Debug:</strong><br>";
+      }
+
+      function testAPI() {
+        log("🔍 Probando API directamente...");
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ run: "10.000.141-1" }),
+        })
+          .then((response) => {
+            log(`📡 API Response: ${response.status}`);
+            return response.json();
+          })
+          .then((data) => {
+            log(`📦 API Data: ${JSON.stringify(data)}`);
+            if (data.encontrado) {
+              log(`✅ Usuario encontrado: ${data.nombre}`, false);
+            } else {
+              log(`ℹ️ Usuario no encontrado`, false);
+            }
+          })
+          .catch((error) => {
+            log(`❌ Error API: ${error.message}`, true);
+          });
+      }
+
+      function testFormulario() {
+        log("🧪 Probando funciones del formulario principal...");
+
+        // Test 1: Verificar si las funciones principales existen
+        const funciones = [
+          "normalizarRun",
+          "dvValido",
+          "formatearRun",
+          "buscarUsuario",
+          "initializarEventosRun",
+        ];
+
+        funciones.forEach((nombreFuncion) => {
+          if (typeof window[nombreFuncion] === "function") {
+            log(`✅ Función ${nombreFuncion} existe`);
+          } else {
+            log(`❌ Función ${nombreFuncion} NO existe`, true);
+          }
+        });
+
+        // Test 2: Verificar elementos del DOM
+        const elementos = ["run", "nombre", "fecha_nacimiento"];
+        elementos.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            log(`✅ Elemento #${id} existe`);
+          } else {
+            log(`❌ Elemento #${id} NO existe`, true);
+          }
+        });
+
+        // Test 3: Probar validación de RUN
+        try {
+          if (typeof window.dvValido === "function") {
+            const testRun = "100001411";
+            const resultado = window.dvValido(testRun);
+            log(`🧮 dvValido('${testRun}') = ${resultado}`);
+          } else {
+            log(`❌ No se puede probar dvValido - función no existe`, true);
+          }
+        } catch (error) {
+          log(`❌ Error probando dvValido: ${error.message}`, true);
+        }
+
+        // Test 4: Probar formateo de RUN
+        try {
+          if (typeof window.formatearRun === "function") {
+            const testRun = "100001411";
+            const resultado = window.formatearRun(testRun);
+            log(`🎨 formatearRun('${testRun}') = '${resultado}'`);
+          } else {
+            log(`❌ No se puede probar formatearRun - función no existe`, true);
+          }
+        } catch (error) {
+          log(`❌ Error probando formatearRun: ${error.message}`, true);
+        }
+
+        // Test 5: Verificar eventos en el campo RUN
+        const runInput = document.getElementById("run");
+        if (runInput) {
+          log(`📍 Campo RUN encontrado, probando eventos...`);
+          try {
+            // Simular entrada de datos
+            runInput.value = "100001411";
+            runInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+            setTimeout(() => {
+              log(`🔄 Después de input: valor = '${runInput.value}'`);
+              if (runInput.value === "10.000.141-1") {
+                log(`✅ Autoformato funcionando correctamente`);
+              } else {
+                log(`❌ Autoformato NO funciona - valor no cambió`, true);
+              }
+            }, 100);
+          } catch (error) {
+            log(`❌ Error simulando input: ${error.message}`, true);
+          }
+        } else {
+          log(`❌ Campo RUN no encontrado en esta página`, true);
+        }
+
+        log("🏁 Test del formulario completado");
+      }
+
+      // Inicializar
+      document.addEventListener("DOMContentLoaded", function () {
+        log("🚀 Página de debug cargada");
+        log(
+          "📍 Esta página sirve para verificar si el JavaScript del formulario principal funciona",
+        );
+      });
+
+      log("🎯 Script de debug inicializado");
+    </script>
+  </body>
+</html>

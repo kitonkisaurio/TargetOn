@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Botón Pie Diabético</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 2px solid #ccc; border-radius: 8px; }
+        .success { background: #d1fae5; border-color: #10b981; }
+        .error { background: #fee2e2; border-color: #ef4444; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Botones Pie Diabético</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Botón Header (iconGuardarPieDiabetico)</h2>
+        <button type="button" id="iconGuardarPieDiabetico" 
+                style="background:#16a34a !important;
+                       color:white !important;
+                       border:1px solid #15803d !important;
+                       padding:6px 10px !important;
+                       border-radius:6px !important;
+                       font-size:.85rem !important;
+                       line-height:1 !important;
+                       display:inline-flex !important;
+                       align-items:center !important;
+                       justify-content:center !important;
+                       gap:6px !important;
+                       min-width:120px !important;
+                       height:34px !important;
+                       cursor:not-allowed !important;
+                       opacity:.5 !important;
+                       font-weight:600 !important;
+                       visibility:visible !important;">
+            <span>💾</span>
+            <span>Guardar</span>
+        </button>
+        <div id="test1Result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Botón Formulario (btnGuardarPieDiabetico)</h2>
+        <button type="button" id="btnGuardarPieDiabetico" class="btn"
+                style="font-size:.75rem !important;
+                       background:#16a34a !important;
+                       color:white !important;
+                       border:1px solid #15803d !important;
+                       padding:6px 12px !important;
+                       opacity:.5 !important;
+                       cursor:not-allowed !important;
+                       display:inline-flex !important;
+                       align-items:center !important;
+                       justify-content:center !important;
+                       gap:6px !important;
+                       min-width:120px !important;
+                       visibility:visible !important;">
+            💾 Guardar
+        </button>
+        <div id="test2Result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Dentro de contenedor hidden</h2>
+        <div data-panel="diabetes" hidden style="padding:20px; border:2px dashed #999;">
+            <p>Este div tiene attribute <code>hidden</code></p>
+            <button type="button" id="btnHidden"
+                    style="background:#3b82f6 !important;
+                           color:white !important;
+                           padding:8px 16px !important;
+                           display:inline-flex !important;
+                           visibility:visible !important;">
+                Botón dentro de hidden
+            </button>
+        </div>
+        <div id="test3Result"></div>
+    </div>
+    
+    <script>
+        function testButton(buttonId, resultId) {
+            const btn = document.getElementById(buttonId);
+            const result = document.getElementById(resultId);
+            
+            if (!btn) {
+                result.innerHTML = '❌ <strong>Botón NO encontrado en el DOM</strong>';
+                result.parentElement.classList.add('error');
+                return;
+            }
+            
+            const computed = window.getComputedStyle(btn);
+            const info = {
+                display: computed.display,
+                visibility: computed.visibility,
+                opacity: computed.opacity,
+                offsetParent: btn.offsetParent !== null ? 'visible' : 'HIDDEN',
+                clientRect: btn.getBoundingClientRect()
+            };
+            
+            result.innerHTML = `
+                ✅ <strong>Botón encontrado</strong><br>
+                • display: <code>${info.display}</code><br>
+                • visibility: <code>${info.visibility}</code><br>
+                • opacity: <code>${info.opacity}</code><br>
+                • offsetParent: <code>${info.offsetParent}</code><br>
+                • width: <code>${info.clientRect.width}px</code><br>
+                • height: <code>${info.clientRect.height}px</code><br>
+                • top: <code>${info.clientRect.top}px</code>
+            `;
+            
+            if (info.offsetParent === 'visible' && info.clientRect.height > 0) {
+                result.parentElement.classList.add('success');
+            } else {
+                result.innerHTML += '<br><br>⚠️ <strong>El botón existe pero está OCULTO</strong>';
+                result.parentElement.classList.add('error');
+            }
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            testButton('iconGuardarPieDiabetico', 'test1Result');
+            testButton('btnGuardarPieDiabetico', 'test2Result');
+            testButton('btnHidden', 'test3Result');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🔧 Debug Directo - Formulario RUN</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+      }
+      .input-group {
+        margin: 15px 0;
+      }
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      input {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        width: 100%;
+        max-width: 300px;
+      }
+      .run-valid {
+        border-color: #28a745;
+        background: #d4edda;
+      }
+      .run-invalid {
+        border-color: #dc3545;
+        background: #f8d7da;
+      }
+      .message {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+      .btn {
+        padding: 10px 15px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      .btn:hover {
+        background: #0056b3;
+      }
+      .log {
+        background: #1e1e1e;
+        color: #00ff00;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        max-height: 400px;
+        overflow-y: auto;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 Debug Directo - Formulario RUN</h1>
+      <p>
+        Formulario simplificado para probar funcionalidad de RUN sin
+        dependencias.
+      </p>
+
+      <form action="/usuario/nuevo" method="POST">
+        <div class="input-group">
+          <label for="run">🆔 RUN del Paciente:</label>
+          <input
+            type="text"
+            id="run"
+            name="run"
+            placeholder="Ej: 12345678-9"
+            maxlength="13"
+            required
+          />
+          <div id="run-status" class="message" style="display: none"></div>
+        </div>
+
+        <div class="input-group">
+          <label for="nombre">👤 Nombre Completo:</label>
+          <input
+            type="text"
+            id="nombre"
+            name="nombre"
+            placeholder="Nombre y apellidos"
+            required
+          />
+        </div>
+
+        <div class="input-group">
+          <label for="fecha_nacimiento">📅 Fecha de Nacimiento:</label>
+          <input
+            type="date"
+            id="fecha_nacimiento"
+            name="fecha_nacimiento"
+            required
+          />
+        </div>
+
+        <div class="input-group">
+          <button type="submit" class="btn">💾 Guardar Usuario</button>
+          <button type="button" class="btn" onclick="testRun()">
+            🔍 Test RUN
+          </button>
+          <button type="button" class="btn" onclick="clearLog()">
+            🗑️ Limpiar Log
+          </button>
+        </div>
+      </form>
+
+      <div id="log" class="log">Esperando acciones...</div>
+    </div>
+
+    <script>
+      // ===== FUNCIONES DE RUN (SIMPLIFICADAS) =====
+
+      function normalizarRun(s) {
+        if (!s) return "";
+        s = s
+          .toString()
+          .toUpperCase()
+          .replace(/[^0-9K]/g, "");
+        if (s.length < 2) return s;
+        return s.slice(0, -1) + "-" + s.slice(-1);
+      }
+
+      function dvValido(runNorm) {
+        if (!runNorm) return false;
+        runNorm = runNorm.toString().toUpperCase();
+        const m = /^(\d{7,8})-([\dK])$/.exec(runNorm);
+        if (!m) return false;
+
+        const cuerpo = m[1];
+        const dv = m[2];
+
+        const factores = [2, 3, 4, 5, 6, 7];
+        let s = 0;
+        for (let i = 0; i < cuerpo.length; i++) {
+          const dig = parseInt(cuerpo[cuerpo.length - 1 - i], 10);
+          s += dig * factores[i % factores.length];
+        }
+        const resto = 11 - (s % 11);
+        const dvCalc = resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+        return dv === dvCalc;
+      }
+
+      function formatearRun(valor) {
+        if (!valor) return "";
+        let v = valor.replace(/[^0-9kK]/g, "").toUpperCase();
+
+        if (v.length >= 2) {
+          const cuerpo = v.slice(0, -1);
+          const dv = v.slice(-1);
+          const cuerpoFormateado = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          return cuerpoFormateado + "-" + dv;
+        } else {
+          return v;
+        }
+      }
+
+      // ===== FUNCIONES DE LOG =====
+
+      const log = document.getElementById("log");
+
+      function addLog(mensaje, tipo = "info") {
+        const timestamp = new Date().toLocaleTimeString();
+        const emoji =
+          tipo === "error"
+            ? "❌"
+            : tipo === "success"
+              ? "✅"
+              : tipo === "warning"
+                ? "⚠️"
+                : "ℹ️";
+        const logEntry = `[${timestamp}] ${emoji} ${mensaje}`;
+
+        if (log.textContent === "Esperando acciones...") {
+          log.textContent = logEntry;
+        } else {
+          log.textContent += "\\n" + logEntry;
+        }
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function clearLog() {
+        log.textContent = "Esperando acciones...";
+      }
+
+      // ===== FUNCIONES DE VALIDACIÓN =====
+
+      function validarRun(input) {
+        const valor = input.value.trim();
+        const statusDiv = document.getElementById("run-status");
+
+        addLog(`Validando RUN: "${valor}"`);
+
+        if (!valor) {
+          statusDiv.style.display = "none";
+          input.className = input.className.replace(
+            /\\s*(run-valid|run-invalid)/g,
+            "",
+          );
+          return;
+        }
+
+        // Formatear automáticamente
+        const formateado = formatearRun(valor);
+        if (formateado !== valor) {
+          input.value = formateado;
+          addLog(`RUN formateado a: "${formateado}"`);
+        }
+
+        // Validar si está completo
+        const runLimpio = formateado.replace(/[^0-9kK]/g, "");
+        if (runLimpio.length >= 8) {
+          const normalizado = normalizarRun(formateado);
+          const esValido = dvValido(normalizado);
+
+          addLog(`RUN normalizado: "${normalizado}"`);
+          addLog(
+            `Validación DV: ${esValido ? "VÁLIDO" : "INVÁLIDO"}`,
+            esValido ? "success" : "error",
+          );
+
+          // Actualizar visual
+          input.className = input.className.replace(
+            /\\s*(run-valid|run-invalid)/g,
+            "",
+          );
+          input.classList.add(esValido ? "run-valid" : "run-invalid");
+
+          statusDiv.textContent = esValido
+            ? "✅ RUN válido"
+            : "❌ RUN inválido";
+          statusDiv.className = "message " + (esValido ? "success" : "error");
+          statusDiv.style.display = "block";
+
+          // Si es válido, buscar usuario
+          if (esValido) {
+            buscarUsuario(normalizado);
+          }
+        } else {
+          addLog("RUN incompleto (necesita al menos 8 dígitos)", "warning");
+          statusDiv.style.display = "none";
+          input.className = input.className.replace(
+            /\\s*(run-valid|run-invalid)/g,
+            "",
+          );
+        }
+      }
+
+      function buscarUsuario(run) {
+        addLog(`Buscando usuario con RUN: ${run}`);
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ run: run }),
+        })
+          .then((response) => {
+            addLog(`Respuesta servidor: ${response.status}`);
+            return response.json();
+          })
+          .then((data) => {
+            if (data.encontrado && data.nombre) {
+              addLog(`✅ Usuario encontrado: ${data.nombre}`, "success");
+
+              // Autocompletar formulario
+              document.getElementById("nombre").value = data.nombre || "";
+              if (data.fecha_nacimiento) {
+                document.getElementById("fecha_nacimiento").value =
+                  data.fecha_nacimiento;
+              }
+              addLog("Formulario autocompletado", "success");
+            } else {
+              addLog("Usuario no encontrado - nuevo usuario", "warning");
+            }
+          })
+          .catch((error) => {
+            addLog(`❌ Error en búsqueda: ${error.message}`, "error");
+          });
+      }
+
+      function testRun() {
+        const runInput = document.getElementById("run");
+        const testValue = "10000141-1";
+        runInput.value = testValue;
+        addLog(`Test iniciado con RUN: ${testValue}`);
+        validarRun(runInput);
+      }
+
+      // ===== EVENTOS =====
+
+      document.addEventListener("DOMContentLoaded", function () {
+        addLog("🚀 Formulario de debug cargado correctamente", "success");
+
+        const runInput = document.getElementById("run");
+
+        // Eventos para formateo y validación en tiempo real
+        runInput.addEventListener("input", function (e) {
+          validarRun(e.target);
+        });
+
+        runInput.addEventListener("blur", function (e) {
+          addLog("Campo RUN perdió el foco");
+          validarRun(e.target);
+        });
+
+        runInput.addEventListener("paste", function (e) {
+          addLog("Texto pegado en campo RUN");
+          setTimeout(() => validarRun(e.target), 0);
+        });
+
+        runInput.addEventListener("keyup", function (e) {
+          if (e.key === "Enter") {
+            addLog("Enter presionado en campo RUN");
+            testRun();
+          }
+        });
+
+        addLog("Eventos configurados correctamente", "success");
+      });
+    </script>
+  </body>
+</html>

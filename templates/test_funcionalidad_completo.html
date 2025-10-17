@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <title>🧪 Test de Funcionalidad - Formulario Usuario ECICEP</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png" />
+    <link rel="icon" href="/static/favicon.ico" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background: #f5f5f5;
+      }
+      .test-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        margin: 10px 0;
+        border: 2px solid #ddd;
+      }
+      .test-success {
+        border-color: #28a745;
+        background: #d4edda;
+      }
+      .test-error {
+        border-color: #dc3545;
+        background: #f8d7da;
+      }
+      .test-warning {
+        border-color: #ffc107;
+        background: #fff3cd;
+      }
+      h1 {
+        color: #333;
+      }
+      h2 {
+        color: #007cba;
+      }
+      .btn {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .btn-primary {
+        background: #007cba;
+        color: white;
+      }
+      .btn-success {
+        background: #28a745;
+        color: white;
+      }
+      .btn-warning {
+        background: #ffc107;
+        color: black;
+      }
+      pre {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+      .status {
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 3px;
+      }
+      .status-ok {
+        background: #d4edda;
+        color: #155724;
+      }
+      .status-error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .status-pending {
+        background: #fff3cd;
+        color: #856404;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Test de Funcionalidad - Formulario Usuario ECICEP</h1>
+
+    <div class="test-container">
+      <h2>📊 Estado del Sistema</h2>
+      <div id="sistema-status">
+        <span class="status status-pending">🔄 Verificando...</span>
+      </div>
+      <div id="sistema-info"></div>
+    </div>
+
+    <div class="test-container">
+      <h2>🆔 Test de Validación RUN</h2>
+      <div>
+        <input
+          type="text"
+          id="test-run"
+          placeholder="Ingrese RUN para probar"
+          style="padding: 8px; width: 200px"
+        />
+        <button class="btn btn-primary" onclick="testRun()">
+          🔍 Probar RUN
+        </button>
+      </div>
+      <div id="run-results"></div>
+    </div>
+
+    <div class="test-container">
+      <h2>🔍 Test de Búsqueda de Usuario</h2>
+      <div>
+        <input
+          type="text"
+          id="test-busqueda"
+          placeholder="RUN para buscar usuario"
+          style="padding: 8px; width: 200px"
+        />
+        <button class="btn btn-success" onclick="testBusqueda()">
+          🔎 Buscar Usuario
+        </button>
+      </div>
+      <div id="busqueda-results"></div>
+    </div>
+
+    <div class="test-container">
+      <h2>🌐 Test de Conectividad</h2>
+      <button class="btn btn-warning" onclick="testConectividad()">
+        📡 Probar Conexiones
+      </button>
+      <div id="conectividad-results"></div>
+    </div>
+
+    <div class="test-container">
+      <h2>📝 Logs del Sistema</h2>
+      <button class="btn btn-primary" onclick="clearLogs()">
+        🗑️ Limpiar Logs
+      </button>
+      <pre id="logs-container">Logs aparecerán aquí...</pre>
+    </div>
+
+    <script>
+      console.log("🧪 Test de funcionalidad ECICEP iniciado");
+
+      let logs = [];
+
+      function addLog(mensaje, tipo = "info") {
+        const timestamp = new Date().toLocaleTimeString();
+        const emoji =
+          tipo === "error"
+            ? "❌"
+            : tipo === "warning"
+              ? "⚠️"
+              : tipo === "success"
+                ? "✅"
+                : "ℹ️";
+        const logEntry = `[${timestamp}] ${emoji} ${mensaje}`;
+        logs.push(logEntry);
+        updateLogsDisplay();
+      }
+
+      function updateLogsDisplay() {
+        const container = document.getElementById("logs-container");
+        container.textContent = logs.slice(-20).join("\n"); // Mostrar últimos 20 logs
+        container.scrollTop = container.scrollHeight;
+      }
+
+      function clearLogs() {
+        logs = [];
+        updateLogsDisplay();
+        addLog("Logs limpiados", "info");
+      }
+
+      // Función para normalizar RUN (copia de la función del formulario)
+      function normalizarRun(s) {
+        s = (s || "").toUpperCase().replace(/[^0-9K]/g, "");
+        if (s.length < 2) return s;
+        return s.slice(0, -1) + "-" + s.slice(-1);
+      }
+
+      // Función para validar dígito verificador (copia de la función del formulario)
+      function dvValido(runNorm) {
+        runNorm = (runNorm || "").toUpperCase();
+        const m = /^(\d{7,8})-([\dK])$/.exec(runNorm);
+        if (!m) return false;
+
+        const cuerpo = m[1];
+        const dv = m[2];
+
+        const factores = [2, 3, 4, 5, 6, 7];
+        let s = 0;
+        for (let i = 0; i < cuerpo.length; i++) {
+          const dig = parseInt(cuerpo[cuerpo.length - 1 - i], 10);
+          s += dig * factores[i % factores.length];
+        }
+        const resto = 11 - (s % 11);
+        const dvCalc = resto === 11 ? "0" : resto === 10 ? "K" : String(resto);
+        return dv === dvCalc;
+      }
+
+      function testRun() {
+        const input = document.getElementById("test-run");
+        const results = document.getElementById("run-results");
+        const runValue = input.value.trim();
+
+        if (!runValue) {
+          results.innerHTML =
+            '<div class="status status-error">❌ Ingrese un RUN para probar</div>';
+          addLog("Test RUN: Sin valor ingresado", "error");
+          return;
+        }
+
+        addLog(`Test RUN iniciado: ${runValue}`, "info");
+
+        // Normalizar RUN
+        const runNormalizado = normalizarRun(runValue);
+        const runLimpio = runValue.replace(/[^0-9kK]/g, "");
+
+        let resultHtml = '<div style="margin: 10px 0;">';
+        resultHtml += `<strong>RUN Original:</strong> ${runValue}<br>`;
+        resultHtml += `<strong>RUN Normalizado:</strong> ${runNormalizado}<br>`;
+        resultHtml += `<strong>RUN Limpio:</strong> ${runLimpio}<br>`;
+        resultHtml += `<strong>Longitud:</strong> ${runLimpio.length} caracteres<br>`;
+
+        if (runLimpio.length >= 8) {
+          const esValido = dvValido(runNormalizado);
+          resultHtml += `<strong>Validación DV:</strong> <span class="status ${esValido ? "status-ok" : "status-error"}">${esValido ? "✅ Válido" : "❌ Inválido"}</span>`;
+          addLog(
+            `Test RUN ${runValue}: ${esValido ? "Válido" : "Inválido"}`,
+            esValido ? "success" : "error",
+          );
+        } else {
+          resultHtml += `<strong>Validación DV:</strong> <span class="status status-error">❌ Muy corto (mínimo 8 dígitos)</span>`;
+          addLog(`Test RUN ${runValue}: Muy corto`, "warning");
+        }
+
+        resultHtml += "</div>";
+        results.innerHTML = resultHtml;
+      }
+
+      function testBusqueda() {
+        const input = document.getElementById("test-busqueda");
+        const results = document.getElementById("busqueda-results");
+        const runValue = input.value.trim();
+
+        if (!runValue) {
+          results.innerHTML =
+            '<div class="status status-error">❌ Ingrese un RUN para buscar</div>';
+          addLog("Test búsqueda: Sin RUN ingresado", "error");
+          return;
+        }
+
+        addLog(`Test búsqueda iniciado: ${runValue}`, "info");
+        results.innerHTML =
+          '<div class="status status-pending">🔄 Buscando usuario...</div>';
+
+        fetch("/usuario/buscar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ run: runValue }),
+        })
+          .then((response) => {
+            addLog(
+              `Respuesta servidor: ${response.status}`,
+              response.ok ? "success" : "error",
+            );
+            return response.json();
+          })
+          .then((data) => {
+            let resultHtml = '<div style="margin: 10px 0;">';
+
+            if (data.error) {
+              resultHtml += `<div class="status status-error">❌ Error: ${data.error}</div>`;
+              addLog(
+                `Test búsqueda ${runValue}: Error - ${data.error}`,
+                "error",
+              );
+            } else if (data.nombre) {
+              resultHtml +=
+                '<div class="status status-ok">✅ Usuario encontrado</div>';
+              resultHtml += `<strong>Nombre:</strong> ${data.nombre}<br>`;
+              resultHtml += `<strong>Fecha Nac.:</strong> ${data.fecha_nacimiento || "No disponible"}<br>`;
+              resultHtml += `<strong>Dirección:</strong> ${data.direccion || "No disponible"}<br>`;
+              resultHtml += `<strong>Teléfono:</strong> ${data.telefono || "No disponible"}<br>`;
+              if (data.sector_nombre)
+                resultHtml += `<strong>Sector:</strong> ${data.sector_nombre}<br>`;
+              if (data.categoria_nombre)
+                resultHtml += `<strong>Categoría:</strong> ${data.categoria_nombre}<br>`;
+              addLog(
+                `Test búsqueda ${runValue}: Usuario encontrado - ${data.nombre}`,
+                "success",
+              );
+            } else {
+              resultHtml +=
+                '<div class="status status-warning">⚠️ Usuario no encontrado en BD</div>';
+              addLog(
+                `Test búsqueda ${runValue}: Usuario no encontrado`,
+                "warning",
+              );
+            }
+
+            resultHtml += "</div>";
+            results.innerHTML = resultHtml;
+          })
+          .catch((error) => {
+            results.innerHTML = `<div class="status status-error">❌ Error de conexión: ${error.message}</div>`;
+            addLog(
+              `Test búsqueda ${runValue}: Error de conexión - ${error.message}`,
+              "error",
+            );
+          });
+      }
+
+      function testConectividad() {
+        const results = document.getElementById("conectividad-results");
+        addLog("Test conectividad iniciado", "info");
+        results.innerHTML =
+          '<div class="status status-pending">🔄 Probando conectividad...</div>';
+
+        let testHtml = '<div style="margin: 10px 0;">';
+
+        // Test 1: Endpoint principal
+        fetch("/")
+          .then((response) => {
+            testHtml += `<div class="status ${response.ok ? "status-ok" : "status-error"}">
+                    ${response.ok ? "✅" : "❌"} Endpoint principal: ${response.status}
+                </div>`;
+            addLog(
+              `Endpoint principal: ${response.status}`,
+              response.ok ? "success" : "error",
+            );
+
+            // Test 2: Endpoint usuario
+            return fetch("/usuario");
+          })
+          .then((response) => {
+            testHtml += `<div class="status ${response.ok ? "status-ok" : "status-error"}">
+                    ${response.ok ? "✅" : "❌"} Endpoint usuario: ${response.status}
+                </div>`;
+            addLog(
+              `Endpoint usuario: ${response.status}`,
+              response.ok ? "success" : "error",
+            );
+
+            // Test 3: Endpoint búsqueda
+            return fetch("/usuario/buscar", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ run: "test" }),
+            });
+          })
+          .then((response) => {
+            testHtml += `<div class="status ${response.ok ? "status-ok" : "status-error"}">
+                    ${response.ok ? "✅" : "❌"} Endpoint búsqueda: ${response.status}
+                </div>`;
+            addLog(
+              `Endpoint búsqueda: ${response.status}`,
+              response.ok ? "success" : "error",
+            );
+
+            testHtml += "</div>";
+            results.innerHTML = testHtml;
+          })
+          .catch((error) => {
+            testHtml += `<div class="status status-error">❌ Error de conectividad: ${error.message}</div></div>`;
+            results.innerHTML = testHtml;
+            addLog(`Error conectividad: ${error.message}`, "error");
+          });
+      }
+
+      function verificarSistema() {
+        const statusDiv = document.getElementById("sistema-status");
+        const infoDiv = document.getElementById("sistema-info");
+
+        addLog("Verificación del sistema iniciada", "info");
+
+        fetch("/")
+          .then((response) => {
+            if (response.ok) {
+              statusDiv.innerHTML =
+                '<span class="status status-ok">✅ Sistema Online</span>';
+              infoDiv.innerHTML = `
+                        <div style="margin: 10px 0;">
+                            <strong>Estado:</strong> Servidor respondiendo correctamente<br>
+                            <strong>URL:</strong> ${window.location.origin}<br>
+                            <strong>Timestamp:</strong> ${new Date().toLocaleString()}
+                        </div>
+                    `;
+              addLog("Sistema online y funcional", "success");
+            } else {
+              statusDiv.innerHTML =
+                '<span class="status status-error">❌ Sistema con errores</span>';
+              addLog(`Sistema con errores: ${response.status}`, "error");
+            }
+          })
+          .catch((error) => {
+            statusDiv.innerHTML =
+              '<span class="status status-error">❌ Sistema no disponible</span>';
+            infoDiv.innerHTML = `<div style="margin: 10px 0; color: red;">Error: ${error.message}</div>`;
+            addLog(`Sistema no disponible: ${error.message}`, "error");
+          });
+      }
+
+      // Inicializar al cargar la página
+      document.addEventListener("DOMContentLoaded", function () {
+        addLog("Test de funcionalidad ECICEP cargado", "success");
+        verificarSistema();
+
+        // Auto-test con RUNs conocidos
+        setTimeout(() => {
+          addLog("Ejecutando tests automáticos...", "info");
+
+          // Test RUN válido
+          document.getElementById("test-run").value = "12345678-5";
+          testRun();
+
+          // Test RUN inválido
+          setTimeout(() => {
+            document.getElementById("test-run").value = "12345678-9";
+            testRun();
+          }, 1000);
+        }, 2000);
+      });
+
+      addLog("Script de tests cargado completamente", "success");
+    </script>
+  </body>
+</html>
